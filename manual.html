@@ -232,6 +232,18 @@
         <button class="btn" id="btnSerial" onclick="hubungSerial()">🔌 Serial / COM</button>
         <button class="btn" onclick="putuskan()">Putuskan</button>
       </div>
+      <div class="row" style="margin-top:4px">
+        <div><label>Mode cetak</label>
+          <select data-g="pMode">
+            <option value="teks">Teks printer – tajam (seperti Thermer)</option>
+            <option value="gambar">Gambar – persis seperti pratinjau</option>
+          </select></div>
+        <div><label>Huruf printer (mode teks)</label>
+          <select data-g="pFont">
+            <option value="A">Font A – normal</option>
+            <option value="B">Font B – kecil</option>
+          </select></div>
+      </div>
       <button class="btn go" id="btnLangsung" onclick="cetakLangsung()" disabled>⚡ Cetak Langsung ke Printer</button>
       <div class="bar" id="pBar"><div></div></div>
       <details>
@@ -260,7 +272,8 @@
             </select></div>
         </div>
         <label class="chk"><input type="checkbox" data-g="pCut"> Potong kertas otomatis (printer dengan pisau/auto-cutter)</label>
-        <div class="catatan">Kalau hasil cetak terputus atau ada bagian yang hilang, pilih kecepatan <b>Paling aman</b>.
+        <div class="catatan"><b>Mode teks</b> memakai huruf bawaan printer sehingga paling tajam. Jenis font &amp; jarak huruf dari website tidak berlaku, tetapi tebal, garis bawah, perataan, ukuran besar, spasi baris, logo, QR, dan barcode tetap tercetak.<br>
+          Kalau hasil cetak terputus atau ada bagian yang hilang, pilih kecepatan <b>Paling aman</b>.
           Agar ukuran huruf sesuai, atur <b>Lebar area cetak</b> ke <b>48 mm</b> untuk printer 58 mm, atau <b>72 mm</b> untuk printer 80 mm.</div>
       </details>
       <div class="catatan" id="pInfo" style="display:none"></div>
@@ -1624,7 +1637,7 @@ const JAMF = [["hm","14:30"],["hms","14:30:45"],["hm-wib","14:30 WIB"],["hm-wita
 
 const G0 = { lebar: "58mm", font: "9pt", jenis: FONTS[0][0], tebal: "normal", garis: "ds", garisChar: "-",
   lh: "1.3", ls: "0px", pad: "2mm", gap: "2mm", para: "0mm", feed: "8mm",
-  pDots: "384", pThr: "160", pFeed: "3", pCut: false, pChunk: "100", pDelay: "8", tCols: "32", tTanda: true };
+  pDots: "384", pThr: "160", pFeed: "3", pCut: false, pChunk: "100", pDelay: "8", tCols: "32", tTanda: true, pMode: "teks", pFont: "A" };
 
 const BARU = {
   teks:    () => ({ isi: "Teks baru", rata: "center", ukuran: "0pt", tebal: false, miring: false, garisBawah: false, kapital: false, inv: false, font: "" }),
@@ -2326,6 +2339,128 @@ async function buatESCPOS() {
   return new Uint8Array(out);
 }
 
+/* ===== ESC/POS MODE TEKS (huruf bawaan printer, tajam seperti Thermer) ===== */
+const ESC = 0x1B, GS = 0x1D;
+function asciiAman(s) {
+  return String(s).replace(/[×✕]/g, "x").replace(/[–—]/g, "-").replace(/[·•]/g, ".").replace(/[“”]/g, '"').replace(/[‘’]/g, "'")
+    .normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^\x20-\x7E]/g, "?");
+}
+function kolomPrinter(dots, fontB) { return fontB ? Math.floor(dots / 9) : Math.floor(dots / 12); }
+class EscPos {
+  constructor(boldAll, fontB) { this.b = []; this.boldAll = !!boldAll; this.fontB = !!fontB; }
+  raw(...x) { for (const v of x) this.b.push(v & 255); return this; }
+  init(lhDots) { this.raw(ESC, 0x40, ESC, 0x4D, this.fontB ? 1 : 0, ESC, 0x33, Math.min(255, lhDots)); if (this.boldAll) this.raw(ESC, 0x45, 1); return this; }
+  reset() { this.raw(GS, 0x21, 0, GS, 0x42, 0, ESC, 0x2D, 0, ESC, 0x45, this.boldAll ? 1 : 0, ESC, 0x4D, this.fontB ? 1 : 0, ESC, 0x61, 0); }
+  text(s, o = {}) {
+    const a = { left: 0, center: 1, right: 2 }[o.align] ?? 0;
+    this.raw(ESC, 0x61, a, ESC, 0x45, (o.bold || this.boldAll) ? 1 : 0, ESC, 0x2D, o.ul ? 1 : 0, GS, 0x42, o.inv ? 1 : 0, GS, 0x21, o.size || 0);
+    if (o.fontB !== undefined) this.raw(ESC, 0x4D, o.fontB ? 1 : 0);
+    for (const ch of asciiAman(s)) this.b.push(ch.charCodeAt(0));
+    this.raw(0x0A); this.reset(); return this;
+  }
+  feedDots(n) { n = Math.round(n); while (n > 0) { const k = Math.min(255, n); this.raw(ESC, 0x4A, k); n -= k; } return this; }
+  raster(bm) {
+    const { bits, wB, h } = bm; this.raw(ESC, 0x61, 0);
+    for (let y = 0; y < h; y += 96) {
+      const n = Math.min(96, h - y);
+      this.raw(GS, 0x76, 0x30, 0, wB & 255, wB >> 8, n & 255, n >> 8);
+      for (let k = y * wB; k < (y + n) * wB; k++) this.b.push(bits[k]);
+    }
+    return this;
+  }
+  end(feedLines, cut) { this.raw(ESC, 0x61, 0, ESC, 0x64, feedLines || 0); if (cut) this.raw(GS, 0x56, 0x42, 0); return new Uint8Array(this.b); }
+}
+function bitmap(dots, h) { const wB = dots / 8; return { dots, wB, h, bits: new Uint8Array(wB * h) }; }
+function titik(bm, x, y) { if (x >= 0 && x < bm.dots && y >= 0 && y < bm.h) bm.bits[y * bm.wB + (x >> 3)] |= 0x80 >> (x & 7); }
+function kotak(bm, x, y, w, h) { for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) titik(bm, x + i, y + j); }
+function geser(rata, lebar, dots) { return rata === "center" ? Math.floor((dots - lebar) / 2) : rata === "right" ? dots - lebar : 0; }
+function rasterQR(text, level, sizeMm, rata, dots) {
+  const q = new QRLIB.QRCode(-1, QRLIB.Level[level] ?? QRLIB.Level.M);
+  q.addData(unescape(encodeURIComponent(text || " "))); q.make();
+  const n = q.getModuleCount();
+  const s = Math.max(1, Math.min(Math.floor(dots / n), Math.round(sizeMm * 8 / n)));
+  const bm = bitmap(dots, n * s), x0 = geser(rata, n * s, dots);
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) kotak(bm, x0 + c * s, r * s, s, s);
+  return bm;
+}
+function rasterBarcode(b, dots) {
+  const h = Math.max(8, Math.round(b.tinggi * 8));
+  let segs = [], total = 0, teks = b.isi;
+  if (b.jenis === "ean13") { const e = ean13(b.isi); teks = e.text; e.mods.forEach(m => { segs.push([m.w, m.bar]); total += m.w; }); }
+  else { let bar = true; code128(b.isi || " ").forEach(w => { segs.push([w, bar]); bar = !bar; total += w; }); }
+  const m = Math.max(1, Math.floor(dots * (b.lebarPct / 100) / (total + 20)));
+  const lebar = total * m, bm = bitmap(dots, h);
+  let x = geser(b.rata, lebar, dots);
+  segs.forEach(([w, bar]) => { if (bar) kotak(bm, x, 0, w * m, h); x += w * m; });
+  return { bm, teks };
+}
+function rasterGambar(src, pct, rata, ambang, dots) {
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => {
+      const w = Math.max(8, Math.min(dots, Math.round(dots * pct / 100))), h = Math.max(1, Math.round(img.height * w / img.width));
+      const c = document.createElement("canvas"); c.width = w; c.height = h;
+      const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, w, h); x.drawImage(img, 0, 0, w, h);
+      const p = x.getImageData(0, 0, w, h).data, bm = bitmap(dots, h), x0 = geser(rata, w, dots);
+      for (let yy = 0; yy < h; yy++) for (let xx = 0; xx < w; xx++) {
+        const i = (yy * w + xx) * 4, a = p[i + 3] / 255;
+        const l = (0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2]) * a + 255 * (1 - a);
+        if (l < ambang) titik(bm, x0 + xx, yy);
+      }
+      res(bm);
+    };
+    img.onerror = () => rej(new Error("gambar tidak bisa dibaca"));
+    img.src = src;
+  });
+}
+const UKURAN_ESC = { "-1pt": [0, true], "0pt": [0, false], "2pt": [0x01, false], "3pt": [0x11, false], "4pt": [0x11, false], "6pt": [0x11, false], "7pt": [0x11, false], "12pt": [0x22, false] };
+function spasiDots(lh, fontB) { return Math.round((fontB ? 17 : 24) * (+lh || 1.3)) + 2; }
+
+async function buatESCPOSTeks() {
+  const dots = +G.pDots, fontB = G.pFont === "B", cols = kolomPrinter(dots, fontB);
+  const E = new EscPos(G.tebal === "bold", fontB).init(spasiDots(G.lh, fontB));
+  for (const b of blocks) {
+    switch (b.type) {
+      case "teks": {
+        const [sz, kecil] = UKURAN_ESC[b.ukuran] || [0, false];
+        const c = Math.floor((kecil ? kolomPrinter(dots, true) : cols) / ((sz >> 4) + 1));
+        const isi = b.kapital ? String(b.isi).toUpperCase() : String(b.isi);
+        isi.split("\n").forEach(par => bungkus(par, c).forEach(l =>
+          E.text(l, { align: b.rata === "justify" ? "left" : b.rata, bold: b.tebal, ul: b.garisBawah, inv: b.inv, size: sz, fontB: kecil ? true : undefined })));
+        break;
+      }
+      case "garis": {
+        const k = b.jenis || G.garis;
+        if (k === "kosong") E.feedDots((parseFloat(G.gap) || 2) * 8);
+        else teksBlok(b, cols).forEach(l => E.text(l));
+        break;
+      }
+      case "barang": teksBlok(b, cols).forEach((l, i) => E.text(l, { bold: b.header && i === 0 })); break;
+      case "total": {
+        const lbl = b.besar ? String(b.labelTotal).toUpperCase() : String(b.labelTotal);
+        teksBlok(b, cols).forEach(l => l.startsWith(lbl) ? E.text(l, { bold: true, size: b.besar ? 0x01 : 0 }) : E.text(l));
+        break;
+      }
+      case "gambar": {
+        const src = b.bw && b._bw ? b._bw : b.src;
+        if (src) E.raster(await rasterGambar(src, b.lebarPct, b.rata, b.bw ? 128 : +G.pThr, dots));
+        break;
+      }
+      case "qr":
+        E.raster(rasterQR(b.isi, b.level, b.ukuran, b.rata, dots));
+        if (b.caption) E.text(b.caption, { align: b.rata });
+        break;
+      case "barcode":
+        try { const { bm, teks } = rasterBarcode(b, dots); E.raster(bm); if (b.teks) E.text(teks, { align: b.rata }); } catch (e) {}
+        break;
+      case "spasi": E.feedDots(b.tinggi * 8); break;
+      default: teksBlok(b, cols).forEach(l => E.text(l));
+    }
+  }
+  E.feedDots((parseFloat(G.feed) || 0) * 8);
+  return E.end(+G.pFeed, G.pCut);
+}
+
 async function kirim(bytes, onProg) {
   if (P.jenis === "serial") {
     for (let i = 0; i < bytes.length; i += 1024) { await P.writer.write(bytes.slice(i, i + 1024)); onProg(i / bytes.length); }
@@ -2355,7 +2490,7 @@ async function cetakLangsung() {
   bar.style.display = "block"; isi.style.width = "0";
   try {
     statusPrinter("Menyiapkan struk…", "busy");
-    const data = await buatESCPOS();
+    const data = G.pMode === "gambar" ? await buatESCPOS() : await buatESCPOSTeks();
     statusPrinter(`Mencetak ke ${P.nama}…`, "busy");
     await kirim(data, f => isi.style.width = Math.round(f * 100) + "%");
     isi.style.width = "100%";
