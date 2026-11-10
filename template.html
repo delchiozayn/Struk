@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Template Struk 58mm</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style id="pageStyle">@page { size: 58mm 200mm; margin: 0; }</style>
+<style>
+  :root { --lebar: 58mm; --font: 9pt; --jenis: "Courier New", Courier, monospace; --lh: 1.3; --ls: 0px; --pad: 2mm; --gap: 2mm; --feed: 8mm; --para: 0mm; --tokoPlus: 3pt; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, sans-serif; background: #f2f2f2; color: #222; }
+  .wrap { display: flex; gap: 24px; padding: 20px; flex-wrap: wrap; align-items: flex-start; }
+
+  /* ===== PANEL EDIT ===== */
+  .panel { background: #fff; padding: 16px; border-radius: 8px; width: 460px; max-width: 100%; }
+  .panel h2 { margin: 0 0 12px; font-size: 18px; }
+  .panel h3 { margin: 16px 0 6px; font-size: 14px; color: #555; }
+  .panel label { display: block; font-size: 12px; margin: 6px 0 2px; color: #555; }
+  .panel input, .panel textarea, .panel select { width: 100%; padding: 6px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; }
+  .panel textarea { height: 48px; resize: vertical; }
+  .row2 { display: flex; gap: 8px; } .row2 > div { flex: 1; }
+  table.items { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.items td { padding: 2px; }
+  table.items input { padding: 4px; }
+  .btn { padding: 8px 12px; border: 0; border-radius: 4px; cursor: pointer; font-size: 13px; }
+  .btn-add { background: #e7e7e7; margin-top: 6px; }
+  .btn-del { background: #fbe3e3; color: #a00; padding: 4px 8px; }
+  .btn-print { background: #1a73e8; color: #fff; width: 100%; margin-top: 16px; font-size: 15px; padding: 12px; }
+  .tip { font-size: 11px; color: #777; margin-top: 10px; line-height: 1.5; }
+
+  /* ===== STRUK ===== */
+  .struk {
+    width: var(--lebar); background: #fff; padding: 2mm var(--pad);
+    font-family: var(--jenis); font-size: var(--font); line-height: var(--lh); letter-spacing: var(--ls); color: #000;
+    box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  }
+  .c { text-align: center; } .r { text-align: right; } .b { font-weight: bold; }
+  .toko { font-size: calc(var(--font) + var(--tokoPlus)); font-weight: bold; }
+  .struk .para + .para, .struk .item + .item { margin-top: var(--para); }
+  .struk .upper { text-transform: uppercase; }
+  .feed { height: var(--feed); }
+  .btn-row { display: flex; gap: 8px; margin-top: 8px; }
+  .btn-row .btn { flex: 1; background: #34a853; color: #fff; padding: 10px; font-size: 14px; }
+  .btn-row .btn.pdf { background: #d93025; }
+  .garis { margin: var(--gap) 0; height: 0; border-top: 1px dashed #000; }
+  .garis.ds { border-top: 1px dashed #000; }
+  .garis.dd { border-top: 1px dashed #000; border-bottom: 1px dashed #000; height: 4px; }
+  .garis.ss { border-top: 1px solid #000; }
+  .garis.sd { border-top: 1px solid #000; border-bottom: 1px solid #000; height: 4px; }
+  .garis.dt { border-top: 2px dotted #000; }
+  .garis.tb { border-top: 2px solid #000; }
+  .garis.tx { border: 0; height: auto; overflow: hidden; white-space: nowrap; line-height: 1; }
+  .chk { display: flex; align-items: center; gap: 6px; font-size: 13px; margin-top: 8px; }
+  .chk input { width: auto; }
+  .baris { display: flex; justify-content: space-between; gap: 2mm; }
+  .item-nama { word-break: break-word; }
+  .total { font-size: calc(var(--font) + 1pt); font-weight: bold; }
+  .logo img { max-width: 70%; max-height: 18mm; }
+
+  .kartu { border: 1px solid #e3e3e3; border-radius: 8px; padding: 10px; margin-top: 14px; font-size: 13px; }
+  .kartu > summary { font-weight: 600; cursor: pointer; font-size: 14px; }
+  .stat { display: flex; align-items: center; gap: 6px; font-weight: 600; margin: 8px 0; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: #bbb; flex-shrink: 0; }
+  .dot.on { background: #34a853; } .dot.busy { background: #f9ab00; }
+  .fbar { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; align-items: center; }
+  .fbar .btn { background: #e8eaed; font-size: 12px; padding: 7px 10px; }
+  .fbar .bt { background: #1a73e8; color: #fff; }
+  .go { background: #0b8043; color: #fff; width: 100%; font-size: 15px; padding: 11px; margin-top: 8px; }
+  .go:disabled { background: #9ccfae; cursor: not-allowed; }
+  .catatan { font-size: 11px; color: #a15c00; background: #fff6e0; border-radius: 6px; padding: 6px 8px; margin-top: 8px; line-height: 1.45; }
+  .bar { height: 6px; background: #eee; border-radius: 3px; overflow: hidden; margin-top: 8px; display: none; }
+  .bar > div { height: 100%; width: 0; background: #0b8043; }
+  .kartu details summary { cursor: pointer; font-size: 12px; color: #555; margin-top: 8px; }
+  .chk { display: flex; align-items: center; gap: 6px; font-size: 12px; margin-top: 8px; color: #333; }
+  .chk input { width: auto !important; }
+  pre.teks { background: #fffef8; border: 1px solid #ddd; border-radius: 6px; padding: 10px 8px; margin: 8px 0 0;
+    font-family: "Courier New", Consolas, monospace; font-size: 13px; line-height: 1.35; overflow-x: auto; white-space: pre; color: #000; }
+  .ok { color: #0b8043; font-size: 12px; }
+
+  /* ===== HP ===== */
+  @media screen and (max-width: 700px) {
+    .wrap { padding: 10px; gap: 14px; flex-direction: column; align-items: stretch; }
+    .panel { width: 100%; padding: 12px; }
+    .panel input, .panel textarea, .panel select { font-size: 16px; }
+    .struk { margin: 0 auto; transform: scale(1.4); transform-origin: top center; margin-bottom: 40%; }
+    .btn-print { position: sticky; bottom: 8px; z-index: 5; }
+  }
+
+  /* ===== CETAK ===== */
+  
+  @media print {
+    .struk { transform: none !important; }
+    body { background: #fff; }
+    .panel { display: none; }
+    .wrap { padding: 0; display: block; }
+    .struk { box-shadow: none; margin: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- PANEL EDIT -->
+  <div class="panel">
+    <h2>Template Struk Thermal</h2>
+
+    <h3>Kertas</h3>
+    <div class="row2">
+      <div><label>Lebar area cetak</label>
+        <select id="lebar">
+          <option value="48mm">48 mm (kertas 58mm, aman)</option>
+          <option value="55mm">55 mm</option>
+          <option value="58mm" selected>58 mm</option>
+          <option value="72mm">72 mm (kertas 80mm)</option>
+        </select></div>
+      <div><label>Ukuran huruf</label>
+        <select id="font">
+          <option value="8pt">Kecil (8pt)</option>
+          <option value="9pt" selected>Normal (9pt)</option>
+          <option value="10pt">Besar (10pt)</option>
+        </select></div>
+    </div>
+
+    <h3>Huruf &amp; Garis</h3>
+    <div class="row2">
+      <div><label>Jenis font</label>
+        <select id="jenis">
+          <option value='"Courier New", Courier, monospace' selected>Courier New (struk klasik)</option>
+          <option value='Consolas, "Lucida Console", monospace'>Consolas</option>
+          <option value='"Lucida Console", Monaco, monospace'>Lucida Console</option>
+          <option value='monospace'>Monospace bawaan</option>
+          <option value='Arial, Helvetica, sans-serif'>Arial</option>
+          <option value='Tahoma, Verdana, sans-serif'>Tahoma</option>
+          <option value='Verdana, Geneva, sans-serif'>Verdana</option>
+          <option value='"Trebuchet MS", sans-serif'>Trebuchet MS</option>
+          <option value='"Times New Roman", Times, serif'>Times New Roman</option>
+          <option value='Georgia, serif'>Georgia</option>
+        </select></div>
+      <div><label>Ketebalan huruf</label>
+        <select id="tebal">
+          <option value="normal">Normal</option>
+          <option value="bold">Tebal semua</option>
+        </select></div>
+    </div>
+    <div class="row2">
+      <div><label>Jenis garis pemisah</label>
+        <select id="garis">
+          <option value="ds" selected>- - - Putus-putus tunggal</option>
+          <option value="dd">= = = Putus-putus ganda</option>
+          <option value="ss">───── Lurus tunggal</option>
+          <option value="sd">═════ Lurus ganda</option>
+          <option value="tb">━━━━━ Lurus tebal</option>
+          <option value="dt">····· Titik-titik</option>
+          <option value="tx">Karakter teks (pilih di kanan)</option>
+        </select></div>
+      <div><label>Karakter teks garis</label>
+        <select id="garisChar">
+          <option value="-">- - - - (minus)</option>
+          <option value="=">= = = = (sama dengan)</option>
+          <option value="*">* * * * (bintang)</option>
+          <option value="~">~ ~ ~ ~ (gelombang)</option>
+          <option value="_">_ _ _ _ (garis bawah)</option>
+          <option value=".">. . . . (titik)</option>
+        </select></div>
+    </div>
+    <label>Garis tambahan sebelum TOTAL</label>
+    <select id="garisTotal">
+      <option value="same" selected>Sama dengan garis pemisah</option>
+      <option value="sd">Lurus ganda</option>
+      <option value="dd">Putus-putus ganda</option>
+      <option value="tb">Lurus tebal</option>
+    </select>
+
+    <h3>Pengaturan Paragraf</h3>
+    <div class="row2">
+      <div><label>Spasi baris</label>
+        <select id="lh">
+          <option value="1">1,0 (rapat)</option>
+          <option value="1.15">1,15</option>
+          <option value="1.3" selected>1,3 (normal)</option>
+          <option value="1.5">1,5</option>
+          <option value="2">2,0 (renggang)</option>
+        </select></div>
+      <div><label>Jarak antar huruf</label>
+        <select id="ls">
+          <option value="-0.3px">Rapat</option>
+          <option value="0px" selected>Normal</option>
+          <option value="0.5px">Agak renggang</option>
+          <option value="1px">Renggang</option>
+        </select></div>
+    </div>
+    <div class="row2">
+      <div><label>Perataan header (toko)</label>
+        <select id="alignHeader">
+          <option value="left">Kiri</option>
+          <option value="center" selected>Tengah</option>
+          <option value="right">Kanan</option>
+        </select></div>
+      <div><label>Perataan pesan penutup</label>
+        <select id="alignFooter">
+          <option value="left">Kiri</option>
+          <option value="center" selected>Tengah</option>
+          <option value="right">Kanan</option>
+          <option value="justify">Rata kiri-kanan</option>
+        </select></div>
+    </div>
+    <div class="row2">
+      <div><label>Margin kiri-kanan</label>
+        <select id="pad">
+          <option value="0mm">0 mm</option>
+          <option value="1mm">1 mm</option>
+          <option value="2mm" selected>2 mm</option>
+          <option value="3mm">3 mm</option>
+          <option value="4mm">4 mm</option>
+        </select></div>
+      <div><label>Jarak di sekitar garis</label>
+        <select id="gap">
+          <option value="1mm">1 mm</option>
+          <option value="2mm" selected>2 mm</option>
+          <option value="3mm">3 mm</option>
+          <option value="4mm">4 mm</option>
+        </select></div>
+    </div>
+    <div class="row2">
+      <div><label>Jarak antar barang/paragraf</label>
+        <select id="para">
+          <option value="0mm" selected>0 mm</option>
+          <option value="1mm">1 mm</option>
+          <option value="2mm">2 mm</option>
+          <option value="3mm">3 mm</option>
+        </select></div>
+      <div><label>Ruang kosong di bawah</label>
+        <select id="feed">
+          <option value="0mm">0 mm</option>
+          <option value="5mm">5 mm</option>
+          <option value="8mm" selected>8 mm</option>
+          <option value="15mm">15 mm</option>
+          <option value="25mm">25 mm</option>
+        </select></div>
+    </div>
+    <div class="row2">
+      <div><label>Ukuran nama toko</label>
+        <select id="tokoPlus">
+          <option value="0pt">Sama dengan teks</option>
+          <option value="2pt">Sedikit besar</option>
+          <option value="3pt" selected>Besar</option>
+          <option value="6pt">Sangat besar</option>
+        </select></div>
+      <div><label>Nama barang</label>
+        <select id="caseItem">
+          <option value="">Seperti diketik</option>
+          <option value="upper">HURUF BESAR</option>
+        </select></div>
+    </div>
+
+    <h3>Toko</h3>
+    <label>Logo (opsional, gambar hitam-putih)</label>
+    <input type="file" id="logo" accept="image/*">
+    <label>Nama toko</label><input id="namaToko" value="TOKO MAJU JAYA">
+    <label>Alamat / info</label><textarea id="alamat">Jl. Merdeka No. 10, Jakarta
+Telp. 0812-3456-7890</textarea>
+
+    <h3>Transaksi</h3>
+    <div class="row2">
+      <div><label>No. struk</label><input id="noStruk" value="INV-0001"></div>
+      <div><label>Kasir</label><input id="kasir" value="Admin"></div>
+    </div>
+    <h3>Pengaturan Tanggal</h3>
+    <div class="row2">
+      <div><label>Sumber tanggal</label>
+        <select id="tglMode">
+          <option value="auto" selected>Otomatis (waktu saat ini)</option>
+          <option value="manual">Atur manual</option>
+        </select></div>
+      <div><label>Tanggal &amp; jam manual</label>
+        <input type="datetime-local" id="tanggal" disabled></div>
+    </div>
+    <div class="row2">
+      <div><label>Format tanggal</label>
+        <select id="tglFormat">
+          <option value="dd/mm/yyyy" selected>10/11/2026</option>
+          <option value="dd-mm-yyyy">10-11-2026</option>
+          <option value="dd/mm/yy">10/11/26</option>
+          <option value="yyyy-mm-dd">2026-11-10</option>
+          <option value="d mmm yyyy">10 Nov 2026</option>
+          <option value="d mmmm yyyy">10 November 2026</option>
+          <option value="dddd, d mmmm yyyy">Selasa, 10 November 2026</option>
+          <option value="ddd, dd/mm/yyyy">Sel, 10/11/2026</option>
+        </select></div>
+      <div><label>Format jam</label>
+        <select id="jamFormat">
+          <option value="hm" selected>14:30</option>
+          <option value="hms">14:30:45</option>
+          <option value="hm-wib">14:30 WIB</option>
+          <option value="none">Tidak ditampilkan</option>
+        </select></div>
+    </div>
+    <div class="row2">
+      <div><label>Posisi tanggal</label>
+        <select id="tglPosisi">
+          <option value="satu" selected>Tanggal &amp; jam satu baris</option>
+          <option value="pisah">Tanggal dan jam baris terpisah</option>
+          <option value="tengah">Di tengah, bawah nama toko</option>
+        </select></div>
+      <div><label>Label tanggal</label>
+        <input id="tglLabel" value="Tgl"></div>
+    </div>
+
+    <h3>Barang</h3>
+    <table class="items">
+      <thead><tr><td>Nama</td><td style="width:50px">Qty</td><td style="width:100px">Harga</td><td></td></tr></thead>
+      <tbody id="itemBody"></tbody>
+    </table>
+    <button class="btn btn-add" onclick="tambahItem()">+ Tambah barang</button>
+
+    <h3>Pembayaran</h3>
+    <div class="row2">
+      <div><label>Diskon (Rp)</label><input type="number" id="diskon" value="0"></div>
+      <div><label>Pajak (%)</label><input type="number" id="pajak" value="0"></div>
+    </div>
+    <div class="row2">
+      <div><label>Metode</label>
+        <select id="metode"><option>Tunai</option><option>QRIS</option><option>Transfer</option><option>Debit</option></select></div>
+      <div><label>Dibayar (Rp)</label><input type="number" id="bayar" value="100000"></div>
+    </div>
+
+    <label>Pesan penutup</label><textarea id="footer">Terima kasih atas kunjungan Anda
+Barang yang sudah dibeli tidak dapat dikembalikan</textarea>
+
+    <button class="btn btn-print" onclick="window.print()">🖨️ Cetak Struk</button>
+    <div class="btn-row">
+      <button class="btn" onclick="simpanGambar()">🖼️ Simpan Gambar (PNG)</button>
+      <button class="btn pdf" onclick="simpanPDF()">📄 Simpan PDF</button>
+    </div>
+    <details class="kartu" open>
+      <summary>⚡ Cetak langsung ke printer (Bluetooth)</summary>
+      <div class="stat"><span class="dot" id="pDot"></span><span id="pStat">Printer belum terhubung</span></div>
+      <div class="fbar">
+        <button class="btn bt" onclick="hubungBT()">🔵 Hubungkan Bluetooth</button>
+        <button class="btn" id="btnSerial" onclick="hubungSerial()">🔌 Serial / COM</button>
+        <button class="btn" onclick="putuskan()">Putuskan</button>
+      </div>
+      <button class="btn go" id="btnLangsung" onclick="cetakLangsung()" disabled>⚡ Cetak Langsung ke Printer</button>
+      <div class="bar" id="pBar"><div></div></div>
+      <details>
+        <summary>Pengaturan printer</summary>
+        <div class="row2">
+          <div><label>Lebar cetak printer</label>
+            <select id="pDots">
+              <option value="384" selected>58 mm (384 titik)</option>
+              <option value="432">58 mm lebar (432 titik)</option>
+              <option value="576">80 mm (576 titik)</option>
+              <option value="512">80 mm sempit (512 titik)</option>
+            </select></div>
+          <div><label>Kepekatan</label>
+            <select id="pThr"><option value="120">Tipis</option><option value="160" selected>Normal</option><option value="200">Pekat</option><option value="230">Sangat pekat</option></select></div>
+        </div>
+        <div class="row2">
+          <div><label>Kertas maju setelah cetak</label>
+            <select id="pFeed"><option value="0">0 baris</option><option value="2">2 baris</option><option value="3" selected>3 baris</option><option value="5">5 baris</option><option value="8">8 baris</option></select></div>
+          <div><label>Kecepatan kirim</label>
+            <select id="pChunk"><option value="20">Paling aman (lambat)</option><option value="100" selected>Normal</option><option value="180">Cepat</option><option value="512">Sangat cepat</option></select></div>
+        </div>
+        <label class="chk"><input type="checkbox" id="pCut"> Potong kertas otomatis (printer dengan auto-cutter)</label>
+        <div class="catatan">Kalau hasil cetak terputus, pilih kecepatan <b>Paling aman</b>. Agar ukuran huruf pas, atur <b>Lebar area cetak</b> ke <b>48 mm</b> untuk printer 58 mm.</div>
+      </details>
+      <div class="catatan" id="pInfo" style="display:none"></div>
+    </details>
+
+    <details class="kartu">
+      <summary>📝 Struk versi teks (untuk Thermer)</summary>
+      <div style="font-size:12px;color:#777;margin-top:6px">Salin lalu tempel ke aplikasi Thermer. Ukuran huruf dan logo tidak ikut dalam versi teks.</div>
+      <div class="row2">
+        <div><label>Karakter per baris</label>
+          <select id="tCols"><option value="32" selected>32 (printer 58 mm)</option><option value="30">30</option><option value="42">42 (58 mm huruf kecil)</option><option value="48">48 (printer 80 mm)</option></select></div>
+        <div style="align-self:end"><label class="chk"><input type="checkbox" id="tTanda" checked> Tulis penanda [Logo]</label></div>
+      </div>
+      <div class="fbar">
+        <button class="btn bt" onclick="salinTeks()">📋 Salin teks</button>
+        <button class="btn" id="btnBagi" onclick="bagiTeks()">📤 Bagikan ke aplikasi</button>
+        <button class="btn" onclick="unduhTeks()">⬇️ Simpan .txt</button>
+        <span class="ok" id="okSalin"></span>
+      </div>
+      <pre class="teks" id="teksStruk"></pre>
+    </details>
+
+    <div class="tip">
+      Saat dialog print muncul: pilih printer thermal, <b>Margins: None</b>,
+      <b>Scale: 100%</b>, matikan <b>Headers and footers</b>, dan nyalakan <b>Background graphics</b> jika memakai logo.
+    </div>
+  </div>
+
+  <!-- PRATINJAU STRUK -->
+  <div class="struk" id="struk"></div>
+</div>
+
+<script>
+let items = [
+  { nama: "Kopi Susu Gula Aren", qty: 2, harga: 18000 },
+  { nama: "Roti Bakar Coklat", qty: 1, harga: 15000 },
+  { nama: "Air Mineral 600ml", qty: 3, harga: 5000 }
+];
+let logoData = "";
+
+const $ = id => document.getElementById(id);
+const rp = n => "Rp" + Math.round(n).toLocaleString("id-ID");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+const nl = s => esc(s).replace(/\n/g, "<br>");
+
+function renderItemInputs() {
+  $("itemBody").innerHTML = items.map((it, i) => `
+    <tr>
+      <td><input value="${esc(it.nama)}" oninput="items[${i}].nama=this.value;render()"></td>
+      <td><input type="number" min="0" value="${it.qty}" oninput="items[${i}].qty=+this.value;render()"></td>
+      <td><input type="number" min="0" value="${it.harga}" oninput="items[${i}].harga=+this.value;render()"></td>
+      <td><button class="btn btn-del" onclick="hapusItem(${i})">✕</button></td>
+    </tr>`).join("");
+}
+function tambahItem() { items.push({ nama: "Barang baru", qty: 1, harga: 0 }); renderItemInputs(); render(); }
+function hapusItem(i) { items.splice(i, 1); renderItemInputs(); render(); }
+
+const HARI = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+const BULAN = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+const p2 = n => String(n).padStart(2, "0");
+function fmtTanggal(d, f) {
+  const map = {
+    "dd/mm/yyyy": `${p2(d.getDate())}/${p2(d.getMonth()+1)}/${d.getFullYear()}`,
+    "dd-mm-yyyy": `${p2(d.getDate())}-${p2(d.getMonth()+1)}-${d.getFullYear()}`,
+    "dd/mm/yy": `${p2(d.getDate())}/${p2(d.getMonth()+1)}/${String(d.getFullYear()).slice(-2)}`,
+    "yyyy-mm-dd": `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`,
+    "d mmm yyyy": `${d.getDate()} ${BULAN[d.getMonth()].slice(0,3)} ${d.getFullYear()}`,
+    "d mmmm yyyy": `${d.getDate()} ${BULAN[d.getMonth()]} ${d.getFullYear()}`,
+    "dddd, d mmmm yyyy": `${HARI[d.getDay()]}, ${d.getDate()} ${BULAN[d.getMonth()]} ${d.getFullYear()}`,
+    "ddd, dd/mm/yyyy": `${HARI[d.getDay()].slice(0,3)}, ${p2(d.getDate())}/${p2(d.getMonth()+1)}/${d.getFullYear()}`
+  };
+  return map[f];
+}
+function fmtJam(d, f) {
+  if (f === "none") return "";
+  const hm = `${p2(d.getHours())}:${p2(d.getMinutes())}`;
+  if (f === "hms") return `${hm}:${p2(d.getSeconds())}`;
+  if (f === "hm-wib") return `${hm} WIB`;
+  return hm;
+}
+function garisHTML(kelas) {
+  const k = kelas || $("garis").value;
+  if (k === "tx") {
+    const ch = $("garisChar").value;
+    return `<div class="garis tx">${esc(ch.repeat(80))}</div>`;
+  }
+  return `<div class="garis ${k}"></div>`;
+}
+
+function render() {
+  document.documentElement.style.setProperty("--lebar", $("lebar").value);
+  document.documentElement.style.setProperty("--font", $("font").value);
+  document.documentElement.style.setProperty("--jenis", $("jenis").value);
+  ["lh","ls","pad","gap","para","feed","tokoPlus"].forEach(k =>
+    document.documentElement.style.setProperty("--" + k, $(k).value));
+  const aH = $("alignHeader").value, aF = $("alignFooter").value, up = $("caseItem").value;
+  $("struk").style.fontWeight = $("tebal").value;
+  $("garisChar").disabled = $("garis").value !== "tx";
+  $("tanggal").disabled = $("tglMode").value !== "manual";
+
+  const subtotal = items.reduce((s, it) => s + it.qty * it.harga, 0);
+  const diskon = +$("diskon").value || 0;
+  const pajak = (subtotal - diskon) * ((+$("pajak").value || 0) / 100);
+  const total = subtotal - diskon + pajak;
+  const bayar = +$("bayar").value || 0;
+  const tgl = ($("tglMode").value === "manual" && $("tanggal").value) ? new Date($("tanggal").value) : new Date();
+  const tStr = fmtTanggal(tgl, $("tglFormat").value);
+  const jStr = fmtJam(tgl, $("jamFormat").value);
+  const lbl = esc($("tglLabel").value);
+  const pos = $("tglPosisi").value;
+  let tglAtas = "", tglBaris = "";
+  if (pos === "tengah") tglAtas = `<div class="c">${tStr}${jStr ? " " + jStr : ""}</div>`;
+  else if (pos === "pisah") tglBaris = `<div class="baris"><span>${lbl}</span><span>${tStr}</span></div>` +
+      (jStr ? `<div class="baris"><span>Jam</span><span>${jStr}</span></div>` : "");
+  else tglBaris = `<div class="baris"><span>${lbl}</span><span class="r">${tStr}${jStr ? " " + jStr : ""}</span></div>`;
+  const G = garisHTML();
+  const GT = $("garisTotal").value === "same" ? G : garisHTML($("garisTotal").value);
+
+  $("struk").innerHTML = `
+    ${logoData ? `<div class="logo" style="text-align:${aH}"><img src="${logoData}"></div>` : ""}
+    <div class="toko" style="text-align:${aH}">${esc($("namaToko").value)}</div>
+    <div style="text-align:${aH}">${$("alamat").value.split("\n").map(l => `<div class="para">${esc(l) || "&nbsp;"}</div>`).join("")}</div>
+    ${tglAtas}
+    ${G}
+    <div class="baris"><span>No</span><span>${esc($("noStruk").value)}</span></div>
+    ${tglBaris}
+    <div class="baris"><span>Kasir</span><span>${esc($("kasir").value)}</span></div>
+    ${G}
+    ${items.map(it => `<div class="item">
+      <div class="item-nama ${up}">${esc(it.nama)}</div>
+      <div class="baris"><span>${it.qty} x ${rp(it.harga)}</span><span>${rp(it.qty * it.harga)}</span></div>
+    </div>`).join("")}
+    ${GT}
+    <div class="baris"><span>Subtotal</span><span>${rp(subtotal)}</span></div>
+    ${diskon ? `<div class="baris"><span>Diskon</span><span>-${rp(diskon)}</span></div>` : ""}
+    ${pajak ? `<div class="baris"><span>Pajak ${$("pajak").value}%</span><span>${rp(pajak)}</span></div>` : ""}
+    <div class="baris total"><span>TOTAL</span><span>${rp(total)}</span></div>
+    <div class="baris"><span>${esc($("metode").value)}</span><span>${rp(bayar)}</span></div>
+    <div class="baris"><span>Kembali</span><span>${rp(Math.max(0, bayar - total))}</span></div>
+    ${G}
+    <div style="text-align:${aF}">${$("footer").value.split("\n").map(l => `<div class="para">${esc(l) || "&nbsp;"}</div>`).join("")}</div>
+    <div class="feed"></div>`;
+  if ($("teksStruk")) $("teksStruk").textContent = strukTeks();
+  const mm = Math.ceil($("struk").scrollHeight * 25.4 / 96) + 1;
+  $("pageStyle").textContent = `@page { size: ${$("lebar").value} ${mm}mm; margin: 0; }`;
+}
+
+$("logo").addEventListener("change", e => {
+  const f = e.target.files[0]; if (!f) { logoData = ""; render(); return; }
+  const r = new FileReader(); r.onload = () => { logoData = r.result; render(); }; r.readAsDataURL(f);
+});
+document.querySelectorAll(".panel input:not(#logo), .panel textarea, .panel select")
+  .forEach(el => el.addEventListener("input", render));
+
+/* ===== EKSPOR GAMBAR & PDF (tanpa internet) ===== */
+const SKALA = 4; // resolusi tinggi agar tajam
+function namaFile(ext) {
+  return (($("noStruk").value || "struk").replace(/[^\w-]+/g, "_")) + "." + ext;
+}
+async function strukKeCanvas() {
+  render();
+  const el = $("struk");
+  const w = el.offsetWidth, h = el.scrollHeight;
+  const clone = el.cloneNode(true);
+  clone.style.transform = "none"; clone.style.boxShadow = "none"; clone.style.margin = "0";
+  const rootVars = document.documentElement.getAttribute("style") || "";
+  const css = [...document.styleSheets].map(ss => [...ss.cssRules]
+    .filter(r => !(r instanceof CSSMediaRule) && !(r instanceof CSSPageRule))
+    .map(r => r.cssText).join("\n")).join("\n");
+  const xhtml = new XMLSerializer().serializeToString(clone);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
+    <foreignObject width="100%" height="100%">
+      <div xmlns="http://www.w3.org/1999/xhtml" style="${rootVars.replace(/"/g, "&quot;")}">
+        <style>${css.replace(/</g, "&lt;")}</style>
+        ${xhtml}
+      </div>
+    </foreignObject></svg>`;
+  const img = new Image();
+  img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+  await img.decode();
+  const c = document.createElement("canvas");
+  c.width = w * SKALA; c.height = h * SKALA;
+  const ctx = c.getContext("2d");
+  ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+  ctx.scale(SKALA, SKALA); ctx.drawImage(img, 0, 0, w, h);
+  return c;
+}
+function unduh(blob, nama) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = nama;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+async function simpanGambar() {
+  try {
+    const c = await strukKeCanvas();
+    c.toBlob(b => unduh(b, namaFile("png")), "image/png");
+  } catch (e) { alert("Gagal membuat gambar: " + e.message); }
+}
+async function simpanPDF() {
+  try {
+    const c = await strukKeCanvas();
+    const jpg = atob(c.toDataURL("image/jpeg", 0.95).split(",")[1]);
+    const mmKePt = 72 / 25.4;
+    const lebarMm = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--lebar"));
+    const W = lebarMm * mmKePt, H = W * c.height / c.width;
+    // Membuat PDF sederhana berisi 1 gambar seukuran struk
+    const isi = `q ${W.toFixed(2)} 0 0 ${H.toFixed(2)} 0 0 cm /Im0 Do Q`;
+    const obj = [
+      "<< /Type /Catalog /Pages 2 0 R >>",
+      "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+      `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W.toFixed(2)} ${H.toFixed(2)}] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>`,
+      null,
+      `<< /Length ${isi.length} >>\nstream\n${isi}\nendstream`
+    ];
+    let pdf = "%PDF-1.4\n%\xE2\xE3\xCF\xD3\n";
+    const off = [];
+    obj.forEach((o, i) => {
+      off.push(pdf.length);
+      if (o === null) {
+        pdf += `${i + 1} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${c.width} /Height ${c.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpg.length} >>\nstream\n${jpg}\nendstream\nendobj\n`;
+      } else pdf += `${i + 1} 0 obj\n${o}\nendobj\n`;
+    });
+    const xref = pdf.length;
+    pdf += `xref\n0 ${obj.length + 1}\n0000000000 65535 f \n` +
+      off.map(o => String(o).padStart(10, "0") + " 00000 n \n").join("") +
+      `trailer\n<< /Size ${obj.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
+    const bytes = new Uint8Array(pdf.length);
+    for (let i = 0; i < pdf.length; i++) bytes[i] = pdf.charCodeAt(i) & 255;
+    unduh(new Blob([bytes], { type: "application/pdf" }), namaFile("pdf"));
+  } catch (e) { alert("Gagal membuat PDF: " + e.message); }
+}
+
+/* ===== STRUK VERSI TEKS ===== */
+const ulang = (c, n) => n > 0 ? c.repeat(n) : "";
+function bungkus(t, w) {
+  const out = [];
+  String(t).split("\n").forEach(par => {
+    let baris = "";
+    par.split(/\s+/).filter(Boolean).forEach(k => {
+      while (k.length > w) { if (baris) { out.push(baris); baris = ""; } out.push(k.slice(0, w)); k = k.slice(w); }
+      if (!k) return;
+      if (!baris) baris = k;
+      else if (baris.length + 1 + k.length <= w) baris += " " + k;
+      else { out.push(baris); baris = k; }
+    });
+    out.push(baris);
+  });
+  return out;
+}
+function rataTeks(t, w, r) {
+  return bungkus(t, w).map(l => r === "center" ? ulang(" ", Math.floor((w - l.length) / 2)) + l
+    : r === "right" ? ulang(" ", w - l.length) + l : l);
+}
+function kiriKanan(a, b, w) {
+  a = String(a); b = String(b);
+  const ls = a ? bungkus(a, w) : [""];
+  const akhir = ls.pop();
+  if (akhir.length + 1 + b.length <= w) ls.push(akhir + ulang(" ", w - akhir.length - b.length) + b);
+  else { if (akhir) ls.push(akhir); ls.push(ulang(" ", w - b.length) + b); }
+  return ls;
+}
+const CHAR_GARIS = { ds: "-", dd: "=", ss: "-", sd: "=", tb: "=", dt: "." };
+const garisTeks = (k, w) => ulang(k === "tx" ? $("garisChar").value : (CHAR_GARIS[k] || "-"), w);
+function strukTeks() {
+  const w = +$("tCols").value || 32, L = [];
+  const aH = $("alignHeader").value, aF = $("alignFooter").value === "justify" ? "left" : $("alignFooter").value;
+  const up = $("caseItem").value === "upper";
+  const gK = $("garis").value, gT = $("garisTotal").value === "same" ? gK : $("garisTotal").value;
+  if (logoData && $("tTanda").checked) L.push(...rataTeks("[Logo]", w, "center"));
+  L.push(...rataTeks($("namaToko").value, w, aH));
+  $("alamat").value.split("\n").forEach(l => L.push(...rataTeks(l, w, aH)));
+  const tgl = ($("tglMode").value === "manual" && $("tanggal").value) ? new Date($("tanggal").value) : new Date();
+  const tS = fmtTanggal(tgl, $("tglFormat").value), jS = fmtJam(tgl, $("jamFormat").value);
+  const pos = $("tglPosisi").value, lbl = $("tglLabel").value;
+  if (pos === "tengah") L.push(...rataTeks(tS + (jS ? " " + jS : ""), w, "center"));
+  L.push(garisTeks(gK, w));
+  L.push(...kiriKanan("No", $("noStruk").value, w));
+  if (pos === "pisah") { L.push(...kiriKanan(lbl, tS, w)); if (jS) L.push(...kiriKanan("Jam", jS, w)); }
+  else if (pos !== "tengah") L.push(...kiriKanan(lbl, tS + (jS ? " " + jS : ""), w));
+  L.push(...kiriKanan("Kasir", $("kasir").value, w));
+  L.push(garisTeks(gK, w));
+  items.forEach(it => {
+    L.push(...bungkus(up ? String(it.nama).toUpperCase() : it.nama, w));
+    L.push(...kiriKanan(`${it.qty} x ${rp(it.harga)}`, rp(it.qty * it.harga), w));
+  });
+  L.push(garisTeks(gT, w));
+  const subtotal = items.reduce((s, it) => s + it.qty * it.harga, 0);
+  const diskon = +$("diskon").value || 0, pj = +$("pajak").value || 0;
+  const pajak = (subtotal - diskon) * (pj / 100), total = subtotal - diskon + pajak, bayar = +$("bayar").value || 0;
+  L.push(...kiriKanan("Subtotal", rp(subtotal), w));
+  if (diskon) L.push(...kiriKanan("Diskon", "-" + rp(diskon), w));
+  if (pajak) L.push(...kiriKanan(`Pajak ${pj}%`, rp(pajak), w));
+  L.push(...kiriKanan("TOTAL", rp(total), w));
+  L.push(...kiriKanan($("metode").value, rp(bayar), w));
+  L.push(...kiriKanan("Kembali", rp(Math.max(0, bayar - total)), w));
+  L.push(garisTeks(gK, w));
+  $("footer").value.split("\n").forEach(l => L.push(...rataTeks(l, w, aF)));
+  return L.map(l => l.replace(/\s+$/, "")).join("\n");
+}
+function tandaOk(t) { $("okSalin").textContent = t; setTimeout(() => $("okSalin").textContent = "", 2500); }
+async function salinTeks() {
+  const t = strukTeks();
+  try { await navigator.clipboard.writeText(t); tandaOk("✓ Tersalin"); }
+  catch (e) {
+    const ta = document.createElement("textarea"); ta.value = t; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); tandaOk("✓ Tersalin"); } catch (e2) { tandaOk("Tekan lama teks untuk menyalin"); }
+    ta.remove();
+  }
+}
+async function bagiTeks() { try { await navigator.share({ text: strukTeks() }); } catch (e) { if (e.name !== "AbortError") tandaOk("Tidak bisa membagikan"); } }
+function unduhTeks() { unduh(new Blob([strukTeks()], { type: "text/plain;charset=utf-8" }), namaFile("txt")); }
+if (!navigator.share) $("btnBagi").style.display = "none";
+
+/* ===== PRINTER LANGSUNG (Bluetooth / Serial, ESC/POS) ===== */
+const LAYANAN_BLE = [
+  "000018f0-0000-1000-8000-00805f9b34fb", "e7810a71-73ae-499d-8c15-faa9aef0c3f2",
+  "49535343-fe7d-4ae5-8fa9-9fafd205e455", "0000ff00-0000-1000-8000-00805f9b34fb",
+  "0000ffe0-0000-1000-8000-00805f9b34fb", "0000fee7-0000-1000-8000-00805f9b34fb",
+  "0000ae30-0000-1000-8000-00805f9b34fb", "0000ff80-0000-1000-8000-00805f9b34fb",
+  "0000af30-0000-1000-8000-00805f9b34fb", "0000fff0-0000-1000-8000-00805f9b34fb",
+  "0000ae00-0000-1000-8000-00805f9b34fb", "0000ffb0-0000-1000-8000-00805f9b34fb"
+];
+const SPP = "00001101-0000-1000-8000-00805f9b34fb";
+const P = { jenis: null, nama: "", dev: null, ch: null, tanpaRespon: false, port: null, writer: null, sibuk: false };
+const tidur = ms => new Promise(r => setTimeout(r, ms));
+function statusPrinter(teks, kelas = "") { $("pStat").textContent = teks; $("pDot").className = "dot " + kelas; $("btnLangsung").disabled = !P.jenis || P.sibuk; }
+function info(html) { const el = $("pInfo"); el.style.display = html ? "block" : "none"; el.innerHTML = html || ""; }
+
+async function hubungBT() {
+  info("");
+  if (!navigator.bluetooth) {
+    info("Browser ini belum bisa terhubung langsung ke Bluetooth. Gunakan <b>Google Chrome</b> (Android, Windows, Mac) atau <b>Microsoft Edge</b>. " +
+      "Di iPhone/iPad, buka file ini dengan aplikasi browser <b>Bluefy</b>." + (window.isSecureContext ? "" : "<br>Halaman juga harus dibuka dari alamat <b>https://</b>."));
+    return;
+  }
+  try {
+    statusPrinter("Mencari printer…", "busy");
+    const dev = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: LAYANAN_BLE });
+    await sambungBLE(dev);
+  } catch (e) {
+    statusPrinter(P.jenis ? `Terhubung: ${P.nama}` : "Printer belum terhubung", P.jenis ? "on" : "");
+    if (e.name !== "NotFoundError") info("Gagal terhubung: " + esc(e.message) +
+      "<br>Pastikan printer menyala, Bluetooth &amp; Lokasi HP aktif, dan printer tidak sedang tersambung ke aplikasi lain.");
+  }
+}
+async function sambungBLE(dev) {
+  statusPrinter("Menyambungkan ke " + (dev.name || "printer") + "…", "busy");
+  const server = await dev.gatt.connect();
+  let pilih = null;
+  for (const sv of await server.getPrimaryServices()) {
+    let chars = []; try { chars = await sv.getCharacteristics(); } catch (e) {}
+    for (const c of chars) if (c.properties.writeWithoutResponse || c.properties.write)
+      if (!pilih || (c.properties.writeWithoutResponse && !pilih.properties.writeWithoutResponse)) pilih = c;
+    if (pilih && pilih.properties.writeWithoutResponse) break;
+  }
+  if (!pilih) {
+    dev.gatt.disconnect();
+    throw new Error("Printer ini tidak menyediakan jalur Bluetooth LE untuk mencetak. Kemungkinan printer hanya mendukung Bluetooth klasik. Coba tombol Serial / COM di laptop, atau gunakan aplikasi RawBT di Android.");
+  }
+  dev.addEventListener("gattserverdisconnected", () => { if (P.dev === dev) { P.ch = null; statusPrinter(`Terputus dari ${P.nama} – tekan Cetak Langsung untuk menyambung ulang`, "busy"); $("btnLangsung").disabled = false; } });
+  Object.assign(P, { jenis: "ble", nama: dev.name || "Printer Bluetooth", dev, ch: pilih, tanpaRespon: !!pilih.properties.writeWithoutResponse });
+  statusPrinter(`Terhubung: ${P.nama}`, "on");
+}
+async function hubungSerial() {
+  info("");
+  if (!navigator.serial) { info("Mode Serial/COM hanya ada di <b>Chrome atau Edge di laptop/PC</b>."); return; }
+  try {
+    let port;
+    try { port = await navigator.serial.requestPort({ allowedBluetoothServiceClassIds: [SPP] }); }
+    catch (e) { if (e.name === "NotFoundError") throw e; port = await navigator.serial.requestPort(); }
+    await port.open({ baudRate: 9600 });
+    Object.assign(P, { jenis: "serial", nama: "Printer Serial/COM", port, writer: port.writable.getWriter() });
+    statusPrinter(`Terhubung: ${P.nama}`, "on");
+  } catch (e) {
+    if (e.name !== "NotFoundError") info("Gagal membuka port: " + esc(e.message));
+    statusPrinter(P.jenis ? `Terhubung: ${P.nama}` : "Printer belum terhubung", P.jenis ? "on" : "");
+  }
+}
+async function putuskan() {
+  try { if (P.jenis === "ble" && P.dev?.gatt.connected) P.dev.gatt.disconnect(); } catch (e) {}
+  try { if (P.writer) { P.writer.releaseLock(); await P.port.close(); } } catch (e) {}
+  Object.assign(P, { jenis: null, nama: "", dev: null, ch: null, port: null, writer: null });
+  statusPrinter("Printer belum terhubung");
+}
+async function buatESCPOS() {
+  const src = await strukKeCanvas();
+  const dots = +$("pDots").value, lebarByte = dots / 8;
+  const h = Math.round(src.height * dots / src.width);
+  const c = document.createElement("canvas"); c.width = dots; c.height = h;
+  const x = c.getContext("2d");
+  x.fillStyle = "#fff"; x.fillRect(0, 0, dots, h);
+  x.imageSmoothingEnabled = true; x.imageSmoothingQuality = "high";
+  x.drawImage(src, 0, 0, dots, h);
+  const px = x.getImageData(0, 0, dots, h).data, thr = +$("pThr").value;
+  const bits = new Uint8Array(lebarByte * h);
+  for (let y = 0; y < h; y++) for (let xx = 0; xx < dots; xx++) {
+    const i = (y * dots + xx) * 4;
+    if (0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2] < thr) bits[y * lebarByte + (xx >> 3)] |= 0x80 >> (xx & 7);
+  }
+  let akhir = h; while (akhir > 1 && bits.subarray((akhir - 1) * lebarByte, akhir * lebarByte).every(v => v === 0)) akhir--;
+  akhir = Math.min(h, akhir + Math.round((parseFloat($("feed").value) || 0) * 8));
+  const out = [0x1B, 0x40], BAND = 96;
+  for (let y = 0; y < akhir; y += BAND) {
+    const n = Math.min(BAND, akhir - y);
+    out.push(0x1D, 0x76, 0x30, 0x00, lebarByte & 255, lebarByte >> 8, n & 255, n >> 8);
+    for (let k = y * lebarByte; k < (y + n) * lebarByte; k++) out.push(bits[k]);
+  }
+  out.push(0x1B, 0x64, +$("pFeed").value || 0);
+  if ($("pCut").checked) out.push(0x1D, 0x56, 0x42, 0x00);
+  return new Uint8Array(out);
+}
+async function kirim(bytes, onProg) {
+  if (P.jenis === "serial") {
+    for (let i = 0; i < bytes.length; i += 1024) { await P.writer.write(bytes.slice(i, i + 1024)); onProg(i / bytes.length); }
+    return;
+  }
+  if (!P.dev.gatt.connected || !P.ch) await sambungBLE(P.dev);
+  const size = +$("pChunk").value, jeda = 8;
+  for (let i = 0; i < bytes.length; i += size) {
+    const part = bytes.slice(i, i + size);
+    for (let coba = 0; ; coba++) {
+      try {
+        if (P.tanpaRespon && P.ch.writeValueWithoutResponse) await P.ch.writeValueWithoutResponse(part);
+        else if (P.ch.writeValueWithResponse) await P.ch.writeValueWithResponse(part);
+        else await P.ch.writeValue(part);
+        break;
+      } catch (e) { if (coba >= 5) throw e; await tidur(60); }
+    }
+    await tidur(size >= 180 ? jeda * 2 : jeda);
+    if ((i / size) % 10 === 0) onProg(i / bytes.length);
+  }
+}
+async function cetakLangsung() {
+  if (!P.jenis || P.sibuk) return;
+  info(""); P.sibuk = true;
+  const bar = $("pBar"), isi = bar.firstElementChild;
+  bar.style.display = "block"; isi.style.width = "0";
+  try {
+    statusPrinter("Menyiapkan struk…", "busy");
+    const data = await buatESCPOS();
+    statusPrinter(`Mencetak ke ${P.nama}…`, "busy");
+    await kirim(data, f => isi.style.width = Math.round(f * 100) + "%");
+    isi.style.width = "100%";
+    P.sibuk = false; statusPrinter(`Terhubung: ${P.nama} – selesai mencetak`, "on");
+  } catch (e) {
+    P.sibuk = false; statusPrinter(`Terhubung: ${P.nama}`, "on");
+    info("Gagal mencetak: " + esc(e.message) + "<br>Coba ubah <b>Kecepatan kirim</b> ke <b>Paling aman</b>, atau hubungkan ulang printer.");
+  }
+  setTimeout(() => bar.style.display = "none", 1500);
+}
+if (!navigator.serial) $("btnSerial").style.display = "none";
+
+window.addEventListener("beforeprint", render);
+setInterval(() => { if ($("tglMode").value === "auto") render(); }, 30000);
+document.querySelector(".btn-print").onclick = () => { render(); window.print(); };
+renderItemInputs();
+render();
+</script>
+</body>
+</html>
