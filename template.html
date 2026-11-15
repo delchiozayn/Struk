@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <title>Template Struk 58mm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Roboto+Mono:wght@400;700&family=Inconsolata:wght@400;700&family=VT323&display=swap">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style id="pageStyle">@page { size: 58mm 200mm; margin: 0; }</style>
 <style>
@@ -31,7 +34,7 @@
   /* ===== STRUK ===== */
   .struk {
     width: var(--lebar); background: #fff; padding: 2mm var(--pad);
-    font-family: var(--jenis); font-size: var(--font); line-height: var(--lh); letter-spacing: var(--ls); color: #000;
+    font-family: var(--jenis); font-size: calc(var(--font) * var(--fskala, 1)); line-height: var(--lh); letter-spacing: var(--ls); color: #000;
     box-shadow: 0 2px 8px rgba(0,0,0,.15);
   }
   .c { text-align: center; } .r { text-align: right; } .b { font-weight: bold; }
@@ -137,15 +140,10 @@
       <div><label>Jenis font</label>
         <select id="jenis">
           <option value='"Courier New", Courier, monospace' selected>Courier New (struk klasik)</option>
-          <option value='Consolas, "Lucida Console", monospace'>Consolas</option>
-          <option value='"Lucida Console", Monaco, monospace'>Lucida Console</option>
-          <option value='monospace'>Monospace bawaan</option>
-          <option value='Arial, Helvetica, sans-serif'>Arial</option>
-          <option value='Tahoma, Verdana, sans-serif'>Tahoma</option>
-          <option value='Verdana, Geneva, sans-serif'>Verdana</option>
-          <option value='"Trebuchet MS", sans-serif'>Trebuchet MS</option>
-          <option value='"Times New Roman", Times, serif'>Times New Roman</option>
-          <option value='Georgia, serif'>Georgia</option>
+          <option value='"Courier Prime", "Courier New", monospace'>Courier Prime (tebal &amp; jelas)</option>
+          <option value='"Roboto Mono", monospace'>Roboto Mono (modern)</option>
+          <option value='Inconsolata, monospace'>Inconsolata (ramping)</option>
+          <option value='VT323, monospace'>VT323 (dot matrix jadul)</option>
         </select></div>
       <div><label>Ketebalan huruf</label>
         <select id="tebal">
@@ -475,6 +473,7 @@ function render() {
   document.documentElement.style.setProperty("--lebar", $("lebar").value);
   document.documentElement.style.setProperty("--font", $("font").value);
   document.documentElement.style.setProperty("--jenis", $("jenis").value);
+  document.documentElement.style.setProperty("--fskala", skalaFont($("jenis").value));
   ["lh","ls","pad","gap","para","feed","tokoPlus"].forEach(k =>
     document.documentElement.style.setProperty("--" + k, $(k).value));
   const aH = $("alignHeader").value, aF = $("alignFooter").value, up = $("caseItem").value;
@@ -548,9 +547,10 @@ async function strukKeCanvas() {
   const clone = el.cloneNode(true);
   clone.style.transform = "none"; clone.style.boxShadow = "none"; clone.style.margin = "0";
   const rootVars = document.documentElement.getAttribute("style") || "";
-  const css = [...document.styleSheets].map(ss => [...ss.cssRules]
-    .filter(r => !(r instanceof CSSMediaRule) && !(r instanceof CSSPageRule))
+  const css = (await cssFontTertanam($("jenis").value)) + [...document.styleSheets].map(ss => { try { return [...ss.cssRules]; } catch (e) { return []; } })
+    .map(rs => rs.filter(r => !(r instanceof CSSMediaRule) && !(r instanceof CSSPageRule) && !(r instanceof CSSFontFaceRule))
     .map(r => r.cssText).join("\n")).join("\n");
+  try { await document.fonts.ready; } catch (e) {}
   const xhtml = new XMLSerializer().serializeToString(clone);
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
     <foreignObject width="100%" height="100%">
@@ -929,6 +929,31 @@ async function cetakLangsung() {
   setTimeout(() => bar.style.display = "none", 1500);
 }
 if (!navigator.serial) $("btnSerial").style.display = "none";
+
+/* ===== FONT STRUK (Google Fonts) — ditanam ke PNG/PDF ===== */
+const FONT_GOOGLE = { "Courier Prime": "Courier+Prime:wght@400;700", "Roboto Mono": "Roboto+Mono:wght@400;700", "Inconsolata": "Inconsolata:wght@400;700", "VT323": "VT323" };
+const cacheFont = {};
+async function cssFontTertanam(teksFont) {
+  let css = "";
+  for (const n of Object.keys(FONT_GOOGLE).filter(n => teksFont.includes(n))) {
+    if (cacheFont[n] === undefined) {
+      try {
+        let t = await (await fetch("https://fonts.googleapis.com/css2?family=" + FONT_GOOGLE[n] + "&display=swap")).text();
+        // hanya subset latin & latin-ext (cukup untuk Bahasa Indonesia)
+        t = t.split("/*").filter(b => /^\s*latin(-ext)?\s*\*\//.test(b)).map(b => "/*" + b).join("\n") || t;
+        for (const u of [...new Set([...t.matchAll(/url\((https:[^)]+)\)/g)].map(m => m[1]))]) {
+          const blob = await (await fetch(u)).blob();
+          const d = await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(blob); });
+          t = t.split(u).join(d);
+        }
+        cacheFont[n] = t;
+      } catch (e) { cacheFont[n] = ""; }
+    }
+    css += cacheFont[n];
+  }
+  return css;
+}
+const skalaFont = f => String(f).includes("VT323") ? 1.35 : 1;
 
 /* ===== PILIHAN UKURAN KERTAS 58 / 80 mm ===== */
 const PRESET = {

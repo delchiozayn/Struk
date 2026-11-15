@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Struk Manual 58mm</title>
+<title>Struk Manual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Roboto+Mono:wght@400;700&family=Inconsolata:wght@400;700&family=VT323&display=swap">
 <style id="pageStyle">@page { size: 58mm 200mm; margin: 0; }</style>
 <style>
   :root { --lebar: 58mm; --font: 9pt; --jenis: "Courier New", Courier, monospace; --lh: 1.3; --ls: 0px; --pad: 2mm; --gap: 2mm; --feed: 8mm; --para: 0mm; }
@@ -55,7 +58,7 @@
   .zoomwrap { transform-origin: top center; }
   .struk {
     width: var(--lebar); background: #fff; padding: 2mm var(--pad);
-    font-family: var(--jenis); font-size: var(--font); line-height: var(--lh); letter-spacing: var(--ls);
+    font-family: var(--jenis); font-size: calc(var(--font) * var(--fskala, 1)); line-height: var(--lh); letter-spacing: var(--ls);
     color: #000; box-shadow: 0 2px 10px rgba(0,0,0,.15); overflow: hidden;
   }
   .struk .el { cursor: pointer; }
@@ -1625,15 +1628,10 @@ const uid = () => Math.random().toString(36).slice(2, 9);
 
 const FONTS = [
   ['"Courier New", Courier, monospace', "Courier New (struk klasik)"],
-  ['Consolas, "Lucida Console", monospace', "Consolas"],
-  ['"Lucida Console", Monaco, monospace', "Lucida Console"],
-  ["monospace", "Monospace bawaan"],
-  ["Arial, Helvetica, sans-serif", "Arial"],
-  ["Tahoma, Verdana, sans-serif", "Tahoma"],
-  ["Verdana, Geneva, sans-serif", "Verdana"],
-  ['"Trebuchet MS", sans-serif', "Trebuchet MS"],
-  ['"Times New Roman", Times, serif', "Times New Roman"],
-  ["Georgia, serif", "Georgia"]
+  ['"Courier Prime", "Courier New", monospace', "Courier Prime (tebal & jelas)"],
+  ['"Roboto Mono", monospace', "Roboto Mono (modern)"],
+  ["Inconsolata, monospace", "Inconsolata (ramping)"],
+  ["VT323, monospace", "VT323 (dot matrix jadul)"]
 ];
 const GARIS = [
   ["ds", "- - - Putus-putus tunggal"], ["dd", "= = = Putus-putus ganda"],
@@ -1855,6 +1853,31 @@ $("selChar").innerHTML = opts(CHARS);
 function isiPengaturan() { document.querySelectorAll("[data-g]").forEach(el => { if (el.type === "checkbox") el.checked = !!G[el.dataset.g]; else el.value = G[el.dataset.g]; }); }
 document.querySelectorAll("[data-g]").forEach(el => el.addEventListener("change", () => { G[el.dataset.g] = el.type === "checkbox" ? el.checked : el.value; renderStruk(); simpanLokal(); }));
 
+/* ===== FONT STRUK (Google Fonts) — ditanam ke PNG/PDF ===== */
+const FONT_GOOGLE = { "Courier Prime": "Courier+Prime:wght@400;700", "Roboto Mono": "Roboto+Mono:wght@400;700", "Inconsolata": "Inconsolata:wght@400;700", "VT323": "VT323" };
+const cacheFont = {};
+async function cssFontTertanam(teksFont) {
+  let css = "";
+  for (const n of Object.keys(FONT_GOOGLE).filter(n => teksFont.includes(n))) {
+    if (cacheFont[n] === undefined) {
+      try {
+        let t = await (await fetch("https://fonts.googleapis.com/css2?family=" + FONT_GOOGLE[n] + "&display=swap")).text();
+        // hanya subset latin & latin-ext (cukup untuk Bahasa Indonesia)
+        t = t.split("/*").filter(b => /^\s*latin(-ext)?\s*\*\//.test(b)).map(b => "/*" + b).join("\n") || t;
+        for (const u of [...new Set([...t.matchAll(/url\((https:[^)]+)\)/g)].map(m => m[1]))]) {
+          const blob = await (await fetch(u)).blob();
+          const d = await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(blob); });
+          t = t.split(u).join(d);
+        }
+        cacheFont[n] = t;
+      } catch (e) { cacheFont[n] = ""; }
+    }
+    css += cacheFont[n];
+  }
+  return css;
+}
+const skalaFont = f => String(f).includes("VT323") ? 1.35 : 1;
+
 /* ================= FORMAT TANGGAL ================= */
 const HARI = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
 const BULAN = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
@@ -1916,7 +1939,8 @@ function nomorStr(b) { return b.awalan + String(Math.max(0, Math.floor(b.angka))
 function blokHTML(b) {
   switch (b.type) {
     case "teks": {
-      let st = `text-align:${b.rata};font-size:${fs(b.ukuran)};`;
+      const sk = b.font ? skalaFont(b.font) : "var(--fskala, 1)";
+      let st = `text-align:${b.rata};font-size:calc((var(--font) + ${b.ukuran || "0pt"}) * ${sk});`;
       if (b.tebal) st += "font-weight:bold;"; if (b.miring) st += "font-style:italic;";
       if (b.garisBawah) st += "text-decoration:underline;"; if (b.kapital) st += "text-transform:uppercase;";
       if (b.font) st += `font-family:${b.font.replace(/"/g, "'")};`;
@@ -1987,6 +2011,7 @@ function blokHTML(b) {
 function renderStruk() {
   const R = document.documentElement.style;
   ["lebar", "font", "jenis", "lh", "ls", "pad", "gap", "para", "feed"].forEach(k => R.setProperty("--" + k, G[k]));
+  R.setProperty("--fskala", skalaFont(G.jenis));
   const s = $("struk");
   s.style.fontWeight = G.tebal;
   s.innerHTML = blocks.length
@@ -2056,8 +2081,10 @@ async function strukKeCanvas() {
     const clone = el.cloneNode(true);
     clone.style.boxShadow = "none"; clone.style.margin = "0";
     const vars = document.documentElement.getAttribute("style") || "";
-    const css = [...document.styleSheets].map(ss => { try { return [...ss.cssRules]; } catch (e) { return []; } }).flat()
-      .filter(r => !(r instanceof CSSMediaRule) && !(r instanceof CSSPageRule)).map(r => r.cssText).join("\n");
+    const semuaFont = G.jenis + " " + blocks.filter(b => b.type === "teks").map(b => b.font).join(" ");
+    const css = (await cssFontTertanam(semuaFont)) + [...document.styleSheets].map(ss => { try { return [...ss.cssRules]; } catch (e) { return []; } }).flat()
+      .filter(r => !(r instanceof CSSMediaRule) && !(r instanceof CSSPageRule) && !(r instanceof CSSFontFaceRule)).map(r => r.cssText).join("\n");
+    try { await document.fonts.ready; } catch (e) {}
     const xhtml = new XMLSerializer().serializeToString(clone);
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><foreignObject width="100%" height="100%">
       <div xmlns="http://www.w3.org/1999/xhtml" style="${vars.replace(/"/g, "&quot;")}"><style>${css.replace(/</g, "&lt;")}</style>${xhtml}</div>
@@ -2571,6 +2598,9 @@ function muatContoh() {
 /* ================= MULAI ================= */
 (async () => {
   const ada = bukaLokal();
+  const fontOk = f => FONTS.some(x => x[0] === f);
+  if (!fontOk(G.jenis)) G.jenis = FONTS[0][0];
+  blocks.forEach(b => { if (b.type === "teks" && b.font && !fontOk(b.font)) b.font = ""; });
   const uParam = new URLSearchParams(location.search).get("ukuran");
   if (uParam && PRESET[uParam]) Object.assign(G, PRESET[uParam]);
   isiPengaturan();
