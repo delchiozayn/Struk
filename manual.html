@@ -101,6 +101,11 @@
     font-family: "Courier New", Consolas, monospace; font-size: 13px; line-height: 1.35; overflow-x: auto; white-space: pre; color: #000; }
   .teksCard .ok { color: #0b8043; font-size: 12px; margin-left: 4px; }
 
+  .ukuran-pilih { display: flex; gap: 8px; margin-bottom: 10px; }
+  .ukuran-pilih .uk { flex: 1; padding: 10px; border: 2px solid #ccc; background: #fff; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; }
+  .ukuran-pilih .uk small { display: block; font-size: 11px; font-weight: 400; color: #777; }
+  .ukuran-pilih .uk.on { border-color: #1a73e8; background: #e8f0fe; color: #1a56c4; }
+
   /* ===== HP ===== */
   .mnav { display: none; }
   @media screen and (max-width: 800px) {
@@ -136,6 +141,12 @@
     <h2>Struk Manual</h2>
     <div class="sub">Mulai dari struk kosong, lalu tambahkan elemen satu per satu. Ketuk elemen di pratinjau untuk mengeditnya.</div>
 
+    <div style="font-weight:600;font-size:13px;margin-bottom:4px">Ukuran kertas struk</div>
+    <div class="ukuran-pilih">
+      <button type="button" class="uk" data-uk="58" onclick="pilihUkuran('58')">58 mm<small>printer mini</small></button>
+      <button type="button" class="uk" data-uk="80" onclick="pilihUkuran('80')">80 mm<small>printer kasir</small></button>
+    </div>
+
     <details class="set">
       <summary>⚙️ Pengaturan kertas, huruf &amp; paragraf</summary>
       <div class="row">
@@ -144,7 +155,8 @@
             <option value="48mm">48 mm (kertas 58mm, aman)</option>
             <option value="55mm">55 mm</option>
             <option value="58mm">58 mm</option>
-            <option value="72mm">72 mm (kertas 80mm)</option>
+            <option value="72mm">72 mm (kertas 80mm, aman)</option>
+            <option value="80mm">80 mm</option>
           </select></div>
         <div><label>Ukuran huruf dasar</label>
           <select data-g="font">
@@ -2005,7 +2017,18 @@ function modeHP(lihat) {
   if (lihat) renderStruk();
   window.scrollTo(0, 0);
 }
-function semua() { renderEditor(); renderStruk(); simpanLokal(); }
+function semua() { renderEditor(); renderStruk(); simpanLokal(); tandaiUkuran(); }
+const PRESET = {
+  "58": { lebar: "58mm", pDots: "384", tCols: "32", font: "9pt" },
+  "80": { lebar: "80mm", pDots: "576", tCols: "48", font: "10pt" }
+};
+function ukuranSekarang() { return ["72mm", "80mm"].includes(G.lebar) ? "80" : "58"; }
+function tandaiUkuran() { const u = ukuranSekarang(); document.querySelectorAll(".uk").forEach(b => b.classList.toggle("on", b.dataset.uk === u)); }
+function pilihUkuran(u) {
+  Object.assign(G, PRESET[u] || PRESET["58"]);
+  try { history.replaceState(null, "", location.pathname + "?ukuran=" + u); } catch (e) {}
+  isiPengaturan(); semua();
+}
 
 /* nomor otomatis naik setelah cetak/simpan */
 function naikkanNomor() {
@@ -2548,6 +2571,8 @@ function muatContoh() {
 /* ================= MULAI ================= */
 (async () => {
   const ada = bukaLokal();
+  const uParam = new URLSearchParams(location.search).get("ukuran");
+  if (uParam && PRESET[uParam]) Object.assign(G, PRESET[uParam]);
   isiPengaturan();
   if (ada) await Promise.all(blocks.filter(b => b.type === "gambar").map(prosesGambar));
   semua();

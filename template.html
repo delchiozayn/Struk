@@ -77,6 +77,11 @@
     font-family: "Courier New", Consolas, monospace; font-size: 13px; line-height: 1.35; overflow-x: auto; white-space: pre; color: #000; }
   .ok { color: #0b8043; font-size: 12px; }
 
+  .ukuran-pilih { display: flex; gap: 8px; margin-bottom: 4px; }
+  .ukuran-pilih .uk { flex: 1; padding: 10px; border: 2px solid #ccc; background: #fff; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; }
+  .ukuran-pilih .uk small { display: block; font-size: 11px; font-weight: 400; color: #777; }
+  .ukuran-pilih .uk.on { border-color: #1a73e8; background: #e8f0fe; color: #1a56c4; }
+
   /* ===== HP ===== */
   @media screen and (max-width: 700px) {
     .wrap { padding: 10px; gap: 14px; flex-direction: column; align-items: stretch; }
@@ -105,13 +110,19 @@
     <h2>Template Struk Thermal</h2>
 
     <h3>Kertas</h3>
+    <label>Ukuran kertas struk</label>
+    <div class="ukuran-pilih">
+      <button type="button" class="uk" data-uk="58" onclick="pilihUkuran('58')">58 mm<small>printer mini</small></button>
+      <button type="button" class="uk" data-uk="80" onclick="pilihUkuran('80')">80 mm<small>printer kasir</small></button>
+    </div>
     <div class="row2">
       <div><label>Lebar area cetak</label>
         <select id="lebar">
           <option value="48mm">48 mm (kertas 58mm, aman)</option>
           <option value="55mm">55 mm</option>
           <option value="58mm" selected>58 mm</option>
-          <option value="72mm">72 mm (kertas 80mm)</option>
+          <option value="72mm">72 mm (kertas 80mm, aman)</option>
+          <option value="80mm">80 mm</option>
         </select></div>
       <div><label>Ukuran huruf</label>
         <select id="font">
@@ -919,11 +930,29 @@ async function cetakLangsung() {
 }
 if (!navigator.serial) $("btnSerial").style.display = "none";
 
+/* ===== PILIHAN UKURAN KERTAS 58 / 80 mm ===== */
+const PRESET = {
+  "58": { lebar: "58mm", pDots: "384", tCols: "32", font: "9pt" },
+  "80": { lebar: "80mm", pDots: "576", tCols: "48", font: "10pt" }
+};
+function pilihUkuran(u) {
+  const p = PRESET[u] || PRESET["58"];
+  $("lebar").value = p.lebar; $("pDots").value = p.pDots; $("tCols").value = p.tCols; $("font").value = p.font;
+  document.querySelectorAll(".uk").forEach(b => b.classList.toggle("on", b.dataset.uk === u));
+  document.title = "Template Struk " + u + "mm";
+  try { history.replaceState(null, "", location.pathname + "?ukuran=" + u); } catch (e) {}
+  render();
+}
+$("lebar").addEventListener("change", () => {
+  const u = ["72mm", "80mm"].includes($("lebar").value) ? "80" : "58";
+  document.querySelectorAll(".uk").forEach(b => b.classList.toggle("on", b.dataset.uk === u));
+});
+
 window.addEventListener("beforeprint", render);
 setInterval(() => { if ($("tglMode").value === "auto") render(); }, 30000);
 document.querySelector(".btn-print").onclick = () => { render(); window.print(); };
 renderItemInputs();
-render();
+pilihUkuran(new URLSearchParams(location.search).get("ukuran") === "80" ? "80" : "58");
 </script>
 </body>
 </html>
