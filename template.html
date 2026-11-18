@@ -380,7 +380,7 @@ Telp. 0812-3456-7890</textarea>
       <div><label>Diskon (Rp)</label><input type="number" id="diskon" value="0"></div>
       <div><label>Pajak (%)</label><input type="number" id="pajak" value="0"></div>
     </div>
-    <div class="row2">
+    <div class="row2" id="barisBayar">
       <div><label>Metode</label>
         <select id="metode"><option>Tunai</option><option>QRIS</option><option>Transfer</option><option>Debit</option></select></div>
       <div><label>Dibayar (Rp)</label><input type="number" id="bayar" value="100000"></div>
@@ -561,6 +561,7 @@ function setParam(k, v) {
 function tandaiGaya() {
   document.querySelectorAll(".gy").forEach(b => b.classList.toggle("on", b.dataset.gy === gaya));
   $("opsiTabel").style.display = gaya === "tabel" ? "block" : "none";
+  $("barisBayar").style.display = gaya === "tabel" ? "none" : "";   // gaya tabel tidak memakai Tunai & Kembali
 }
 function pilihGaya(g) { gaya = g; tandaiGaya(); setParam("gaya", g); render(); }
 
@@ -629,7 +630,6 @@ function barisTabel(w) {
   if (diskon) ringkas("Diskon", "-" + titik(diskon));
   if (pajak) ringkas("Pajak", titik(pajak));
   ringkas("Total", titik(total), true);
-  if (bayar) { ringkas($("metode").value, titik(bayar)); ringkas("Kembali", titik(Math.max(0, bayar - total))); }
   L.push(garisTeks(gK, w));
   $("footer").value.split("\n").forEach(l => L.push(...rataTeks(l, w, aF)));
   return L;
