@@ -308,6 +308,16 @@
         </select></div>
       <div style="align-self:end"><label class="chk"><input type="checkbox" id="logoCrop" checked> Potong otomatis ruang kosong di sekitar logo</label></div>
     </div>
+    <div class="row2">
+      <div style="align-self:end"><label class="chk"><input type="checkbox" id="logoBW" checked> Ubah ke hitam-putih (disarankan untuk printer thermal)</label></div>
+      <div><label>Kepekatan logo</label>
+        <select id="logoAmbang">
+          <option value="110">Terang (lebih sedikit hitam)</option>
+          <option value="150" selected>Normal</option>
+          <option value="190">Gelap (lebih banyak hitam)</option>
+          <option value="220">Sangat gelap</option>
+        </select></div>
+    </div>
     <label>Nama toko</label><input id="namaToko" value="TOKO MAJU JAYA">
     <label>Alamat / info</label><textarea id="alamat">Jl. Merdeka No. 10, Jakarta
 Telp. 0812-3456-7890</textarea>
@@ -463,8 +473,35 @@ let items = [
 ];
 let logoData = "", logoAsli = "";
 async function prosesLogo() {
-  logoData = logoAsli && $("logoCrop").checked ? await potongOtomatis(logoAsli) : logoAsli;
+  let src = logoAsli;
+  if (src && $("logoBW").checked) src = await keHitamPutih(src, +$("logoAmbang").value);
+  if (src && $("logoCrop").checked) src = await potongOtomatis(src);
+  $("logoAmbang").disabled = !$("logoBW").checked;
+  logoData = src;
   render();
+}
+/* logo → hitam-putih murni agar tajam di kertas thermal */
+const cacheHP = {};
+function keHitamPutih(src, ambang) {
+  const key = src.length + ":" + src.slice(-60) + ":" + ambang;
+  if (cacheHP[key]) return Promise.resolve(cacheHP[key]);
+  return new Promise(res => {
+    const img = new Image();
+    img.onload = () => {
+      const s = Math.min(1, 576 / img.width);
+      const c = document.createElement("canvas"); c.width = Math.max(1, Math.round(img.width * s)); c.height = Math.max(1, Math.round(img.height * s));
+      const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); x.drawImage(img, 0, 0, c.width, c.height);
+      const d = x.getImageData(0, 0, c.width, c.height), p = d.data;
+      for (let i = 0; i < p.length; i += 4) {
+        const v = (0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2]) < ambang ? 0 : 255;
+        p[i] = p[i + 1] = p[i + 2] = v; p[i + 3] = 255;
+      }
+      x.putImageData(d, 0, 0);
+      res(cacheHP[key] = c.toDataURL("image/png"));
+    };
+    img.onerror = () => res(src);
+    img.src = src;
+  });
 }
 
 const $ = id => document.getElementById(id);
@@ -684,6 +721,8 @@ $("logo").addEventListener("change", e => {
   const r = new FileReader(); r.onload = () => { logoAsli = r.result; prosesLogo(); }; r.readAsDataURL(f);
 });
 $("logoCrop").addEventListener("change", prosesLogo);
+$("logoBW").addEventListener("change", prosesLogo);
+$("logoAmbang").addEventListener("change", prosesLogo);
 document.querySelectorAll(".panel input:not(#logo), .panel textarea, .panel select")
   .forEach(el => el.addEventListener("input", render));
 
@@ -1047,7 +1086,7 @@ async function buatESCPOSTeks() {
   const dots = +$("pDots").value, fontB = $("pFont").value === "B", cols = kolomPrinter(dots, fontB);
   const E = new EscPos($("tebal").value === "bold", fontB).init(spasiDots($("lh").value, fontB));
   const aH = $("alignHeader").value;
-  if (logoData) { E.raster(await rasterGambar(logoData, +$("logoLebar").value, aH, +$("pThr").value, dots)); E.feedDots(8); }
+  if (logoData) { E.raster(await rasterGambar(logoData, +$("logoLebar").value, aH, $("logoBW").checked ? 128 : +$("pThr").value, dots)); E.feedDots(8); }
   const [sz] = ukuranEsc($("tokoPlus").value, $("font").value);
   bungkus($("namaToko").value, Math.floor(cols / ((sz >> 4) + 1))).forEach(l => E.text(l, { align: aH, bold: true, size: sz }));
   $("alamat").value.split("\n").forEach(par => bungkus(par, cols).forEach(l => E.text(l, { align: aH })));

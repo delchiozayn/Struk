@@ -1845,7 +1845,12 @@ const cacheBW = {};
 async function prosesGambar(b) {
   if (!b.src) return;
   b._src2 = b.crop !== false ? await potongOtomatis(b.src) : b.src;
-  const asal = b._src2;
+  await ubahHitamPutih(b);
+  // potong setelah hitam-putih, agar latar berwarna yang menjadi putih ikut terbuang
+  if (b.bw && b._bw && b.crop !== false) b._bw = await potongOtomatis(b._bw);
+}
+function ubahHitamPutih(b) {
+  const asal = b.src;
   return new Promise(res => {
     if (!b.bw) return res();
     const key = asal.length + ":" + asal.slice(-40) + ":" + b.ambang;
