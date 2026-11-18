@@ -86,6 +86,9 @@
   .ukuran-pilih .uk small { display: block; font-size: 11px; font-weight: 400; color: #777; }
   .ukuran-pilih .uk.on { border-color: #1a73e8; background: #e8f0fe; color: #1a56c4; }
 
+  pre.tbl { margin: 0; font: inherit; white-space: pre; overflow: hidden; letter-spacing: inherit; }
+  pre.tbl b { font-weight: bold; }
+
   /* ===== HP ===== */
   @media screen and (max-width: 700px) {
     .wrap { padding: 10px; gap: 14px; flex-direction: column; align-items: stretch; }
@@ -118,6 +121,18 @@
     <div class="ukuran-pilih">
       <button type="button" class="uk" data-uk="58" onclick="pilihUkuran('58')">58 mm<small>printer mini</small></button>
       <button type="button" class="uk" data-uk="80" onclick="pilihUkuran('80')">80 mm<small>printer kasir</small></button>
+    </div>
+    <label>Gaya struk</label>
+    <div class="ukuran-pilih">
+      <button type="button" class="uk gy" data-gy="standar" onclick="pilihGaya('standar')">Standar<small>nama di atas, qty × harga</small></button>
+      <button type="button" class="uk gy" data-gy="tabel" onclick="pilihGaya('tabel')">Tabel<small>Item · Harga · Qty · Jumlah</small></button>
+    </div>
+    <div id="opsiTabel" style="display:none">
+      <label>Nama barang yang panjang (gaya tabel)</label>
+      <select id="namaPanjang">
+        <option value="lanjut" selected>Lanjut ke baris berikutnya</option>
+        <option value="potong">Dipotong (seperti struk kasir)</option>
+      </select>
     </div>
     <div class="row2">
       <div><label>Lebar area cetak</label>
@@ -501,6 +516,88 @@ function garisHTML(kelas) {
   return `<div class="garis ${k}"></div>`;
 }
 
+/* ===== GAYA STRUK: STANDAR / TABEL ===== */
+let gaya = "standar";
+function setParam(k, v) {
+  try { const q = new URLSearchParams(location.search); q.set(k, v); history.replaceState(null, "", location.pathname + "?" + q.toString()); } catch (e) {}
+}
+function tandaiGaya() {
+  document.querySelectorAll(".gy").forEach(b => b.classList.toggle("on", b.dataset.gy === gaya));
+  $("opsiTabel").style.display = gaya === "tabel" ? "block" : "none";
+}
+function pilihGaya(g) { gaya = g; tandaiGaya(); setParam("gaya", g); render(); }
+
+/* jumlah karakter per baris yang muat di pratinjau, sesuai font & lebar kertas */
+function kolomPreview() {
+  const st = $("struk"), cs = getComputedStyle(st);
+  const c = kolomPreview.c || (kolomPreview.c = document.createElement("canvas").getContext("2d"));
+  c.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+  const cw = c.measureText("0000000000").width / 10 + (parseFloat(cs.letterSpacing) || 0);
+  const isi = st.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  return Math.max(20, Math.floor(isi / cw));
+}
+
+/* baris-baris struk gaya tabel (tanpa logo/nama toko/alamat). Baris tebal = {s, bold:true} */
+function barisTabel(w) {
+  const L = [], B = s => ({ s, bold: true });
+  const aF = $("alignFooter").value === "justify" ? "left" : $("alignFooter").value;
+  const up = $("caseItem").value === "upper";
+  const gK = $("garis").value, gT = $("garisTotal").value === "same" ? gK : $("garisTotal").value;
+  const tgl = ($("tglMode").value === "manual" && $("tanggal").value) ? new Date($("tanggal").value) : new Date();
+  const tS = fmtTanggal(tgl, $("tglFormat").value), jS = fmtJam(tgl, $("jamFormat").value);
+  const pos = $("tglPosisi").value, lbl = $("tglLabel").value;
+  const LW = 9;
+  const info = (k, v) => {
+    const pre = String(k).padEnd(LW).slice(0, LW) + " : ";
+    bungkus(String(v), Math.max(4, w - pre.length)).forEach((l, i) => L.push((i ? " ".repeat(pre.length) : pre) + l));
+  };
+  if (pos === "tengah") L.push(...rataTeks(tS + (jS ? " " + jS : ""), w, "center"));
+  L.push("");
+  if ($("noStruk").value.trim()) info("No", $("noStruk").value);
+  if (pos === "pisah") { info(lbl, tS); if (jS) info("Jam", jS); }
+  else if (pos !== "tengah") info(lbl, tS + (jS ? " " + jS : ""));
+  info("Kasir", $("kasir").value);
+  L.push(garisTeks(gK, w));
+
+  const polos = n => String(Math.round(n || 0));
+  const kH = items.map(i => polos(i.harga)), kQ = items.map(i => String(i.qty)), kJ = items.map(i => polos(i.qty * i.harga));
+  const wh = Math.max(5, ...kH.map(x => x.length)), wq = Math.max(3, ...kQ.map(x => x.length)), wj = Math.max(6, ...kJ.map(x => x.length));
+  const wn = w - wh - wq - wj - 3;
+  const angkaKol = (h, q, j) => h.padStart(wh) + " " + q.padStart(wq) + " " + j.padStart(wj);
+  if (wn >= 6) {
+    L.push("Item".padEnd(wn) + " " + angkaKol("Harga", "Qty", "Jumlah"));
+    L.push(garisTeks(gK, w));
+    items.forEach((it, i) => {
+      const nm = up ? String(it.nama).toUpperCase() : String(it.nama);
+      const ls = $("namaPanjang").value === "potong" ? [nm.slice(0, wn)] : bungkus(nm, wn);
+      ls.forEach((l, k) => L.push(k === 0 ? l.padEnd(wn) + " " + angkaKol(kH[i], kQ[i], kJ[i]) : l));
+    });
+  } else {
+    L.push(("Harga Qty Jumlah").padStart(w));
+    L.push(garisTeks(gK, w));
+    items.forEach((it, i) => { L.push(...bungkus(up ? String(it.nama).toUpperCase() : it.nama, w)); L.push(angkaKol(kH[i], kQ[i], kJ[i]).padStart(w)); });
+  }
+  L.push(garisTeks(gT, w));
+
+  const subtotal = items.reduce((s, it) => s + it.qty * it.harga, 0);
+  const diskon = +$("diskon").value || 0, pj = +$("pajak").value || 0;
+  const pajak = (subtotal - diskon) * (pj / 100), total = subtotal - diskon + pajak, bayar = +$("bayar").value || 0;
+  const titik = n => Math.round(n || 0).toLocaleString("id-ID");
+  const ind = Math.max(0, Math.min(Math.floor(w * 0.3), w - LW - 5 - 9)), wa = Math.max(6, w - ind - LW - 5);
+  const ringkas = (k, v, tebal) => {
+    const t = " ".repeat(ind) + String(k).padEnd(LW).slice(0, LW) + " : Rp" + String(v).padStart(wa);
+    L.push(tebal ? B(t) : t);
+  };
+  ringkas("Penjualan", titik(subtotal));
+  if (diskon) ringkas("Diskon", "-" + titik(diskon));
+  if (pajak) ringkas("Pajak", titik(pajak));
+  ringkas("Total", titik(total), true);
+  if (bayar) { ringkas($("metode").value, titik(bayar)); ringkas("Kembali", titik(Math.max(0, bayar - total))); }
+  L.push(garisTeks(gK, w));
+  $("footer").value.split("\n").forEach(l => L.push(...rataTeks(l, w, aF)));
+  return L;
+}
+
 function render() {
   document.documentElement.style.setProperty("--lebar", $("lebar").value);
   document.documentElement.style.setProperty("--font", $("font").value);
@@ -530,6 +627,28 @@ function render() {
   else tglBaris = `<div class="baris"><span>${lbl}</span><span class="r">${tStr}${jStr ? " " + jStr : ""}</span></div>`;
   const G = garisHTML();
   const GT = $("garisTotal").value === "same" ? G : garisHTML($("garisTotal").value);
+
+  if (gaya === "tabel") {
+    $("struk").innerHTML = `
+    ${logoData ? `<div class="logo" style="text-align:${aH}"><img src="${logoData}" style="width:${$("logoLebar").value}%"></div>` : ""}
+    <div class="toko" style="text-align:${aH}">${esc($("namaToko").value)}</div>
+    <div style="text-align:${aH}">${$("alamat").value.split("\n").map(l => `<div class="para">${esc(l) || "&nbsp;"}</div>`).join("")}</div>
+    <pre class="tbl" id="tblPre"></pre>
+    <div class="feed"></div>`;
+    // pratinjau memakai jumlah karakter yang sama dengan printer (32 / 48 dst.), huruf disesuaikan agar pas
+    const kol = kolomPrinter(+$("pDots").value, $("pFont").value === "B");
+    const pre = $("tblPre"), cs = getComputedStyle($("struk"));
+    const c = kolomPreview.c || (kolomPreview.c = document.createElement("canvas").getContext("2d"));
+    c.font = `${cs.fontWeight} 100px ${cs.fontFamily}`;
+    const lebarIsi = $("struk").clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    const ls = parseFloat(cs.letterSpacing) || 0;
+    pre.style.fontSize = Math.max(6, ((lebarIsi / kol) - ls) / (c.measureText("0000000000").width / 1000)) + "px";
+    pre.innerHTML = barisTabel(kol).map(l => typeof l === "string" ? esc(l) : `<b>${esc(l.s)}</b>`).join("\n");
+    if ($("teksStruk")) $("teksStruk").textContent = strukTeks();
+    const mm2 = Math.ceil($("struk").scrollHeight * 25.4 / 96) + 1;
+    $("pageStyle").textContent = `@page { size: ${$("lebar").value} ${mm2}mm; margin: 0; }`;
+    return;
+  }
 
   $("struk").innerHTML = `
     ${logoData ? `<div class="logo" style="text-align:${aH}"><img src="${logoData}" style="width:${$("logoLebar").value}%"></div>` : ""}
@@ -689,6 +808,11 @@ function strukTeks(wArg, printer) {
     if (logoData && $("tTanda").checked) L.push(...rataTeks("[Logo]", w, "center"));
     L.push(...rataTeks($("namaToko").value, w, aH));
     $("alamat").value.split("\n").forEach(l => L.push(...rataTeks(l, w, aH)));
+  }
+  if (gaya === "tabel") {
+    const T = barisTabel(w);
+    if (printer) return [...L, ...T];
+    return [...L, ...T.map(l => typeof l === "string" ? l : l.s)].map(l => l.replace(/\s+$/, "")).join("\n");
   }
   const tgl = ($("tglMode").value === "manual" && $("tanggal").value) ? new Date($("tanggal").value) : new Date();
   const tS = fmtTanggal(tgl, $("tglFormat").value), jS = fmtJam(tgl, $("jamFormat").value);
@@ -1038,21 +1162,24 @@ const PRESET = {
 function pilihUkuran(u) {
   const p = PRESET[u] || PRESET["58"];
   $("lebar").value = p.lebar; $("pDots").value = p.pDots; $("tCols").value = p.tCols; $("font").value = p.font;
-  document.querySelectorAll(".uk").forEach(b => b.classList.toggle("on", b.dataset.uk === u));
+  document.querySelectorAll(".uk[data-uk]").forEach(b => b.classList.toggle("on", b.dataset.uk === u));
   document.title = "Template Struk " + u + "mm";
-  try { history.replaceState(null, "", location.pathname + "?ukuran=" + u); } catch (e) {}
+  setParam("ukuran", u);
   render();
 }
 $("lebar").addEventListener("change", () => {
   const u = ["72mm", "80mm"].includes($("lebar").value) ? "80" : "58";
-  document.querySelectorAll(".uk").forEach(b => b.classList.toggle("on", b.dataset.uk === u));
+  document.querySelectorAll(".uk[data-uk]").forEach(b => b.classList.toggle("on", b.dataset.uk === u));
 });
 
 window.addEventListener("beforeprint", render);
 setInterval(() => { if ($("tglMode").value === "auto") render(); }, 30000);
 document.querySelector(".btn-print").onclick = () => { render(); window.print(); };
 renderItemInputs();
+gaya = new URLSearchParams(location.search).get("gaya") === "tabel" ? "tabel" : "standar";
+tandaiGaya();
 pilihUkuran(new URLSearchParams(location.search).get("ukuran") === "80" ? "80" : "58");
+try { document.fonts.addEventListener("loadingdone", render); } catch (e) {}
 </script>
 </body>
 </html>
