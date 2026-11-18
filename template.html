@@ -9,7 +9,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style id="pageStyle">@page { size: 58mm 200mm; margin: 0; }</style>
 <style>
-  :root { --lebar: 58mm; --font: 9pt; --jenis: "Courier New", Courier, monospace; --lh: 1.3; --ls: 0px; --pad: 2mm; --gap: 2mm; --feed: 8mm; --para: 0mm; --tokoPlus: 3pt; }
+  :root { --lebar: 58mm; --font: 9pt; --jenis: "Courier New", Courier, monospace; --lh: 1.3; --ls: 0px; --pad: 2mm; --gap: 2mm; --feed: 8mm; --para: 0mm; --tokoPlus: 12pt; }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: system-ui, sans-serif; background: #f2f2f2; color: #222; }
   .wrap { display: flex; gap: 24px; padding: 20px; flex-wrap: wrap; align-items: flex-start; }
@@ -38,7 +38,7 @@
     box-shadow: 0 2px 8px rgba(0,0,0,.15);
   }
   .c { text-align: center; } .r { text-align: right; } .b { font-weight: bold; }
-  .toko { font-size: calc(var(--font) + var(--tokoPlus)); font-weight: bold; }
+  .toko { font-size: calc(var(--tokoPlus) * var(--fskala, 1)); font-weight: bold; }
   .struk .para + .para, .struk .item + .item { margin-top: var(--para); }
   .struk .upper { text-transform: uppercase; }
   .feed { height: var(--feed); }
@@ -128,11 +128,16 @@
           <option value="72mm">72 mm (kertas 80mm, aman)</option>
           <option value="80mm">80 mm</option>
         </select></div>
-      <div><label>Ukuran huruf</label>
+      <div><label>Ukuran huruf (pt)</label>
         <select id="font">
-          <option value="8pt">Kecil (8pt)</option>
-          <option value="9pt" selected>Normal (9pt)</option>
-          <option value="10pt">Besar (10pt)</option>
+          <option value="6pt">6</option>
+          <option value="7pt">7</option>
+          <option value="8pt">8</option>
+          <option value="9pt" selected>9</option>
+          <option value="10pt">10</option>
+          <option value="11pt">11</option>
+          <option value="12pt">12</option>
+          <option value="14pt">14</option>
         </select></div>
     </div>
 
@@ -249,12 +254,26 @@
         </select></div>
     </div>
     <div class="row2">
-      <div><label>Ukuran nama toko</label>
+      <div><label>Ukuran nama toko (pt)</label>
         <select id="tokoPlus">
-          <option value="0pt">Sama dengan teks</option>
-          <option value="2pt">Sedikit besar</option>
-          <option value="3pt" selected>Besar</option>
-          <option value="6pt">Sangat besar</option>
+          <option value="6pt">6</option>
+          <option value="7pt">7</option>
+          <option value="8pt">8</option>
+          <option value="9pt">9</option>
+          <option value="10pt">10</option>
+          <option value="11pt">11</option>
+          <option value="12pt" selected>12</option>
+          <option value="14pt">14</option>
+          <option value="16pt">16</option>
+          <option value="18pt">18</option>
+          <option value="20pt">20</option>
+          <option value="22pt">22</option>
+          <option value="24pt">24</option>
+          <option value="26pt">26</option>
+          <option value="28pt">28</option>
+          <option value="36pt">36</option>
+          <option value="48pt">48</option>
+          <option value="72pt">72</option>
         </select></div>
       <div><label>Nama barang</label>
         <select id="caseItem">
@@ -890,12 +909,22 @@ function rasterGambar(src, pct, rata, ambang, dots) {
 const UKURAN_ESC = { "-1pt": [0, true], "0pt": [0, false], "2pt": [0x01, false], "3pt": [0x11, false], "4pt": [0x11, false], "6pt": [0x11, false], "7pt": [0x11, false], "12pt": [0x22, false] };
 function spasiDots(lh, fontB) { return Math.round((fontB ? 17 : 24) * (+lh || 1.3)) + 2; }
 
+/* ukuran huruf (pt, seperti Word) → ukuran huruf printer: [perintah GS !, pakai Font B kecil] */
+function ukuranEsc(pt, dasar) {
+  const r = (parseFloat(pt) || dasar) / (parseFloat(dasar) || 9);
+  if (r < 0.9) return [0, true];
+  if (r < 1.3) return [0, false];
+  if (r < 1.75) return [0x01, false];
+  if (r < 2.5) return [0x11, false];
+  return [0x22, false];
+}
+
 async function buatESCPOSTeks() {
   const dots = +$("pDots").value, fontB = $("pFont").value === "B", cols = kolomPrinter(dots, fontB);
   const E = new EscPos($("tebal").value === "bold", fontB).init(spasiDots($("lh").value, fontB));
   const aH = $("alignHeader").value;
   if (logoData) { E.raster(await rasterGambar(logoData, +$("logoLebar").value, aH, +$("pThr").value, dots)); E.feedDots(8); }
-  const [sz] = UKURAN_ESC[$("tokoPlus").value] || [0x11];
+  const [sz] = ukuranEsc($("tokoPlus").value, $("font").value);
   bungkus($("namaToko").value, Math.floor(cols / ((sz >> 4) + 1))).forEach(l => E.text(l, { align: aH, bold: true, size: sz }));
   $("alamat").value.split("\n").forEach(par => bungkus(par, cols).forEach(l => E.text(l, { align: aH })));
   strukTeks(cols, true).forEach(l => typeof l === "string" ? E.text(l.replace(/\s+$/, "")) : E.text(l.s, { bold: l.bold, size: l.size }));

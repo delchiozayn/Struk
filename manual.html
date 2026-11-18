@@ -161,10 +161,16 @@
             <option value="72mm">72 mm (kertas 80mm, aman)</option>
             <option value="80mm">80 mm</option>
           </select></div>
-        <div><label>Ukuran huruf dasar</label>
+        <div><label>Ukuran huruf dasar (pt)</label>
           <select data-g="font">
-            <option value="7pt">7pt</option><option value="8pt">8pt</option>
-            <option value="9pt">9pt</option><option value="10pt">10pt</option><option value="11pt">11pt</option>
+          <option value="6pt">6</option>
+          <option value="7pt">7</option>
+          <option value="8pt">8</option>
+          <option value="9pt">9</option>
+          <option value="10pt">10</option>
+          <option value="11pt">11</option>
+          <option value="12pt">12</option>
+          <option value="14pt">14</option>
           </select></div>
       </div>
       <div class="row">
@@ -1639,7 +1645,19 @@ const GARIS = [
   ["dt", "····· Titik-titik"], ["tx", "Karakter teks"], ["kosong", "Tanpa garis (jarak saja)"]
 ];
 const CHARS = [["-", "- minus"], ["=", "= sama dengan"], ["*", "* bintang"], ["~", "~ gelombang"], ["_", "_ garis bawah"], [".", ". titik"], ["#", "# pagar"]];
-const UKURAN = [["-1pt", "Kecil"], ["0pt", "Normal"], ["2pt", "Sedang"], ["4pt", "Besar"], ["7pt", "Sangat besar"], ["12pt", "Raksasa"]];
+const PT_WORD = [6, 7, 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72];
+const UKURAN = [["", "Ikuti ukuran dasar"], ...PT_WORD.map(n => [n + "pt", String(n)])];
+const ptTerdekat = n => PT_WORD.reduce((a, b) => Math.abs(b - n) < Math.abs(a - n) ? b : a);
+/* desain lama memakai ukuran relatif (+2pt, +4pt…) → ubah ke ukuran pt seperti Word */
+function migrasiUkuran(list) {
+  list.forEach(b => {
+    if ((b.type === "teks" || b.type === "kolom") && b.ukuran !== undefined) {
+      const d = parseFloat(b.ukuran) || 0;
+      b.pt = d ? ptTerdekat((parseFloat(G.font) || 9) + d) + "pt" : "";
+      delete b.ukuran;
+    }
+  });
+}
 const RATA = [["left", "Kiri"], ["center", "Tengah"], ["right", "Kanan"], ["justify", "Rata kiri-kanan"]];
 const TGLF = [["dd/mm/yyyy","10/11/2026"],["dd-mm-yyyy","10-11-2026"],["dd/mm/yy","10/11/26"],["yyyy-mm-dd","2026-11-10"],
   ["d mmm yyyy","10 Nov 2026"],["d mmmm yyyy","10 November 2026"],["dddd, d mmmm yyyy","Selasa, 10 November 2026"],["ddd, dd/mm/yyyy","Sel, 10/11/2026"],["none","Tidak ditampilkan"]];
@@ -1650,8 +1668,8 @@ const G0 = { lebar: "58mm", font: "9pt", jenis: FONTS[0][0], tebal: "normal", ga
   pDots: "384", pThr: "160", pFeed: "3", pCut: false, pChunk: "100", pDelay: "8", tCols: "32", tTanda: true, pMode: "teks", pFont: "A" };
 
 const BARU = {
-  teks:    () => ({ isi: "Teks baru", rata: "center", ukuran: "0pt", tebal: false, miring: false, garisBawah: false, kapital: false, inv: false, font: "" }),
-  kolom:   () => ({ kiri: "Label", kanan: "Nilai", tebal: false, ukuran: "0pt", pemisah: "" }),
+  teks:    () => ({ isi: "Teks baru", rata: "center", pt: "", tebal: false, miring: false, garisBawah: false, kapital: false, inv: false, font: "" }),
+  kolom:   () => ({ kiri: "Label", kanan: "Nilai", tebal: false, pt: "", pemisah: "" }),
   barang:  () => ({ tata: "dua", header: true, kapital: false, ringkas: true,
                     rows: [{ nama: "Barang 1", qty: 1, harga: 10000 }] }),
   total:   () => ({ subtotal: true, diskon: 0, pajak: 0, layanan: 0, metode: "Tunai", bayar: 0, kembali: true, besar: true, labelTotal: "TOTAL" }),
@@ -1697,12 +1715,12 @@ const row = (...x) => `<div class="row">${x.join("")}</div>`;
 function formBlok(b) {
   switch (b.type) {
     case "teks": return F.area(b, "isi", "Isi teks (Enter = baris baru)") +
-      row(F.sel(b, "rata", "Perataan", RATA), F.sel(b, "ukuran", "Ukuran", UKURAN)) +
+      row(F.sel(b, "rata", "Perataan", RATA), F.sel(b, "pt", "Ukuran huruf (pt)", UKURAN)) +
       row(F.sel(b, "font", "Font", [["", "Ikuti pengaturan"], ...FONTS]), "<div></div>") +
       row(F.chk(b, "tebal", "<b>Tebal</b>"), F.chk(b, "miring", "<i>Miring</i>"), F.chk(b, "garisBawah", "<u>Garis bawah</u>")) +
       row(F.chk(b, "kapital", "HURUF BESAR"), F.chk(b, "inv", "Putih di atas hitam"));
     case "kolom": return row(F.txt(b, "kiri", "Teks kiri"), F.txt(b, "kanan", "Teks kanan")) +
-      row(F.sel(b, "ukuran", "Ukuran", UKURAN), F.txt(b, "pemisah", "Pemisah tengah (opsional)", "mis. :")) + F.chk(b, "tebal", "<b>Tebal</b>");
+      row(F.sel(b, "pt", "Ukuran huruf (pt)", UKURAN), F.txt(b, "pemisah", "Pemisah tengah (opsional)", "mis. :")) + F.chk(b, "tebal", "<b>Tebal</b>");
     case "barang": return row(
         F.sel(b, "tata", "Tata letak", [["dua", "Nama di atas, qty × harga di bawah"], ["satu", "Satu baris: nama | qty | jumlah"], ["tiga", "Nama | qty × harga | jumlah"]]),
         "<div></div>") +
@@ -1976,14 +1994,14 @@ function blokHTML(b) {
   switch (b.type) {
     case "teks": {
       const sk = b.font ? skalaFont(b.font) : "var(--fskala, 1)";
-      let st = `text-align:${b.rata};font-size:calc((var(--font) + ${b.ukuran || "0pt"}) * ${sk});`;
+      let st = `text-align:${b.rata};font-size:calc(${b.pt || "var(--font)"} * ${sk});`;
       if (b.tebal) st += "font-weight:bold;"; if (b.miring) st += "font-style:italic;";
       if (b.garisBawah) st += "text-decoration:underline;"; if (b.kapital) st += "text-transform:uppercase;";
       if (b.font) st += `font-family:${b.font.replace(/"/g, "'")};`;
       const lines = String(b.isi).split("\n").map(l => `<div class="para">${b.inv ? `<span class="inv">${esc(l) || "&nbsp;"}</span>` : (esc(l) || "&nbsp;")}</div>`).join("");
       return `<div style="${st}">${lines}</div>`;
     }
-    case "kolom": return `<div class="baris" style="font-size:${fs(b.ukuran)};${b.tebal ? "font-weight:bold" : ""}"><span>${esc(b.kiri)}${b.pemisah ? " " + esc(b.pemisah) : ""}</span><span>${esc(b.kanan)}</span></div>`;
+    case "kolom": return `<div class="baris" style="font-size:calc(${b.pt || "var(--font)"} * var(--fskala, 1));${b.tebal ? "font-weight:bold" : ""}"><span>${esc(b.kiri)}${b.pemisah ? " " + esc(b.pemisah) : ""}</span><span>${esc(b.kanan)}</span></div>`;
     case "barang": {
       const up = b.kapital ? "text-transform:uppercase;" : "";
       let h = "";
@@ -2502,13 +2520,23 @@ function rasterGambar(src, pct, rata, ambang, dots) {
 const UKURAN_ESC = { "-1pt": [0, true], "0pt": [0, false], "2pt": [0x01, false], "3pt": [0x11, false], "4pt": [0x11, false], "6pt": [0x11, false], "7pt": [0x11, false], "12pt": [0x22, false] };
 function spasiDots(lh, fontB) { return Math.round((fontB ? 17 : 24) * (+lh || 1.3)) + 2; }
 
+/* ukuran huruf (pt, seperti Word) → ukuran huruf printer: [perintah GS !, pakai Font B kecil] */
+function ukuranEsc(pt, dasar) {
+  const r = (parseFloat(pt) || dasar) / (parseFloat(dasar) || 9);
+  if (r < 0.9) return [0, true];
+  if (r < 1.3) return [0, false];
+  if (r < 1.75) return [0x01, false];
+  if (r < 2.5) return [0x11, false];
+  return [0x22, false];
+}
+
 async function buatESCPOSTeks() {
   const dots = +G.pDots, fontB = G.pFont === "B", cols = kolomPrinter(dots, fontB);
   const E = new EscPos(G.tebal === "bold", fontB).init(spasiDots(G.lh, fontB));
   for (const b of blocks) {
     switch (b.type) {
       case "teks": {
-        const [sz, kecil] = UKURAN_ESC[b.ukuran] || [0, false];
+        const [sz, kecil] = ukuranEsc(b.pt || G.font, G.font);
         const c = Math.floor((kecil ? kolomPrinter(dots, true) : cols) / ((sz >> 4) + 1));
         const isi = b.kapital ? String(b.isi).toUpperCase() : String(b.isi);
         isi.split("\n").forEach(par => bungkus(par, c).forEach(l =>
@@ -2601,7 +2629,7 @@ $("fileDesain").addEventListener("change", e => {
   r.onload = async () => {
     try {
       const d = JSON.parse(r.result); if (!Array.isArray(d.blocks)) throw new Error("bukan file desain struk");
-      G = { ...G0, ...d.G }; blocks = d.blocks.map(b => ({ ...BARU[b.type](), ...b, id: b.id || uid() })); aktif = null;
+      G = { ...G0, ...d.G }; blocks = d.blocks.map(b => ({ ...BARU[b.type](), ...b, id: b.id || uid() })); migrasiUkuran(blocks); aktif = null;
       await Promise.all(blocks.filter(b => b.type === "gambar").map(prosesGambar));
       isiPengaturan(); semua();
     } catch (err) { alert("File tidak bisa dibuka: " + err.message); }
@@ -2614,7 +2642,7 @@ function muatContoh() {
   if (blocks.length && !confirm("Ganti struk sekarang dengan contoh?")) return;
   const B = (type, p = {}) => ({ id: uid(), type, ...BARU[type](), ...p });
   blocks = [
-    B("teks", { isi: "TOKO MAJU JAYA", ukuran: "4pt", tebal: true }),
+    B("teks", { isi: "TOKO MAJU JAYA", pt: "14pt", tebal: true }),
     B("teks", { isi: "Jl. Merdeka No. 10, Jakarta\nTelp. 0812-3456-7890" }),
     B("garis"),
     B("nomor"),
@@ -2636,6 +2664,7 @@ function muatContoh() {
   const ada = bukaLokal();
   const fontOk = f => FONTS.some(x => x[0] === f);
   if (!fontOk(G.jenis)) G.jenis = FONTS[0][0];
+  migrasiUkuran(blocks);
   blocks.forEach(b => { if (b.type === "teks" && b.font && !fontOk(b.font)) b.font = ""; if (b.type === "gambar" && b.crop === undefined) b.crop = true; });
   const uParam = new URLSearchParams(location.search).get("ukuran");
   if (uParam && PRESET[uParam]) Object.assign(G, PRESET[uParam]);
