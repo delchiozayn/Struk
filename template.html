@@ -564,9 +564,7 @@ function setParam(k, v) {
 const DESAIN = [
   { id: "standar", nama: "Standar", ket: "Nama barang di atas, qty × harga di bawah" },
   { id: "tabel", nama: "Tabel", ket: "Kolom Item · Harga · Qty · Jumlah, ringkasan rata kanan" },
-  { id: "aplikasi", nama: "Aplikasi Kasir (Warung Kopi Mamang)", ket: "Label di kiri, nilai tebal di kanan, garis lurus, Total lebih besar",
-    preset: { jenis: '"Poppins", sans-serif', garis: "ss", garisTotal: "same", alignHeader: "center", alignFooter: "center",
-      tglFormat: "dd-mm-yyyy", jamFormat: "hm", tglLabel: "Tanggal", tglPosisi: "satu", metode: "Non Tunai", bayar: "0", tokoPlus: "12pt", tebal: "normal" } }
+  { id: "aplikasi", nama: "Aplikasi Kasir (Warung Kopi Mamang)", ket: "Label di kiri, nilai tebal di kanan, Total lebih besar. Pengaturan sama dengan template biasa." }
 ];
 $("gayaSel").innerHTML = DESAIN.map(d => `<option value="${d.id}">${d.nama}</option>`).join("");
 function tandaiGaya() {
