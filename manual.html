@@ -4,327 +4,156 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Struk Manual</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Roboto+Mono:wght@400;700&family=Inconsolata:wght@400;700&family=VT323&display=swap">
-<style id="pageStyle">@page { size: 58mm 200mm; margin: 0; }</style>
 <style>
-  :root { --lebar: 58mm; --font: 9pt; --jenis: "Courier New", Courier, monospace; --lh: 1.3; --ls: 0px; --pad: 2mm; --gap: 2mm; --feed: 8mm; --para: 0mm; }
   * { box-sizing: border-box; }
-  body { margin: 0; font-family: system-ui, sans-serif; background: #eef0f3; color: #222; }
+  body { margin: 0; font-family: system-ui, -apple-system, sans-serif; background: #eef0f3; color: #222; }
   .wrap { display: flex; gap: 20px; padding: 16px; align-items: flex-start; }
-
-  /* ===== EDITOR ===== */
-  .panel { background: #fff; border-radius: 10px; padding: 14px; width: 480px; flex-shrink: 0; }
-  .panel h2 { margin: 0 0 4px; font-size: 18px; }
-  .sub { font-size: 12px; color: #777; margin-bottom: 10px; }
-  details.set { border: 1px solid #e3e3e3; border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; }
-  details.set summary { font-weight: 600; cursor: pointer; font-size: 14px; }
-  label { display: block; font-size: 12px; margin: 6px 0 2px; color: #555; }
-  input, textarea, select { width: 100%; padding: 6px; font-size: 13px; border: 1px solid #ccc; border-radius: 5px; font-family: inherit; }
-  textarea { min-height: 52px; resize: vertical; }
+  .panel { background: #fff; border-radius: 12px; padding: 14px; width: 460px; flex-shrink: 0; }
+  .panel h2 { margin: 0 0 8px; font-size: 18px; }
+  .kembali { font-size: 13px; color: #1a56c4; text-decoration: none; display: inline-block; margin-bottom: 6px; }
+  .blok { border: 1px solid #e6e8eb; border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; }
+  .blok > summary, .judul { font-weight: 600; font-size: 14px; cursor: pointer; }
+  .judul { cursor: default; margin-bottom: 4px; }
+  label { display: block; font-size: 12px; margin: 7px 0 2px; color: #555; }
+  input, select, textarea { width: 100%; padding: 7px; font-size: 14px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; background: #fff; }
+  textarea { min-height: 46px; resize: vertical; }
   input[type=checkbox] { width: auto; }
   .row { display: flex; gap: 8px; } .row > * { flex: 1; min-width: 0; }
-  .chk { display: flex; align-items: center; gap: 5px; font-size: 12px; margin: 8px 0 2px; color: #333; }
-  .btn { padding: 7px 10px; border: 0; border-radius: 6px; cursor: pointer; font-size: 13px; background: #e8eaed; }
-  .btn:hover { filter: brightness(.95); }
+  .btn { padding: 8px 12px; border: 0; border-radius: 7px; cursor: pointer; font-size: 13px; background: #e8eaed; color: #222; }
+  .btn.biru { background: #1a73e8; color: #fff; }
+  .btn.hapus { background: #fde8e8; color: #c00; }
+  .fbar { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; align-items: center; }
+  .pilih { display: flex; gap: 8px; }
+  .pilih .opt { flex: 1; padding: 9px; border: 2px solid #ccc; background: #fff; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; }
+  .pilih .opt.on { border-color: #1a73e8; background: #e8f0fe; color: #1a56c4; }
+  .ket { font-size: 12px; color: #777; line-height: 1.45; }
+  .ok { font-size: 12px; color: #0b8043; }
+  .stat { display: flex; align-items: center; gap: 6px; font-weight: 600; margin: 6px 0; font-size: 13px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: #bbb; flex-shrink: 0; }
+  .dot.on { background: #34a853; } .dot.busy { background: #f9ab00; }
+  .catatan { font-size: 12px; color: #a15c00; background: #fff6e0; border-radius: 6px; padding: 6px 8px; margin-top: 8px; line-height: 1.45; }
+  .bar { height: 6px; background: #eee; border-radius: 3px; overflow: hidden; margin-top: 8px; display: none; }
+  .bar > div { height: 100%; width: 0; background: #0b8043; }
+  .aksi { display: flex; gap: 8px; margin-top: 10px; }
+  .aksi .btn { flex: 1; padding: 12px 6px; font-size: 14px; }
+  .aksi .cetak { background: #0b8043; color: #fff; flex: 2; }
+  .aksi .cetak:disabled { background: #9ccfae; }
+  .prev { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0; position: sticky; top: 16px; }
+  .kertas { background: #fff; padding: 8px 6px; box-shadow: 0 2px 10px rgba(0,0,0,.15); }
+  #pratinjau { display: block; }
+  .brg { display: grid; grid-template-columns: 1fr 52px 92px 30px; gap: 4px; margin-bottom: 4px; align-items: center; }
+  .brg .btn { padding: 7px 0; }
+  details summary { cursor: pointer; }
+  @media (max-width: 820px) {
+    .wrap { flex-direction: column; padding: 8px; gap: 10px; }
+    .panel { width: 100%; }
+    .prev { position: static; width: 100%; }
+    input, select, textarea { font-size: 16px; }
+  }
 
-  .addbar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 8px 0 12px; }
-  .addbar .btn { background: #e8f0fe; color: #1a56c4; font-size: 12px; padding: 8px 4px; }
-
-  .blok { border: 1px solid #dde1e6; border-radius: 8px; margin-bottom: 8px; background: #fafbfc; }
-  .blok.aktif { border-color: #1a73e8; box-shadow: 0 0 0 2px #1a73e822; }
-  .bh { display: flex; align-items: center; gap: 4px; padding: 6px 8px; cursor: pointer; }
-  .bh .judul { flex: 1; font-size: 13px; font-weight: 600; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-  .bh .judul small { font-weight: 400; color: #888; }
-  .bh .btn { padding: 4px 7px; font-size: 12px; background: #fff; border: 1px solid #ddd; }
-  .bh .del { color: #c00; }
-  .bb { padding: 0 10px 10px; border-top: 1px solid #eee; }
+  .addbar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 6px 0 4px; }
+  .addbar .btn { background: #e8f0fe; color: #1a56c4; font-size: 12px; padding: 9px 4px; }
+  .el { border: 1px solid #dde1e6; border-radius: 8px; margin-bottom: 6px; background: #fafbfc; }
+  .el.aktif { border-color: #1a73e8; }
+  .elh { display: flex; align-items: center; gap: 4px; padding: 6px 8px; cursor: pointer; }
+  .elh .nm { flex: 1; font-size: 13px; font-weight: 600; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .elh .nm small { font-weight: 400; color: #888; }
+  .elh .btn { padding: 4px 8px; font-size: 12px; background: #fff; border: 1px solid #ddd; }
+  .elb { padding: 0 10px 10px; border-top: 1px solid #eee; }
   .rowtbl { width: 100%; border-collapse: collapse; margin-top: 6px; }
   .rowtbl td { padding: 2px; }
-  .rowtbl input { padding: 5px; }
-  .kosong { text-align: center; color: #888; font-size: 13px; padding: 20px; border: 2px dashed #ddd; border-radius: 8px; }
-  .filebar { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
-  .filebar .btn { font-size: 12px; }
-
-  /* ===== PRATINJAU ===== */
-  .prev { flex: 1; position: sticky; top: 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 0; }
-  .toolbar { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; background: #fff; padding: 8px; border-radius: 10px; }
-  .toolbar .btn { font-size: 13px; }
-  .toolbar .print { background: #1a73e8; color: #fff; }
-  .toolbar .png { background: #34a853; color: #fff; }
-  .toolbar .pdf { background: #d93025; color: #fff; }
-  .toolbar select { width: auto; }
-  .zoomwrap { transform-origin: top center; }
-  .struk {
-    width: var(--lebar); background: #fff; padding: 2mm var(--pad);
-    font-family: var(--jenis); font-size: calc(var(--font) * var(--fskala, 1)); line-height: var(--lh); letter-spacing: var(--ls);
-    color: #000; box-shadow: 0 2px 10px rgba(0,0,0,.15); overflow: hidden;
-  }
-  .struk .el { cursor: pointer; }
-  .struk .el:hover { outline: 1px dotted #1a73e8; }
-  .struk .el.sel { outline: 1px solid #1a73e8; }
-  .baris { display: flex; justify-content: space-between; gap: 2mm; }
-  .baris > span:last-child { text-align: right; }
-  .tbl3 { display: grid; grid-template-columns: 1fr auto auto; column-gap: 2mm; }
-  .tbl3 .r { text-align: right; }
-  .para + .para, .item + .item { margin-top: var(--para); }
-  .garis { margin: var(--gap) 0; height: 0; border-top: 1px dashed #000; }
-  .garis.ds { border-top: 1px dashed #000; }
-  .garis.dd { border-top: 1px dashed #000; border-bottom: 1px dashed #000; height: 4px; }
-  .garis.ss { border-top: 1px solid #000; }
-  .garis.sd { border-top: 1px solid #000; border-bottom: 1px solid #000; height: 4px; }
-  .garis.dt { border-top: 2px dotted #000; }
-  .garis.tb { border-top: 2px solid #000; }
-  .garis.tx { border: 0; height: auto; overflow: hidden; white-space: nowrap; line-height: 1; }
-  .garis.kosong { border: 0; }
-  .inv { background: #000; color: #fff; padding: .4mm 1mm; }
-  .struk img { max-width: 100%; display: inline-block; vertical-align: top; }
-  .struk svg { display: inline-block; vertical-align: top; }
-
-  .printer { background: #fff; border-radius: 10px; padding: 10px 12px; width: 100%; max-width: 380px; font-size: 13px; }
-  .printer .stat { display: flex; align-items: center; gap: 6px; font-weight: 600; margin-bottom: 8px; }
-  .printer .dot { width: 10px; height: 10px; border-radius: 50%; background: #bbb; flex-shrink: 0; }
-  .printer .dot.on { background: #34a853; } .printer .dot.busy { background: #f9ab00; }
-  .printer .bt { background: #1a73e8; color: #fff; }
-  .printer .go { background: #0b8043; color: #fff; width: 100%; font-size: 15px; padding: 11px; margin-top: 8px; }
-  .printer .go:disabled { background: #9ccfae; cursor: not-allowed; }
-  .printer .catatan { font-size: 11px; color: #a15c00; background: #fff6e0; border-radius: 6px; padding: 6px 8px; margin-top: 8px; line-height: 1.45; }
-  .bar { height: 6px; background: #eee; border-radius: 3px; overflow: hidden; margin-top: 8px; display: none; }
-  .bar > div { height: 100%; width: 0; background: #0b8043; transition: width .1s; }
-  .printer summary { cursor: pointer; font-size: 12px; color: #555; margin-top: 8px; }
-
-  .tabs { display: flex; gap: 4px; background: #e3e6ea; padding: 3px; border-radius: 8px; }
-  .tabs .btn { background: transparent; padding: 6px 10px; }
-  .tabs .btn.on { background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.15); font-weight: 600; }
-  .teksCard { background: #fff; border-radius: 10px; padding: 10px 12px; width: 100%; max-width: 420px; display: none; }
-  body.modeTeks .teksCard { display: block; }
-  body.modeTeks .zoomwrap, body.modeTeks .tip { display: none; }
-  .teksCard pre { background: #fffef8; border: 1px solid #ddd; border-radius: 6px; padding: 10px 8px; margin: 8px 0 0;
-    font-family: "Courier New", Consolas, monospace; font-size: 13px; line-height: 1.35; overflow-x: auto; white-space: pre; color: #000; }
-  .teksCard .ok { color: #0b8043; font-size: 12px; margin-left: 4px; }
-
-  .ukuran-pilih { display: flex; gap: 8px; margin-bottom: 10px; }
-  .ukuran-pilih .uk { flex: 1; padding: 10px; border: 2px solid #ccc; background: #fff; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; }
-  .ukuran-pilih .uk small { display: block; font-size: 11px; font-weight: 400; color: #777; }
-  .ukuran-pilih .uk.on { border-color: #1a73e8; background: #e8f0fe; color: #1a56c4; }
-
-  /* ===== HP ===== */
-  .mnav { display: none; }
-  @media screen and (max-width: 800px) {
-    .wrap { flex-direction: column; padding: 8px 8px 70px; gap: 10px; }
-    .panel { width: 100%; padding: 10px; }
-    input, textarea, select { font-size: 16px; }
-    .prev { position: static; width: 100%; }
-    body.lihat .panel { display: none; }
-    body:not(.lihat) .prev { display: none; }
-    .mnav { display: flex; position: fixed; left: 0; right: 0; bottom: 0; background: #fff; box-shadow: 0 -2px 8px rgba(0,0,0,.12); padding: 8px; gap: 8px; z-index: 10; }
-    .mnav .btn { flex: 1; font-size: 15px; padding: 11px; }
-    .mnav .on { background: #1a73e8; color: #fff; }
-  }
-
-  /* ===== CETAK ===== */
-  @media print {
-    body { background: #fff; }
-    .panel, .toolbar, .mnav, .tip, .printer, .teksCard { display: none !important; }
-    body.modeTeks .zoomwrap { display: block !important; }
-    .wrap { padding: 0; display: block; }
-    .prev { display: block !important; position: static; }
-    .zoomwrap { transform: none !important; height: auto !important; }
-    .struk { box-shadow: none; margin: 0; }
-    .struk .el { outline: none !important; }
-  }
+  .chk { display: flex; align-items: center; gap: 6px; font-size: 13px; margin: 8px 0 2px; color: #333; }
+  .kosong { text-align: center; color: #888; font-size: 13px; padding: 18px; border: 2px dashed #ddd; border-radius: 8px; }
 </style>
 </head>
 <body>
 <div class="wrap">
+<div class="panel">
+  <a class="kembali" href="./">← Halaman depan</a>
+  <h2>✏️ Struk Manual</h2>
 
-  <!-- ================= EDITOR ================= -->
-  <div class="panel">
-    <h2>Struk Manual</h2>
-    <div class="sub">Mulai dari struk kosong, lalu tambahkan elemen satu per satu. Ketuk elemen di pratinjau untuk mengeditnya.</div>
-
-    <div style="font-weight:600;font-size:13px;margin-bottom:4px">Ukuran kertas struk</div>
-    <div class="ukuran-pilih">
-      <button type="button" class="uk" data-uk="58" onclick="pilihUkuran('58')">58 mm<small>printer mini</small></button>
-      <button type="button" class="uk" data-uk="80" onclick="pilihUkuran('80')">80 mm<small>printer kasir</small></button>
+  <details class="blok">
+    <summary>💾 Simpan / buka desain</summary>
+    <div class="ket" style="margin:6px 0">Desain <b>tersimpan otomatis</b>. Gunakan file untuk cadangan atau pindah HP.</div>
+    <div class="fbar">
+      <button type="button" class="btn" onclick="eksporDesain()">⬇️ Simpan ke file</button>
+      <button type="button" class="btn" onclick="$('fileDesain').click()">⬆️ Buka file</button>
+      <input type="file" id="fileDesain" accept=".json,application/json" style="display:none">
     </div>
-
-    <details class="set">
-      <summary>⚙️ Pengaturan kertas, huruf &amp; paragraf</summary>
-      <div class="row">
-        <div><label>Lebar area cetak</label>
-          <select data-g="lebar">
-            <option value="48mm">48 mm (kertas 58mm, aman)</option>
-            <option value="55mm">55 mm</option>
-            <option value="58mm">58 mm</option>
-            <option value="72mm">72 mm (kertas 80mm, aman)</option>
-            <option value="80mm">80 mm</option>
-          </select></div>
-        <div><label>Ukuran huruf dasar (pt)</label>
-          <select data-g="font">
-          <option value="6pt">6</option>
-          <option value="7pt">7</option>
-          <option value="8pt">8</option>
-          <option value="9pt">9</option>
-          <option value="10pt">10</option>
-          <option value="11pt">11</option>
-          <option value="12pt">12</option>
-          <option value="14pt">14</option>
-          </select></div>
-      </div>
-      <div class="row">
-        <div><label>Jenis font</label><select data-g="jenis" id="selJenis"></select></div>
-        <div><label>Ketebalan huruf</label>
-          <select data-g="tebal"><option value="normal">Normal</option><option value="bold">Tebal semua</option></select></div>
-      </div>
-      <div class="row">
-        <div><label>Garis bawaan</label><select data-g="garis" id="selGaris"></select></div>
-        <div><label>Karakter garis teks</label><select data-g="garisChar" id="selChar"></select></div>
-      </div>
-      <div class="row">
-        <div><label>Spasi baris</label>
-          <select data-g="lh"><option value="1">1,0</option><option value="1.15">1,15</option><option value="1.3">1,3</option><option value="1.5">1,5</option><option value="2">2,0</option></select></div>
-        <div><label>Jarak antar huruf</label>
-          <select data-g="ls"><option value="-0.3px">Rapat</option><option value="0px">Normal</option><option value="0.5px">Agak renggang</option><option value="1px">Renggang</option></select></div>
-      </div>
-      <div class="row">
-        <div><label>Margin kiri-kanan</label>
-          <select data-g="pad"><option>0mm</option><option>1mm</option><option>2mm</option><option>3mm</option><option>4mm</option></select></div>
-        <div><label>Jarak di sekitar garis</label>
-          <select data-g="gap"><option>1mm</option><option>2mm</option><option>3mm</option><option>4mm</option></select></div>
-      </div>
-      <div class="row">
-        <div><label>Jarak antar paragraf/barang</label>
-          <select data-g="para"><option>0mm</option><option>1mm</option><option>2mm</option><option>3mm</option></select></div>
-        <div><label>Ruang kosong di bawah</label>
-          <select data-g="feed"><option>0mm</option><option>5mm</option><option>8mm</option><option>15mm</option><option>25mm</option></select></div>
-      </div>
-    </details>
-
-    <details class="set">
-      <summary>💾 Simpan / buka desain</summary>
-      <div class="sub" style="margin-top:6px">Desain otomatis tersimpan di browser ini. Untuk dipindah ke perangkat lain atau disimpan sebagai beberapa template, gunakan file desain (.json).</div>
-      <div class="filebar">
-        <button class="btn" onclick="exportDesain()">⬇️ Simpan file desain</button>
-        <button class="btn" onclick="$('fileDesain').click()">⬆️ Buka file desain</button>
-        <input type="file" id="fileDesain" accept=".json,application/json" style="display:none">
-      </div>
-      <div class="filebar">
-        <button class="btn" onclick="muatContoh()">📋 Muat contoh struk toko</button>
-        <button class="btn" style="color:#c00" onclick="kosongkan()">🗑️ Kosongkan struk</button>
-      </div>
-    </details>
-
-    <div style="font-weight:600;font-size:14px;margin-top:4px">➕ Tambah elemen</div>
-    <div class="addbar">
-      <button class="btn" onclick="tambah('teks')">🔤 Teks</button>
-      <button class="btn" onclick="tambah('kolom')">↔️ Dua kolom</button>
-      <button class="btn" onclick="tambah('barang')">🛒 Daftar barang</button>
-      <button class="btn" onclick="tambah('total')">🧮 Total &amp; bayar</button>
-      <button class="btn" onclick="tambah('garis')">➖ Garis</button>
-      <button class="btn" onclick="tambah('tanggal')">📅 Tanggal/jam</button>
-      <button class="btn" onclick="tambah('gambar')">🖼️ Gambar/logo</button>
-      <button class="btn" onclick="tambah('qr')">🔳 QR code</button>
-      <button class="btn" onclick="tambah('barcode')">▮▯ Barcode</button>
-      <button class="btn" onclick="tambah('spasi')">↕️ Spasi kosong</button>
-      <button class="btn" onclick="tambah('nomor')">#️⃣ Nomor otomatis</button>
-      <button class="btn" onclick="tambah('ttd')">✍️ Tanda tangan</button>
+    <div class="fbar">
+      <button type="button" class="btn" onclick="muatContoh()">📋 Muat contoh struk</button>
+      <button type="button" class="btn hapus" onclick="kosongkan()">🗑️ Kosongkan</button>
     </div>
+  </details>
 
-    <div id="daftarBlok"></div>
+  <div class="blok">
+    <div class="judul">Kertas</div>
+    <div class="pilih">
+      <button type="button" class="opt" data-uk="58" onclick="pilihUkuran('58')">58 mm</button>
+      <button type="button" class="opt" data-uk="80" onclick="pilihUkuran('80')">80 mm</button>
+    </div>
+    <label>Garis pemisah bawaan</label>
+    <select id="gGaris"></select>
   </div>
 
-  <!-- ================= PRATINJAU ================= -->
-  <div class="prev">
-    <div class="toolbar">
-      <button class="btn print" onclick="cetak()">🖨️ Cetak</button>
-      <button class="btn png" onclick="simpanGambar()">🖼️ PNG</button>
-      <button class="btn pdf" onclick="simpanPDF()">📄 PDF</button>
-      <div class="tabs"><button class="btn on" id="tabVisual" onclick="modeTeks(false)">🧾 Visual</button><button class="btn" id="tabTeks" onclick="modeTeks(true)">📝 Teks</button></div>
-      <select id="zoom" title="Perbesar pratinjau">
-        <option value="1">100%</option><option value="1.5" selected>150%</option><option value="2">200%</option>
-      </select>
+  <div class="blok">
+    <div class="judul">➕ Tambah elemen</div>
+    <div class="addbar">
+      <button type="button" class="btn" onclick="tambah('teks')">Teks</button>
+      <button type="button" class="btn" onclick="tambah('kolom')">Dua kolom</button>
+      <button type="button" class="btn" onclick="tambah('barang')">Daftar barang</button>
+      <button type="button" class="btn" onclick="tambah('total')">Total &amp; bayar</button>
+      <button type="button" class="btn" onclick="tambah('garis')">Garis</button>
+      <button type="button" class="btn" onclick="tambah('tanggal')">Tanggal/jam</button>
+      <button type="button" class="btn" onclick="tambah('gambar')">Logo/gambar</button>
+      <button type="button" class="btn" onclick="tambah('qr')">QR code</button>
+      <button type="button" class="btn" onclick="tambah('barcode')">Barcode</button>
+      <button type="button" class="btn" onclick="tambah('spasi')">Baris kosong</button>
+      <button type="button" class="btn" onclick="tambah('nomor')">Nomor otomatis</button>
+      <button type="button" class="btn" onclick="tambah('ttd')">Tanda tangan</button>
     </div>
-    <div class="printer">
+  </div>
+
+  <div id="daftar"></div>
+</div>
+
+<div class="prev">
+  <div class="ket">Pratinjau = hasil cetak printer</div>
+  <div class="kertas"><canvas id="pratinjau"></canvas></div>
+  <div class="ket" id="infoKertas"></div>
+  <div class="panel" style="width:100%;max-width:460px;padding:12px">
+    <div class="blok" style="margin:0">
+      <div class="judul">Printer</div>
       <div class="stat"><span class="dot" id="pDot"></span><span id="pStat">Printer belum terhubung</span></div>
-      <div class="filebar" style="margin-top:0">
-        <button class="btn bt" onclick="hubungBT()">🔵 Hubungkan Bluetooth</button>
-        <button class="btn" id="btnSerial" onclick="hubungSerial()">🔌 Serial / COM</button>
-        <button class="btn" onclick="putuskan()">Putuskan</button>
+      <div class="fbar" style="margin-top:0">
+        <button type="button" class="btn biru" onclick="hubungBT()">🔵 Hubungkan Bluetooth</button>
+        <button type="button" class="btn" id="btnSerial" onclick="hubungSerial()">🔌 Serial / COM</button>
+        <button type="button" class="btn" onclick="putuskan()">Putuskan</button>
       </div>
-      <div class="row" style="margin-top:4px">
-        <div><label>Huruf printer</label>
-          <select data-g="pFont">
-            <option value="A">Font A – normal</option>
-            <option value="B">Font B – kecil</option>
-          </select></div>
+      <div class="row">
+        <div><label>Huruf printer</label><select id="pFont"><option value="A">Font A – normal</option><option value="B">Font B – kecil</option></select></div>
+        <div><label>Jumlah cetak</label><select id="salinan"><option>1</option><option>2</option><option>3</option></select></div>
       </div>
-      <button class="btn go" id="btnLangsung" onclick="cetakLangsung()" disabled>⚡ Cetak Langsung ke Printer</button>
-      <div class="bar" id="pBar"><div></div></div>
-      <details>
-        <summary>Pengaturan printer</summary>
-        <div class="row">
-          <div><label>Lebar cetak printer</label>
-            <select data-g="pDots">
-              <option value="384">58 mm (384 titik)</option>
-              <option value="432">58 mm lebar (432 titik)</option>
-              <option value="576">80 mm (576 titik)</option>
-              <option value="512">80 mm sempit (512 titik)</option>
-            </select></div>
-          <div><label>Kepekatan</label>
-            <select data-g="pThr">
-              <option value="120">Tipis</option><option value="160">Normal</option>
-              <option value="200">Pekat</option><option value="230">Sangat pekat</option>
-            </select></div>
-        </div>
+      <details style="margin-top:8px">
+        <summary class="ket">Pengaturan lain</summary>
         <div class="row">
           <div><label>Kertas maju setelah cetak</label>
-            <select data-g="pFeed"><option value="0">0 baris</option><option value="2">2 baris</option><option value="3">3 baris</option><option value="5">5 baris</option><option value="8">8 baris</option></select></div>
+            <select id="pFeed"><option value="1">1 baris</option><option value="3" selected>3 baris</option><option value="5">5 baris</option></select></div>
           <div><label>Kecepatan kirim</label>
-            <select data-g="pChunk">
-              <option value="20">Paling aman (lambat)</option><option value="100">Normal</option>
-              <option value="180">Cepat</option><option value="512">Sangat cepat</option>
-            </select></div>
+            <select id="pChunk"><option value="20">Paling aman</option><option value="100" selected>Normal</option><option value="180">Cepat</option></select></div>
         </div>
-        <label class="chk"><input type="checkbox" data-g="pCut"> Potong kertas otomatis (printer dengan pisau/auto-cutter)</label>
-        <div class="catatan">Struk dicetak dengan <b>huruf bawaan printer</b> agar paling tajam. Jenis font &amp; jarak huruf pilihan hanya berlaku untuk pratinjau dan file PNG/PDF; tebal, garis bawah, perataan, ukuran besar, spasi baris, logo, QR, dan barcode tetap tercetak.<br>
-          Kalau hasil cetak terputus atau ada bagian yang hilang, pilih kecepatan <b>Paling aman</b>.
-          Agar ukuran huruf sesuai, atur <b>Lebar area cetak</b> ke <b>48 mm</b> untuk printer 58 mm, atau <b>72 mm</b> untuk printer 80 mm.</div>
+        <label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="pCut"> Potong kertas otomatis (printer dengan auto-cutter)</label>
       </details>
+      <div class="aksi">
+        <button type="button" class="btn cetak" id="btnLangsung" onclick="cetak()" disabled>⚡ Cetak</button>
+        <button type="button" class="btn" onclick="simpanGambar()">🖼️ PNG</button>
+        <button type="button" class="btn" onclick="simpanPdf()">📄 PDF</button>
+      </div>
+      <div class="bar" id="pBar"><div></div></div>
       <div class="catatan" id="pInfo" style="display:none"></div>
-    </div>
-    <div class="teksCard">
-      <div style="font-weight:600">📝 Struk versi teks</div>
-      <div class="sub" style="margin:2px 0 6px">Salin lalu tempel ke aplikasi Thermer atau aplikasi printer lain. Ukuran huruf, gambar, QR, dan barcode tidak ikut dalam versi teks.</div>
-      <div class="row">
-        <div><label>Karakter per baris</label>
-          <select data-g="tCols">
-            <option value="32">32 (printer 58 mm)</option>
-            <option value="30">30</option>
-            <option value="42">42 (58 mm huruf kecil)</option>
-            <option value="48">48 (printer 80 mm)</option>
-          </select></div>
-        <div style="align-self:end"><label class="chk"><input type="checkbox" data-g="tTanda"> Tulis penanda [QR] / [Barcode] / [Gambar]</label></div>
-      </div>
-      <div class="filebar">
-        <button class="btn" style="background:#1a73e8;color:#fff" onclick="salinTeks()">📋 Salin teks</button>
-        <button class="btn" id="btnBagi" onclick="bagiTeks()">📤 Bagikan ke aplikasi</button>
-        <button class="btn" onclick="unduhTeks()">⬇️ Simpan .txt</button>
-        <span class="ok" id="okSalin"></span>
-      </div>
-      <pre id="teksStruk"></pre>
-    </div>
-    <div class="zoomwrap" id="zoomwrap"><div class="struk" id="struk"></div></div>
-    <div class="tip" style="font-size:11px;color:#777;max-width:340px;text-align:center;line-height:1.5">
-      Saat mencetak: pilih printer thermal, <b>Margins: None</b>, <b>Scale: 100%</b>, matikan <b>Headers and footers</b>.
     </div>
   </div>
 </div>
-
-<div class="mnav">
-  <button class="btn on" id="navEdit" onclick="modeHP(false)">✏️ Edit</button>
-  <button class="btn" id="navLihat" onclick="modeHP(true)">👁️ Pratinjau &amp; Cetak</button>
 </div>
 
 <script>
@@ -1587,7 +1416,6 @@ module.exports = QRCode;
 
 };
 return { QRCode: req("./index"), Level: req("./QRErrorCorrectLevel") }; })();
-/* Barcode CODE128 & EAN-13 */
 const C128 = "212222 222122 222221 121223 121322 131222 122213 122312 132212 221213 221312 231212 112232 122132 122231 113222 123122 123221 223211 221132 221231 213212 223112 312131 311222 321122 321221 312212 322112 322211 212123 212321 232121 111323 131123 131321 112313 132113 132311 211313 231113 231311 112133 112331 132131 113123 113321 133121 313121 211331 231131 213113 213311 213131 311123 311321 331121 312113 312311 332111 314111 221411 431111 111224 111422 121124 121421 141122 141221 112214 112412 122114 122411 142112 142211 241211 221114 413111 241112 134111 111242 121142 121241 114212 124112 124211 411212 421112 421211 212141 214121 412121 111143 111341 131141 114113 114311 411113 411311 113141 114131 311141 411131 211412 211214 211232 2331112".split(" ");
 function code128(txt){
   let codes;
@@ -1620,184 +1448,290 @@ function ean13(txt){
   return { mods: m, text: full };
 }
 
-
-/* ================= DATA ================= */
+/* ==========================================================================
+   INTI STRUK v2 — satu jalur untuk semua: baris teks printer
+   → cetak ESC/POS (huruf bawaan printer) / pratinjau / PNG / PDF
+   ========================================================================== */
 const $ = id => document.getElementById(id);
-const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const rp = n => "Rp" + Math.round(n || 0).toLocaleString("id-ID");
-const uid = () => Math.random().toString(36).slice(2, 9);
+const p2 = n => String(n).padStart(2, "0");
+const ulang = (c, n) => n > 0 ? c.repeat(n) : "";
 
-const FONTS = [
-  ['"Courier New", Courier, monospace', "Courier New (struk klasik)"],
-  ['"Courier Prime", "Courier New", monospace', "Courier Prime (tebal & jelas)"],
-  ['"Roboto Mono", monospace', "Roboto Mono (modern)"],
-  ["Inconsolata, monospace", "Inconsolata (ramping)"],
-  ["VT323, monospace", "VT323 (dot matrix jadul)"]
-];
-const GARIS = [
-  ["ds", "- - - Putus-putus tunggal"], ["dd", "= = = Putus-putus ganda"],
-  ["ss", "───── Lurus tunggal"], ["sd", "═════ Lurus ganda"], ["tb", "━━━━━ Lurus tebal"],
-  ["dt", "····· Titik-titik"], ["tx", "Karakter teks"], ["kosong", "Tanpa garis (jarak saja)"]
-];
-const CHARS = [["-", "- minus"], ["=", "= sama dengan"], ["*", "* bintang"], ["~", "~ gelombang"], ["_", "_ garis bawah"], [".", ". titik"], ["#", "# pagar"]];
-const PT_WORD = [6, 7, 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72];
-const UKURAN = [["", "Ikuti ukuran dasar"], ...PT_WORD.map(n => [n + "pt", String(n)])];
-const ptTerdekat = n => PT_WORD.reduce((a, b) => Math.abs(b - n) < Math.abs(a - n) ? b : a);
-/* desain lama memakai ukuran relatif (+2pt, +4pt…) → ubah ke ukuran pt seperti Word */
-function migrasiUkuran(list) {
-  list.forEach(b => {
-    if ((b.type === "teks" || b.type === "kolom") && b.ukuran !== undefined) {
-      const d = parseFloat(b.ukuran) || 0;
-      b.pt = d ? ptTerdekat((parseFloat(G.font) || 9) + d) + "pt" : "";
-      delete b.ukuran;
-    }
+/* ---------- tanggal ---------- */
+const HARI = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+const BULAN = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+function fmtTanggal(d, f) {
+  const D = d.getDate(), M = d.getMonth(), Y = d.getFullYear();
+  return ({
+    "dd/mm/yyyy": `${p2(D)}/${p2(M + 1)}/${Y}`, "dd-mm-yyyy": `${p2(D)}-${p2(M + 1)}-${Y}`, "dd/mm/yy": `${p2(D)}/${p2(M + 1)}/${String(Y).slice(-2)}`,
+    "yyyy-mm-dd": `${Y}-${p2(M + 1)}-${p2(D)}`, "d mmm yyyy": `${D} ${BULAN[M].slice(0, 3)} ${Y}`, "d mmmm yyyy": `${D} ${BULAN[M]} ${Y}`,
+    "dddd, d mmmm yyyy": `${HARI[d.getDay()]}, ${D} ${BULAN[M]} ${Y}`, "none": ""
+  })[f] ?? `${p2(D)}/${p2(M + 1)}/${Y}`;
+}
+function fmtJam(d, f) {
+  if (f === "none") return "";
+  const hm = `${p2(d.getHours())}:${p2(d.getMinutes())}`;
+  return ({ hm, hms: `${hm}:${p2(d.getSeconds())}`, "hm-wib": hm + " WIB" })[f] ?? hm;
+}
+const OPSI_TGL = [["dd/mm/yyyy", "21/11/2026"], ["dd-mm-yyyy", "21-11-2026"], ["dd/mm/yy", "21/11/26"], ["yyyy-mm-dd", "2026-11-21"],
+  ["d mmm yyyy", "21 Nov 2026"], ["d mmmm yyyy", "21 November 2026"], ["dddd, d mmmm yyyy", "Sabtu, 21 November 2026"], ["none", "Tidak ditampilkan"]];
+const OPSI_JAM = [["hm", "13:08"], ["hms", "13:08:45"], ["hm-wib", "13:08 WIB"], ["none", "Tidak ditampilkan"]];
+
+/* ---------- susun teks selebar N karakter ---------- */
+function bungkus(t, w) {
+  const out = [];
+  String(t ?? "").split("\n").forEach(par => {
+    let b = "";
+    par.split(/\s+/).filter(Boolean).forEach(k => {
+      while (k.length > w) { if (b) { out.push(b); b = ""; } out.push(k.slice(0, w)); k = k.slice(w); }
+      if (!k) return;
+      if (!b) b = k; else if (b.length + 1 + k.length <= w) b += " " + k; else { out.push(b); b = k; }
+    });
+    out.push(b);
   });
+  return out;
 }
-const RATA = [["left", "Kiri"], ["center", "Tengah"], ["right", "Kanan"], ["justify", "Rata kiri-kanan"]];
-const TGLF = [["dd/mm/yyyy","10/11/2026"],["dd-mm-yyyy","10-11-2026"],["dd/mm/yy","10/11/26"],["yyyy-mm-dd","2026-11-10"],
-  ["d mmm yyyy","10 Nov 2026"],["d mmmm yyyy","10 November 2026"],["dddd, d mmmm yyyy","Selasa, 10 November 2026"],["ddd, dd/mm/yyyy","Sel, 10/11/2026"],["none","Tidak ditampilkan"]];
-const JAMF = [["hm","14:30"],["hms","14:30:45"],["hm-wib","14:30 WIB"],["hm-wita","14:30 WITA"],["hm-wit","14:30 WIT"],["none","Tidak ditampilkan"]];
+function rataTeks(t, w, r) {
+  return bungkus(t, w).map(l => r === "center" ? ulang(" ", Math.floor((w - l.length) / 2)) + l : r === "right" ? ulang(" ", w - l.length) + l : l);
+}
+function kiriKanan(a, b, w) {
+  a = String(a ?? ""); b = String(b ?? "");
+  const ls = a ? bungkus(a, w) : [""];
+  const akhir = ls.pop();
+  if (akhir.length + 1 + b.length <= w) ls.push(akhir + ulang(" ", w - akhir.length - b.length) + b);
+  else { if (akhir) ls.push(akhir); ls.push(ulang(" ", Math.max(0, w - b.length)) + b); }
+  return ls;
+}
+/* jenis garis = karakter yang diulang selebar kertas */
+const OPSI_GARIS = [["-", "- - - - Putus-putus"], ["=", "= = = = Ganda"], [".", ". . . . Titik-titik"], ["*", "* * * * Bintang"], ["_", "_ _ _ _ Garis bawah"], ["", "Tanpa garis (baris kosong)"]];
+const garisTeks = (ch, w) => ch ? ulang(ch, w) : "";
+const opsiHTML = (list, val) => list.map(([v, t]) => `<option value="${esc(v)}"${String(v) === String(val) ? " selected" : ""}>${esc(t)}</option>`).join("");
 
-const G0 = { lebar: "58mm", font: "9pt", jenis: FONTS[0][0], tebal: "normal", garis: "ds", garisChar: "-",
-  lh: "1.3", ls: "0px", pad: "2mm", gap: "2mm", para: "0mm", feed: "8mm",
-  pDots: "384", pThr: "160", pFeed: "3", pCut: false, pChunk: "100", pDelay: "8", tCols: "32", tTanda: true, pMode: "teks", pFont: "A", pTebal: false };
+/* ---------- kertas & huruf printer ---------- */
+const DOTS = { "58": 384, "80": 576 };
+const kolomPrinter = (dots, fontB) => fontB ? Math.floor(dots / 9) : Math.floor(dots / 12);
+const SEL = fontB => fontB ? { w: 9, h: 17, lh: 24 } : { w: 12, h: 24, lh: 32 };   // ukuran sel huruf & jarak baris (titik)
 
+/* ---------- gambar (logo, QR, barcode) → bitmap selebar printer ---------- */
+function bitmap(dots, h) { const wB = dots / 8; return { dots, wB, h, bits: new Uint8Array(wB * h) }; }
+function titik(bm, x, y) { if (x >= 0 && x < bm.dots && y >= 0 && y < bm.h) bm.bits[y * bm.wB + (x >> 3)] |= 0x80 >> (x & 7); }
+function kotak(bm, x, y, w, h) { for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) titik(bm, x + i, y + j); }
+function geser(rata, lebar, dots) { return rata === "center" ? Math.floor((dots - lebar) / 2) : rata === "right" ? dots - lebar : 0; }
+const muatGambar = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error("Gambar tidak bisa dibuka")); i.src = src; });
+async function rasterGambar(src, pct, rata, ambang, dots) {
+  const img = await muatGambar(src);
+  const w = Math.max(8, Math.min(dots, Math.round(dots * pct / 100))), h = Math.max(1, Math.round(img.height * w / img.width));
+  const c = document.createElement("canvas"); c.width = w; c.height = h;
+  const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, w, h); x.drawImage(img, 0, 0, w, h);
+  const p = x.getImageData(0, 0, w, h).data, bm = bitmap(dots, h), x0 = geser(rata, w, dots);
+  for (let yy = 0; yy < h; yy++) for (let xx = 0; xx < w; xx++) {
+    const i = (yy * w + xx) * 4, a = p[i + 3] / 255;
+    if ((0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2]) * a + 255 * (1 - a) < ambang) titik(bm, x0 + xx, yy);
+  }
+  return bm;
+}
+/* logo: hitam-putih lalu buang tepi putih */
+const cacheLogo = {};
+function siapkanLogo(src, ambang, potong) {
+  const key = src.length + ":" + src.slice(-50) + ":" + ambang + ":" + potong;
+  if (cacheLogo[key]) return Promise.resolve(cacheLogo[key]);
+  return muatGambar(src).then(img => {
+    const s = Math.min(1, 576 / img.width);
+    const W = Math.max(1, Math.round(img.width * s)), H = Math.max(1, Math.round(img.height * s));
+    const c = document.createElement("canvas"); c.width = W; c.height = H;
+    const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, W, H); x.drawImage(img, 0, 0, W, H);
+    const d = x.getImageData(0, 0, W, H), p = d.data;
+    let x0 = W, y0 = H, x1 = -1, y1 = -1;
+    for (let yy = 0; yy < H; yy++) for (let xx = 0; xx < W; xx++) {
+      const i = (yy * W + xx) * 4, hit = (0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2]) < ambang;
+      p[i] = p[i + 1] = p[i + 2] = hit ? 0 : 255; p[i + 3] = 255;
+      if (hit) { if (xx < x0) x0 = xx; if (xx > x1) x1 = xx; if (yy < y0) y0 = yy; if (yy > y1) y1 = yy; }
+    }
+    x.putImageData(d, 0, 0);
+    if (!potong || x1 < 0) return (cacheLogo[key] = c.toDataURL("image/png"));
+    const o = document.createElement("canvas"); o.width = x1 - x0 + 1; o.height = y1 - y0 + 1;
+    o.getContext("2d").drawImage(c, x0, y0, o.width, o.height, 0, 0, o.width, o.height);
+    return (cacheLogo[key] = o.toDataURL("image/png"));
+  }).catch(() => src);
+}
+
+/* ---------- dokumen struk ----------
+   Isi: string (satu baris teks, sudah selebar N karakter) | {raster: bitmap} | {feed: titik} */
+function asciiAman(s) {
+  return String(s).replace(/[×✕]/g, "x").replace(/[–—]/g, "-").replace(/[·•]/g, ".").replace(/[“”]/g, '"').replace(/[‘’]/g, "'")
+    .normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^\x20-\x7E]/g, "?");
+}
+/* → perintah ESC/POS (huruf bawaan printer, tanpa tebal/ukuran khusus) */
+function dokumenKeEscPos(dok, o) {
+  const fontB = !!o.fontB, sel = SEL(fontB), b = [];
+  const raw = (...x) => { for (const v of x) b.push(v & 255); };
+  const ESC = 0x1B, GS = 0x1D;
+  for (let s = 0; s < (o.salinan || 1); s++) {
+    raw(ESC, 0x40, ESC, 0x4D, fontB ? 1 : 0, ESC, 0x33, sel.lh);
+    for (const it of dok) {
+      if (typeof it === "string") { raw(ESC, 0x61, 0); for (const ch of asciiAman(it.replace(/\s+$/, ""))) b.push(ch.charCodeAt(0)); raw(0x0A); }
+      else if (it.raster) {
+        const { bits, wB, h } = it.raster; raw(ESC, 0x61, 0);
+        for (let y = 0; y < h; y += 96) { const n = Math.min(96, h - y); raw(GS, 0x76, 0x30, 0, wB & 255, wB >> 8, n & 255, n >> 8); for (let k = y * wB; k < (y + n) * wB; k++) b.push(bits[k]); }
+      }
+      else if (it.feed) { let n = Math.round(it.feed); while (n > 0) { const k = Math.min(255, n); raw(ESC, 0x4A, k); n -= k; } }
+    }
+    raw(ESC, 0x64, o.feedBaris ?? 3);
+    if (o.potong) raw(GS, 0x56, 0x42, 0);
+  }
+  return new Uint8Array(b);
+}
+/* → gambar kanvas yang meniru hasil printer (untuk pratinjau, PNG, PDF) */
+function dokumenKeKanvas(dok, o) {
+  const dots = o.dots, sel = SEL(!!o.fontB);
+  let H = 12;
+  dok.forEach(it => { H += typeof it === "string" ? sel.lh : it.raster ? it.raster.h : it.feed || 0; });
+  H += sel.lh * 2;
+  const c = document.createElement("canvas"); c.width = dots; c.height = H;
+  const x = c.getContext("2d");
+  x.fillStyle = "#fff"; x.fillRect(0, 0, dots, H); x.fillStyle = "#000";
+  x.font = `${Math.round(sel.h * 0.92)}px "Courier New", Courier, monospace`; x.textBaseline = "alphabetic";
+  let y = 8;
+  for (const it of dok) {
+    if (typeof it === "string") {
+      const t = asciiAman(it);
+      for (let i = 0; i < t.length; i++) if (t[i] !== " ") x.fillText(t[i], i * sel.w, y + sel.h * 0.8, sel.w + 0.5);
+      y += sel.lh;
+    } else if (it.raster) {
+      const { bits, wB, h } = it.raster, d = x.getImageData(0, y, dots, h), p = d.data;
+      for (let yy = 0; yy < h; yy++) for (let xx = 0; xx < dots; xx++) if (bits[yy * wB + (xx >> 3)] & (0x80 >> (xx & 7))) { const k = (yy * dots + xx) * 4; p[k] = p[k + 1] = p[k + 2] = 0; }
+      x.putImageData(d, 0, y); y += h;
+    } else if (it.feed) y += it.feed;
+  }
+  return c;
+}
+
+/* ---------- simpan file ---------- */
+function unduh(blob, nama) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = nama;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+function simpanPNG(c, nama) { c.toBlob(b => unduh(b, nama), "image/png"); }
+function simpanPDF(c, nama, lebarMm) {
+  const jpg = atob(c.toDataURL("image/jpeg", 0.95).split(",")[1]);
+  const W = lebarMm * 72 / 25.4, H = W * c.height / c.width;
+  const isi = `q ${W.toFixed(2)} 0 0 ${H.toFixed(2)} 0 0 cm /Im0 Do Q`;
+  const obj = ["<< /Type /Catalog /Pages 2 0 R >>", "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+    `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W.toFixed(2)} ${H.toFixed(2)}] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>`,
+    null, `<< /Length ${isi.length} >>\nstream\n${isi}\nendstream`];
+  let pdf = "%PDF-1.4\n%\xE2\xE3\xCF\xD3\n"; const off = [];
+  obj.forEach((o, i) => {
+    off.push(pdf.length);
+    pdf += o === null
+      ? `${i + 1} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${c.width} /Height ${c.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpg.length} >>\nstream\n${jpg}\nendstream\nendobj\n`
+      : `${i + 1} 0 obj\n${o}\nendobj\n`;
+  });
+  const xref = pdf.length;
+  pdf += `xref\n0 ${obj.length + 1}\n0000000000 65535 f \n` + off.map(o => String(o).padStart(10, "0") + " 00000 n \n").join("") +
+    `trailer\n<< /Size ${obj.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
+  const bytes = new Uint8Array(pdf.length);
+  for (let i = 0; i < pdf.length; i++) bytes[i] = pdf.charCodeAt(i) & 255;
+  unduh(new Blob([bytes], { type: "application/pdf" }), nama);
+}
+
+
+/* ===== DATA ===== */
+const G0 = { ukuran: "58", garis: "-", pFont: "A", pFeed: "3", pChunk: "100", pCut: false };
+let G = { ...G0 }, blocks = [], aktif = null;
+const uid = () => Math.random().toString(36).slice(2, 9);
+const RATA = [["left", "Kiri"], ["center", "Tengah"], ["right", "Kanan"]];
 const BARU = {
-  teks:    () => ({ isi: "Teks baru", rata: "center", pt: "", tebal: false, miring: false, garisBawah: false, kapital: false, inv: false, font: "" }),
-  kolom:   () => ({ kiri: "Label", kanan: "Nilai", tebal: false, pt: "", pemisah: "" }),
-  barang:  () => ({ tata: "dua", header: true, kapital: false, ringkas: true,
-                    rows: [{ nama: "Barang 1", qty: 1, harga: 10000 }] }),
-  total:   () => ({ subtotal: true, diskon: 0, pajak: 0, layanan: 0, metode: "Tunai", bayar: 0, kembali: true, besar: true, labelTotal: "TOTAL" }),
-  garis:   () => ({ jenis: "", char: "" }),
+  teks: () => ({ isi: "Teks baru", rata: "center" }),
+  kolom: () => ({ kiri: "Label", kanan: "Nilai" }),
+  barang: () => ({ tata: "dua", header: false, ringkas: false, rows: [{ nama: "Barang 1", qty: 1, harga: 10000 }] }),
+  total: () => ({ subtotal: true, diskon: 0, pajak: 0, layanan: 0, metode: "Tunai", bayar: 0, kembali: true, labelTotal: "TOTAL" }),
+  garis: () => ({ jenis: "ikut" }),
   tanggal: () => ({ sumber: "auto", manual: "", fTgl: "dd/mm/yyyy", fJam: "hm", tata: "kolom", label: "Tanggal", labelJam: "Jam", rata: "left" }),
-  gambar:  () => ({ src: "", lebarPct: 60, rata: "center", bw: true, ambang: 150, crop: true }),
-  qr:      () => ({ isi: "https://contoh.com", ukuran: 25, rata: "center", level: "M", caption: "" }),
+  gambar: () => ({ src: "", lebarPct: 60, rata: "center", ambang: 150 }),
+  qr: () => ({ isi: "https://contoh.com", ukuran: 25, rata: "center", caption: "" }),
   barcode: () => ({ jenis: "code128", isi: "INV-0001", tinggi: 10, lebarPct: 90, teks: true, rata: "center" }),
-  spasi:   () => ({ tinggi: 4 }),
-  nomor:   () => ({ label: "No", awalan: "INV-", angka: 1, digit: 4, otomatis: true, tata: "kolom", rata: "left" }),
-  ttd:     () => ({ kiri: "Penerima", kanan: "Hormat kami", tinggi: 12, dua: true })
+  spasi: () => ({ tinggi: 1 }),
+  nomor: () => ({ label: "No", awalan: "INV-", angka: 1, digit: 4, otomatis: true, tata: "kolom", rata: "left" }),
+  ttd: () => ({ kiri: "Penerima", kanan: "Hormat kami", dua: true })
 };
-const NAMA = { teks: "🔤 Teks", kolom: "↔️ Dua kolom", barang: "🛒 Daftar barang", total: "🧮 Total & bayar", garis: "➖ Garis",
-  tanggal: "📅 Tanggal/jam", gambar: "🖼️ Gambar", qr: "🔳 QR code", barcode: "▮▯ Barcode", spasi: "↕️ Spasi", nomor: "#️⃣ Nomor", ttd: "✍️ Tanda tangan" };
+const NAMA = { teks: "Teks", kolom: "Dua kolom", barang: "Daftar barang", total: "Total & bayar", garis: "Garis", tanggal: "Tanggal/jam",
+  gambar: "Logo/gambar", qr: "QR code", barcode: "Barcode", spasi: "Baris kosong", nomor: "Nomor", ttd: "Tanda tangan" };
+const OPSI_GARIS_EL = [["ikut", "Ikuti garis bawaan"], ...OPSI_GARIS];
+$("gGaris").innerHTML = opsiHTML(OPSI_GARIS, "-");
 
-let G = { ...G0 };
-let blocks = [];
-let aktif = null;
-
-/* ================= SIMPAN OTOMATIS ================= */
-const KUNCI = "strukManual.v1";
-let tSimpan;
-function simpanLokal() {
-  clearTimeout(tSimpan);
-  tSimpan = setTimeout(() => { try { localStorage.setItem(KUNCI, JSON.stringify({ G, blocks: blocks.map(({ _bw, _src2, ...b }) => b) })); } catch (e) {} }, 400);
-}
-function bukaLokal() {
-  try { const d = JSON.parse(localStorage.getItem(KUNCI)); if (d && d.blocks) { G = { ...G0, ...d.G }; blocks = d.blocks; return true; } } catch (e) {}
-  return false;
-}
-
-/* ================= EDITOR ================= */
-const opts = (list, val) => list.map(([v, t]) => `<option value="${esc(v)}"${String(v) === String(val) ? " selected" : ""}>${esc(t)}</option>`).join("");
+/* ===== EDITOR ===== */
 const F = {
-  txt: (b, k, label, ph = "") => `<div><label>${label}</label><input data-k="${k}" value="${esc(b[k])}" placeholder="${esc(ph)}"></div>`,
-  num: (b, k, label, step = 1) => `<div><label>${label}</label><input type="number" step="${step}" data-k="${k}" value="${esc(b[k])}"></div>`,
-  area: (b, k, label) => `<div><label>${label}</label><textarea data-k="${k}">${esc(b[k])}</textarea></div>`,
-  sel: (b, k, label, list) => `<div><label>${label}</label><select data-k="${k}">${opts(list, b[k])}</select></div>`,
-  chk: (b, k, label) => `<label class="chk"><input type="checkbox" data-k="${k}"${b[k] ? " checked" : ""}> ${label}</label>`
+  txt: (b, k, l, ph = "") => `<div><label>${l}</label><input data-k="${k}" value="${esc(b[k])}" placeholder="${esc(ph)}"></div>`,
+  num: (b, k, l) => `<div><label>${l}</label><input type="number" data-k="${k}" value="${esc(b[k])}"></div>`,
+  area: (b, k, l) => `<div><label>${l}</label><textarea data-k="${k}">${esc(b[k])}</textarea></div>`,
+  sel: (b, k, l, list) => `<div><label>${l}</label><select data-k="${k}">${opsiHTML(list, b[k])}</select></div>`,
+  chk: (b, k, l) => `<label class="chk"><input type="checkbox" data-k="${k}"${b[k] ? " checked" : ""}> ${l}</label>`
 };
 const row = (...x) => `<div class="row">${x.join("")}</div>`;
-
 function formBlok(b) {
   switch (b.type) {
-    case "teks": return F.area(b, "isi", "Isi teks (Enter = baris baru)") +
-      row(F.sel(b, "rata", "Perataan", RATA), F.sel(b, "pt", "Ukuran huruf (pt)", UKURAN)) +
-      row(F.sel(b, "font", "Font", [["", "Ikuti pengaturan"], ...FONTS]), "<div></div>") +
-      row(F.chk(b, "tebal", "<b>Tebal</b>"), F.chk(b, "miring", "<i>Miring</i>"), F.chk(b, "garisBawah", "<u>Garis bawah</u>")) +
-      row(F.chk(b, "kapital", "HURUF BESAR"), F.chk(b, "inv", "Putih di atas hitam"));
-    case "kolom": return row(F.txt(b, "kiri", "Teks kiri"), F.txt(b, "kanan", "Teks kanan")) +
-      row(F.sel(b, "pt", "Ukuran huruf (pt)", UKURAN), F.txt(b, "pemisah", "Pemisah tengah (opsional)", "mis. :")) + F.chk(b, "tebal", "<b>Tebal</b>");
-    case "barang": return row(
-        F.sel(b, "tata", "Tata letak", [["dua", "Nama di atas, qty × harga di bawah"], ["satu", "Satu baris: nama | qty | jumlah"], ["tiga", "Nama | qty × harga | jumlah"]]),
-        "<div></div>") +
-      row(F.chk(b, "header", "Tampilkan judul kolom"), F.chk(b, "kapital", "Nama HURUF BESAR"), F.chk(b, "ringkas", "Tampilkan jumlah item")) +
-      `<table class="rowtbl"><tr style="font-size:11px;color:#666"><td>Nama barang</td><td style="width:52px">Qty</td><td style="width:92px">Harga</td><td style="width:30px"></td></tr>
-        ${b.rows.map((r, j) => `<tr>
-          <td><input data-r="${j}" data-k="nama" value="${esc(r.nama)}"></td>
-          <td><input type="number" step="any" data-r="${j}" data-k="qty" value="${esc(r.qty)}"></td>
-          <td><input type="number" data-r="${j}" data-k="harga" value="${esc(r.harga)}"></td>
-          <td><button class="btn del" style="color:#c00;padding:5px 7px" data-aksi="hapusRow" data-r="${j}">✕</button></td></tr>`).join("")}
-      </table><button class="btn" style="margin-top:6px" data-aksi="tambahRow">+ Tambah barang</button>`;
-    case "total": return `<div class="sub" style="margin:6px 0 0">Dihitung otomatis dari semua elemen Daftar barang.</div>` +
-      row(F.num(b, "diskon", "Diskon (Rp)"), F.num(b, "pajak", "Pajak/PPN (%)", "any")) +
+    case "teks": return F.area(b, "isi", "Isi teks (Enter = baris baru)") + F.sel(b, "rata", "Posisi", RATA);
+    case "kolom": return row(F.txt(b, "kiri", "Teks kiri"), F.txt(b, "kanan", "Teks kanan"));
+    case "barang": return F.sel(b, "tata", "Tata letak", [["dua", "Nama di atas, qty × harga di bawah"], ["satu", "Satu baris: nama | qty | jumlah"], ["tiga", "Nama | qty×harga | jumlah"]]) +
+      row(F.chk(b, "header", "Judul kolom"), F.chk(b, "ringkas", "Jumlah item")) +
+      `<table class="rowtbl"><tr class="ket"><td>Nama</td><td style="width:52px">Qty</td><td style="width:90px">Harga</td><td style="width:30px"></td></tr>
+      ${b.rows.map((r, j) => `<tr><td><input data-r="${j}" data-k="nama" value="${esc(r.nama)}"></td>
+        <td><input type="number" data-r="${j}" data-k="qty" value="${esc(r.qty)}"></td>
+        <td><input type="number" data-r="${j}" data-k="harga" value="${esc(r.harga)}"></td>
+        <td><button type="button" class="btn hapus" style="padding:6px 8px" data-aksi="hapusRow" data-r="${j}">✕</button></td></tr>`).join("")}</table>
+      <button type="button" class="btn" style="margin-top:6px" data-aksi="tambahRow">+ Tambah barang</button>`;
+    case "total": return `<div class="ket" style="margin-top:6px">Dihitung otomatis dari semua Daftar barang.</div>` +
+      row(F.num(b, "diskon", "Diskon (Rp)"), F.num(b, "pajak", "Pajak (%)")) +
       row(F.num(b, "layanan", "Biaya layanan (Rp)"), F.txt(b, "labelTotal", "Tulisan total")) +
-      row(F.sel(b, "metode", "Metode bayar", [["Tunai","Tunai"],["QRIS","QRIS"],["Transfer","Transfer"],["Debit","Debit"],["Kredit","Kredit"],["E-Wallet","E-Wallet"]]), F.num(b, "bayar", "Dibayar (Rp, 0 = pas)")) +
-      row(F.chk(b, "subtotal", "Tampilkan subtotal"), F.chk(b, "kembali", "Tampilkan kembalian"), F.chk(b, "besar", "Total huruf besar"));
-    case "garis": return row(F.sel(b, "jenis", "Jenis garis", [["", "Ikuti pengaturan"], ...GARIS]), F.sel(b, "char", "Karakter (jika teks)", [["", "Ikuti pengaturan"], ...CHARS]));
-    case "tanggal": return row(F.sel(b, "sumber", "Sumber", [["auto", "Otomatis (saat ini)"], ["manual", "Atur manual"]]),
+      row(F.sel(b, "metode", "Metode bayar", ["Tunai", "Non Tunai", "QRIS", "Transfer", "Debit"].map(x => [x, x])), F.num(b, "bayar", "Dibayar (0 = pas)")) +
+      row(F.chk(b, "subtotal", "Subtotal"), F.chk(b, "kembali", "Kembalian"));
+    case "garis": return F.sel(b, "jenis", "Jenis garis", OPSI_GARIS_EL);
+    case "tanggal": return row(F.sel(b, "sumber", "Sumber", [["auto", "Otomatis (sekarang)"], ["manual", "Atur sendiri"]]),
         b.sumber === "manual" ? `<div><label>Tanggal &amp; jam</label><input type="datetime-local" data-k="manual" value="${esc(b.manual)}"></div>` : "<div></div>") +
-      row(F.sel(b, "fTgl", "Format tanggal", TGLF), F.sel(b, "fJam", "Format jam", JAMF)) +
-      row(F.sel(b, "tata", "Tata letak", [["kolom", "Label kiri, nilai kanan (1 baris)"], ["pisah", "Tanggal & jam baris terpisah"], ["polos", "Teks saja"]]),
-          F.sel(b, "rata", "Perataan (teks saja)", RATA.slice(0, 3))) +
+      row(F.sel(b, "fTgl", "Format tanggal", OPSI_TGL), F.sel(b, "fJam", "Format jam", OPSI_JAM)) +
+      row(F.sel(b, "tata", "Tata letak", [["kolom", "Label kiri, nilai kanan"], ["pisah", "Tanggal & jam terpisah"], ["polos", "Teks saja"]]), F.sel(b, "rata", "Posisi (teks saja)", RATA)) +
       row(F.txt(b, "label", "Label tanggal"), F.txt(b, "labelJam", "Label jam"));
     case "gambar": return `<label>Pilih gambar / logo</label><input type="file" accept="image/*" data-aksi="gambar">` +
-      row(F.num(b, "lebarPct", "Lebar (% kertas)"), F.sel(b, "rata", "Perataan", RATA.slice(0, 3))) +
-      row(F.chk(b, "bw", "Ubah ke hitam-putih (disarankan)"), F.num(b, "ambang", "Ambang gelap (0–255)")) +
-      F.chk(b, "crop", "Potong otomatis ruang kosong di sekitar logo");
-    case "qr": return F.area(b, "isi", "Isi QR (link, teks, nomor, dll.)") +
-      row(F.num(b, "ukuran", "Ukuran (mm)"), F.sel(b, "rata", "Perataan", RATA.slice(0, 3))) +
-      row(F.sel(b, "level", "Tingkat koreksi error", [["L", "L (7%)"], ["M", "M (15%)"], ["Q", "Q (25%)"], ["H", "H (30%)"]]), F.txt(b, "caption", "Tulisan di bawah QR"));
-    case "barcode": return row(F.sel(b, "jenis", "Jenis", [["code128", "CODE 128 (huruf & angka)"], ["ean13", "EAN-13 (12–13 angka)"]]), F.txt(b, "isi", "Isi barcode")) +
-      row(F.num(b, "tinggi", "Tinggi (mm)"), F.num(b, "lebarPct", "Lebar (% kertas)")) +
-      row(F.sel(b, "rata", "Perataan", RATA.slice(0, 3)), F.chk(b, "teks", "Tampilkan angka/teks"));
-    case "spasi": return F.num(b, "tinggi", "Tinggi spasi (mm)");
-    case "nomor": return row(F.txt(b, "label", "Label"), F.txt(b, "awalan", "Awalan")) +
-      row(F.num(b, "angka", "Nomor saat ini"), F.num(b, "digit", "Jumlah digit")) +
-      row(F.sel(b, "tata", "Tata letak", [["kolom", "Label kiri, nomor kanan"], ["polos", "Teks saja"]]), F.sel(b, "rata", "Perataan (teks saja)", RATA.slice(0, 3))) +
-      F.chk(b, "otomatis", "Naik +1 otomatis setelah klik Cetak") + `<button class="btn" style="margin-top:6px" data-aksi="nomorBerikut">➡️ Nomor berikutnya (+1)</button>`;
-    case "ttd": return row(F.txt(b, "kiri", "Teks kiri"), F.txt(b, "kanan", "Teks kanan")) +
-      row(F.num(b, "tinggi", "Ruang tanda tangan (mm)"), F.chk(b, "dua", "Dua kolom"));
+      row(F.sel(b, "lebarPct", "Ukuran", [["35", "Kecil"], ["50", "Sedang"], ["60", "Besar"], ["90", "Penuh"]]), F.sel(b, "rata", "Posisi", RATA)) +
+      F.sel(b, "ambang", "Kepekatan", [["110", "Terang"], ["150", "Normal"], ["190", "Gelap"]]);
+    case "qr": return F.area(b, "isi", "Isi QR (link, teks, nomor)") +
+      row(F.num(b, "ukuran", "Ukuran (mm)"), F.sel(b, "rata", "Posisi", RATA)) + F.txt(b, "caption", "Tulisan di bawah QR");
+    case "barcode": return row(F.sel(b, "jenis", "Jenis", [["code128", "CODE 128"], ["ean13", "EAN-13"]]), F.txt(b, "isi", "Isi barcode")) +
+      row(F.num(b, "tinggi", "Tinggi (mm)"), F.num(b, "lebarPct", "Lebar (%)")) + row(F.sel(b, "rata", "Posisi", RATA), F.chk(b, "teks", "Tampilkan angka"));
+    case "spasi": return F.num(b, "tinggi", "Jumlah baris kosong");
+    case "nomor": return row(F.txt(b, "label", "Label"), F.txt(b, "awalan", "Awalan")) + row(F.num(b, "angka", "Nomor saat ini"), F.num(b, "digit", "Jumlah digit")) +
+      row(F.sel(b, "tata", "Tata letak", [["kolom", "Label kiri, nomor kanan"], ["polos", "Teks saja"]]), F.sel(b, "rata", "Posisi (teks saja)", RATA)) +
+      F.chk(b, "otomatis", "Naik +1 otomatis setelah cetak");
+    case "ttd": return row(F.txt(b, "kiri", "Teks kiri"), F.txt(b, "kanan", "Teks kanan")) + F.chk(b, "dua", "Dua kolom");
   }
   return "";
 }
-
 function ringkas(b) {
-  const t = { teks: b.isi, kolom: `${b.kiri} | ${b.kanan}`, barang: `${b.rows?.length || 0} barang`, total: b.labelTotal,
-    garis: (GARIS.find(g => g[0] === b.jenis) || ["", "ikuti pengaturan"])[1], tanggal: b.sumber === "auto" ? "otomatis" : b.manual,
-    gambar: b.src ? "ada gambar" : "belum ada gambar", qr: b.isi, barcode: b.isi, spasi: b.tinggi + " mm",
+  const t = { teks: b.isi, kolom: `${b.kiri} | ${b.kanan}`, barang: `${b.rows?.length || 0} barang`, total: b.labelTotal, garis: "",
+    tanggal: b.sumber === "auto" ? "otomatis" : b.manual, gambar: b.src ? "" : "belum dipilih", qr: b.isi, barcode: b.isi, spasi: b.tinggi + " baris",
     nomor: b.awalan + String(b.angka).padStart(b.digit, "0"), ttd: b.kiri + " / " + b.kanan }[b.type];
-  return esc(String(t ?? "").split("\n")[0]).slice(0, 40);
+  return esc(String(t ?? "").split("\n")[0]).slice(0, 36);
 }
-
 function renderEditor() {
-  const el = $("daftarBlok");
-  if (!blocks.length) { el.innerHTML = `<div class="kosong">Struk masih kosong.<br>Pilih elemen di atas untuk mulai membuat struk.</div>`; return; }
-  el.innerHTML = blocks.map((b, i) => `
-    <div class="blok${aktif === b.id ? " aktif" : ""}" data-i="${i}" id="ed-${b.id}">
-      <div class="bh" data-aksi="buka">
-        <span class="judul">${NAMA[b.type]} <small>${ringkas(b)}</small></span>
-        <button class="btn" data-aksi="naik" title="Naik">▲</button>
-        <button class="btn" data-aksi="turun" title="Turun">▼</button>
-        <button class="btn" data-aksi="salin" title="Duplikat">⧉</button>
-        <button class="btn del" data-aksi="hapus" title="Hapus">✕</button>
-      </div>
-      ${aktif === b.id ? `<div class="bb">${formBlok(b)}</div>` : ""}
-    </div>`).join("");
+  if (!blocks.length) { $("daftar").innerHTML = `<div class="kosong">Struk masih kosong.<br>Tambah elemen di atas, atau buka <b>Simpan / buka desain → Muat contoh struk</b>.</div>`; return; }
+  $("daftar").innerHTML = blocks.map((b, i) => `<div class="el${aktif === b.id ? " aktif" : ""}" data-i="${i}">
+    <div class="elh" data-aksi="buka"><span class="nm">${NAMA[b.type]} <small>${ringkas(b)}</small></span>
+      <button type="button" class="btn" data-aksi="naik">▲</button><button type="button" class="btn" data-aksi="turun">▼</button>
+      <button type="button" class="btn" data-aksi="salin">⧉</button><button type="button" class="btn" data-aksi="hapus" style="color:#c00">✕</button></div>
+    ${aktif === b.id ? `<div class="elb">${formBlok(b)}</div>` : ""}</div>`).join("");
 }
-
 function tambah(type) {
   const b = { id: uid(), type, ...BARU[type]() };
   const idx = aktif ? blocks.findIndex(x => x.id === aktif) : -1;
   if (idx >= 0) blocks.splice(idx + 1, 0, b); else blocks.push(b);
   aktif = b.id; semua();
-  setTimeout(() => $("ed-" + b.id)?.scrollIntoView({ block: "nearest", behavior: "smooth" }), 50);
 }
-
-$("daftarBlok").addEventListener("click", e => {
-  const t = e.target.closest("[data-aksi]"); if (!t) return;
-  const card = t.closest(".blok"); const i = +card.dataset.i; const b = blocks[i];
-  const a = t.dataset.aksi;
-  if (a === "gambar") return;
-  e.stopPropagation();
+$("daftar").addEventListener("click", e => {
+  const t = e.target.closest("[data-aksi]"); if (!t || t.dataset.aksi === "gambar") return;
+  const i = +t.closest(".el").dataset.i, b = blocks[i], a = t.dataset.aksi;
   if (a === "buka") aktif = aktif === b.id ? null : b.id;
   if (a === "naik" && i > 0) [blocks[i - 1], blocks[i]] = [blocks[i], blocks[i - 1]];
   if (a === "turun" && i < blocks.length - 1) [blocks[i + 1], blocks[i]] = [blocks[i], blocks[i + 1]];
@@ -1805,527 +1739,155 @@ $("daftarBlok").addEventListener("click", e => {
   if (a === "hapus") { blocks.splice(i, 1); if (aktif === b.id) aktif = null; }
   if (a === "tambahRow") b.rows.push({ nama: "", qty: 1, harga: 0 });
   if (a === "hapusRow") b.rows.splice(+t.dataset.r, 1);
-  if (a === "nomorBerikut") b.angka = Math.floor(b.angka) + 1;
   semua();
 });
-
-function nilaiInput(t) {
-  if (t.type === "checkbox") return t.checked;
-  if (t.type === "number") return t.value === "" ? 0 : +t.value;
-  return t.value;
-}
-$("daftarBlok").addEventListener("input", e => {
+const nilai = t => t.type === "checkbox" ? t.checked : t.type === "number" ? (t.value === "" ? 0 : +t.value) : t.value;
+$("daftar").addEventListener("input", e => {
   const t = e.target; if (!t.dataset.k) return;
-  const b = blocks[+t.closest(".blok").dataset.i];
-  if (t.dataset.r !== undefined) b.rows[+t.dataset.r][t.dataset.k] = nilaiInput(t);
-  else b[t.dataset.k] = nilaiInput(t);
-  const j = t.closest(".blok").querySelector(".judul small"); if (j) j.innerHTML = ringkas(b);
-  renderStruk(); simpanLokal();
+  const b = blocks[+t.closest(".el").dataset.i];
+  if (t.dataset.r !== undefined) b.rows[+t.dataset.r][t.dataset.k] = nilai(t); else b[t.dataset.k] = nilai(t);
+  const s = t.closest(".el").querySelector(".nm small"); if (s) s.innerHTML = ringkas(b);
+  perbarui();
 });
-$("daftarBlok").addEventListener("change", e => {
-  const t = e.target;
-  const b = blocks[+t.closest(".blok")?.dataset.i];
+$("daftar").addEventListener("change", e => {
+  const t = e.target, el = t.closest(".el"); if (!el) return;
+  const b = blocks[+el.dataset.i];
   if (t.dataset.aksi === "gambar") {
     const f = t.files[0]; if (!f) return;
-    const r = new FileReader();
-    r.onload = () => { b.src = r.result; prosesGambar(b).then(() => { renderStruk(); simpanLokal(); }); };
-    r.readAsDataURL(f); return;
+    const r = new FileReader(); r.onload = () => { b.src = r.result; perbarui(); }; r.readAsDataURL(f); return;
   }
-  if (b && b.type === "gambar" && ["bw", "ambang", "crop"].includes(t.dataset.k)) prosesGambar(b).then(() => { renderStruk(); simpanLokal(); });
-  if (t.tagName === "SELECT" || t.type === "checkbox") { renderEditor(); renderStruk(); simpanLokal(); }
+  if (t.tagName === "SELECT" || t.type === "checkbox") { renderEditor(); perbarui(); }
 });
 
-/* gambar → hitam putih agar tajam di printer thermal */
-const cacheBW = {};
-async function prosesGambar(b) {
-  if (!b.src) return;
-  b._src2 = b.crop !== false ? await potongOtomatis(b.src) : b.src;
-  await ubahHitamPutih(b);
-  // potong setelah hitam-putih, agar latar berwarna yang menjadi putih ikut terbuang
-  if (b.bw && b._bw && b.crop !== false) b._bw = await potongOtomatis(b._bw);
+/* ===== ISI STRUK → DOKUMEN PRINTER ===== */
+const nomorStr = b => b.awalan + String(Math.max(0, Math.floor(b.angka))).padStart(Math.max(1, b.digit), "0");
+function hitungTotal(b) {
+  const sub = blocks.filter(x => x.type === "barang").reduce((s, x) => s + x.rows.reduce((t, r) => t + (+r.qty || 0) * (+r.harga || 0), 0), 0);
+  const pjk = (sub - b.diskon) * (b.pajak / 100), tot = sub - b.diskon + pjk + (+b.layanan || 0), bayar = b.bayar > 0 ? b.bayar : tot;
+  return { sub, pjk, tot, bayar };
 }
-function ubahHitamPutih(b) {
-  const asal = b.src;
-  return new Promise(res => {
-    if (!b.bw) return res();
-    const key = asal.length + ":" + asal.slice(-40) + ":" + b.ambang;
-    if (cacheBW[key]) { b._bw = cacheBW[key]; return res(); }
-    const img = new Image();
-    img.onload = () => {
-      const maxW = 576, s = Math.min(1, maxW / img.width);
-      const c = document.createElement("canvas"); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
-      const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); x.drawImage(img, 0, 0, c.width, c.height);
-      const d = x.getImageData(0, 0, c.width, c.height), p = d.data;
-      for (let i = 0; i < p.length; i += 4) {
-        const a = p[i + 3] / 255, l = (0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2]) * a + 255 * (1 - a);
-        const v = l < b.ambang ? 0 : 255; p[i] = p[i + 1] = p[i + 2] = v; p[i + 3] = 255;
-      }
-      x.putImageData(d, 0, 0);
-      b._bw = cacheBW[key] = c.toDataURL("image/png"); res();
-    };
-    img.onerror = () => res();
-    img.src = asal;
-  });
-}
-
-/* ===== POTONG OTOMATIS LOGO (buang ruang putih / transparan di sekeliling) ===== */
-const cacheCrop = {};
-function potongOtomatis(src) {
-  const key = src.length + ":" + src.slice(-60);
-  if (cacheCrop[key]) return Promise.resolve(cacheCrop[key]);
-  return new Promise(res => {
-    const img = new Image();
-    img.onload = () => {
-      const s = Math.min(1, 1200 / Math.max(img.width, img.height));
-      const W = Math.max(1, Math.round(img.width * s)), H = Math.max(1, Math.round(img.height * s));
-      const c = document.createElement("canvas"); c.width = W; c.height = H;
-      const x = c.getContext("2d"); x.drawImage(img, 0, 0, W, H);
-      const p = x.getImageData(0, 0, W, H).data;
-      // piksel dianggap "kosong" jika transparan atau hampir putih
-      const isi = i => p[i + 3] > 24 && (0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2]) < 235;
-      let x0 = W, y0 = H, x1 = -1, y1 = -1;
-      for (let yy = 0; yy < H; yy++) for (let xx = 0; xx < W; xx++) {
-        if (isi((yy * W + xx) * 4)) { if (xx < x0) x0 = xx; if (xx > x1) x1 = xx; if (yy < y0) y0 = yy; if (yy > y1) y1 = yy; }
-      }
-      if (x1 < 0) { cacheCrop[key] = src; return res(src); }          // gambar kosong: biarkan
-      const pad = Math.max(2, Math.round(Math.max(x1 - x0, y1 - y0) * 0.02));
-      x0 = Math.max(0, x0 - pad); y0 = Math.max(0, y0 - pad); x1 = Math.min(W - 1, x1 + pad); y1 = Math.min(H - 1, y1 + pad);
-      if (x0 === 0 && y0 === 0 && x1 === W - 1 && y1 === H - 1 && s === 1) { cacheCrop[key] = src; return res(src); }
-      const o = document.createElement("canvas"); o.width = x1 - x0 + 1; o.height = y1 - y0 + 1;
-      o.getContext("2d").drawImage(c, x0, y0, o.width, o.height, 0, 0, o.width, o.height);
-      res(cacheCrop[key] = o.toDataURL("image/png"));
-    };
-    img.onerror = () => res(src);
-    img.src = src;
-  });
-}
-
-/* ================= PENGATURAN GLOBAL ================= */
-$("selJenis").innerHTML = opts(FONTS);
-$("selGaris").innerHTML = opts(GARIS.filter(g => g[0] !== "kosong"));
-$("selChar").innerHTML = opts(CHARS);
-function isiPengaturan() { document.querySelectorAll("[data-g]").forEach(el => { if (el.type === "checkbox") el.checked = !!G[el.dataset.g]; else el.value = G[el.dataset.g]; }); }
-document.querySelectorAll("[data-g]").forEach(el => el.addEventListener("change", () => { G[el.dataset.g] = el.type === "checkbox" ? el.checked : el.value; renderStruk(); simpanLokal(); }));
-
-/* ===== FONT STRUK (Google Fonts) — ditanam ke PNG/PDF ===== */
-const FONT_GOOGLE = { "Courier Prime": "Courier+Prime:wght@400;700", "Roboto Mono": "Roboto+Mono:wght@400;700", "Inconsolata": "Inconsolata:wght@400;700", "VT323": "VT323" };
-const cacheFont = {};
-async function cssFontTertanam(teksFont) {
-  let css = "";
-  for (const n of Object.keys(FONT_GOOGLE).filter(n => teksFont.includes(n))) {
-    if (cacheFont[n] === undefined) {
-      try {
-        let t = await (await fetch("https://fonts.googleapis.com/css2?family=" + FONT_GOOGLE[n] + "&display=swap")).text();
-        // hanya subset latin & latin-ext (cukup untuk Bahasa Indonesia)
-        t = t.split("/*").filter(b => /^\s*latin(-ext)?\s*\*\//.test(b)).map(b => "/*" + b).join("\n") || t;
-        for (const u of [...new Set([...t.matchAll(/url\((https:[^)]+)\)/g)].map(m => m[1]))]) {
-          const blob = await (await fetch(u)).blob();
-          const d = await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(blob); });
-          t = t.split(u).join(d);
-        }
-        cacheFont[n] = t;
-      } catch (e) { cacheFont[n] = ""; }
-    }
-    css += cacheFont[n];
-  }
-  return css;
-}
-const skalaFont = f => String(f).includes("VT323") ? 1.35 : 1;
-
-/* ================= FORMAT TANGGAL ================= */
-const HARI = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
-const BULAN = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
-const p2 = n => String(n).padStart(2, "0");
-function fmtTgl(d, f) {
-  const D = d.getDate(), M = d.getMonth(), Y = d.getFullYear();
-  return ({
-    "dd/mm/yyyy": `${p2(D)}/${p2(M + 1)}/${Y}`, "dd-mm-yyyy": `${p2(D)}-${p2(M + 1)}-${Y}`, "dd/mm/yy": `${p2(D)}/${p2(M + 1)}/${String(Y).slice(-2)}`,
-    "yyyy-mm-dd": `${Y}-${p2(M + 1)}-${p2(D)}`, "d mmm yyyy": `${D} ${BULAN[M].slice(0, 3)} ${Y}`, "d mmmm yyyy": `${D} ${BULAN[M]} ${Y}`,
-    "dddd, d mmmm yyyy": `${HARI[d.getDay()]}, ${D} ${BULAN[M]} ${Y}`, "ddd, dd/mm/yyyy": `${HARI[d.getDay()].slice(0, 3)}, ${p2(D)}/${p2(M + 1)}/${Y}`, "none": ""
-  })[f] ?? "";
-}
-function fmtJam(d, f) {
-  if (f === "none") return "";
-  const hm = `${p2(d.getHours())}:${p2(d.getMinutes())}`;
-  return ({ hm, hms: `${hm}:${p2(d.getSeconds())}`, "hm-wib": hm + " WIB", "hm-wita": hm + " WITA", "hm-wit": hm + " WIT" })[f] ?? hm;
-}
-
-/* ================= QR & BARCODE → SVG ================= */
-function qrSVG(text, level, sizeMm) {
-  const q = new QRLIB.QRCode(-1, QRLIB.Level[level] ?? QRLIB.Level.M);
-  q.addData(unescape(encodeURIComponent(text || " "))); q.make();
-  const n = q.getModuleCount(); let d = "";
-  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) d += `M${c} ${r}h1v1h-1z`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 ${n + 4} ${n + 4}" style="width:${sizeMm}mm;height:${sizeMm}mm" shape-rendering="crispEdges"><rect x="-2" y="-2" width="${n + 4}" height="${n + 4}" fill="#fff"/><path d="${d}" fill="#000"/></svg>`;
-}
-function barcodeSVG(b) {
-  const fs = 9, txtH = b.teks ? 12 : 0;
-  if (b.jenis === "ean13") {
-    const e = ean13(b.isi); let x = 9, rects = "";
-    const total = 9 + 95 + 7, h = 60;
-    e.mods.forEach(m => { if (m.bar) rects += `<rect x="${x}" y="0" width="${m.w}" height="${m.guard && b.teks ? h + 5 : h}"/>`; x += m.w; });
-    const t = e.text;
-    const txt = b.teks ? `<g font-family="monospace" font-size="${fs}" text-anchor="middle">
-      <text x="4" y="${h + 10}">${t[0]}</text><text x="${9 + 3 + 21}" y="${h + 10}" textLength="38">${t.slice(1, 7)}</text>
-      <text x="${9 + 50 + 21}" y="${h + 10}" textLength="38">${t.slice(7)}</text></g>` : "";
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${total} ${h + txtH}" preserveAspectRatio="none" style="width:${b.lebarPct}%;height:${+b.tinggi + (b.teks ? 3 : 0)}mm" shape-rendering="crispEdges"><g fill="#000">${rects}</g>${txt}</svg>`;
-  }
-  const bars = code128(b.isi || " "); let x = 10, rects = "", bar = true;
-  bars.forEach(w => { if (bar) rects += `<rect x="${x}" y="0" width="${w}" height="60"/>`; x += w; bar = !bar; });
-  const total = x + 10;
-  return `<div style="display:inline-block;width:${b.lebarPct}%"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${total} 60" preserveAspectRatio="none" style="width:100%;height:${b.tinggi}mm;display:block" shape-rendering="crispEdges"><g fill="#000">${rects}</g></svg>${b.teks ? `<div style="text-align:center;font-size:.9em">${esc(b.isi)}</div>` : ""}</div>`;
-}
-
-/* ================= RENDER STRUK ================= */
-function garisHTML(jenis, ch) {
-  const k = jenis || G.garis;
-  if (k === "tx") return `<div class="garis tx">${esc((ch || G.garisChar).repeat(80))}</div>`;
-  return `<div class="garis ${k}"></div>`;
-}
-const fs = u => `calc(var(--font) + ${u || "0pt"})`;
-function hitungTotal() {
-  let sub = 0, n = 0;
-  blocks.filter(b => b.type === "barang").forEach(b => b.rows.forEach(r => { sub += (+r.qty || 0) * (+r.harga || 0); n += (+r.qty || 0); }));
-  return { sub, n };
-}
-function nomorStr(b) { return b.awalan + String(Math.max(0, Math.floor(b.angka))).padStart(Math.max(1, b.digit), "0"); }
-
-function blokHTML(b) {
+async function blokKeDokumen(b, w, dots, dok) {
+  const T = l => dok.push(l), KK = (a, c) => kiriKanan(a, c, w).forEach(T);
   switch (b.type) {
-    case "teks": {
-      const sk = b.font ? skalaFont(b.font) : "var(--fskala, 1)";
-      let st = `text-align:${b.rata};font-size:calc(${b.pt || "var(--font)"} * ${sk});`;
-      if (b.tebal) st += "font-weight:bold;"; if (b.miring) st += "font-style:italic;";
-      if (b.garisBawah) st += "text-decoration:underline;"; if (b.kapital) st += "text-transform:uppercase;";
-      if (b.font) st += `font-family:${b.font.replace(/"/g, "'")};`;
-      const lines = String(b.isi).split("\n").map(l => `<div class="para">${b.inv ? `<span class="inv">${esc(l) || "&nbsp;"}</span>` : (esc(l) || "&nbsp;")}</div>`).join("");
-      return `<div style="${st}">${lines}</div>`;
-    }
-    case "kolom": return `<div class="baris" style="font-size:calc(${b.pt || "var(--font)"} * var(--fskala, 1));${b.tebal ? "font-weight:bold" : ""}"><span>${esc(b.kiri)}${b.pemisah ? " " + esc(b.pemisah) : ""}</span><span>${esc(b.kanan)}</span></div>`;
+    case "teks": String(b.isi).split("\n").forEach(p => rataTeks(p, w, b.rata === "justify" ? "left" : b.rata).forEach(T)); break;
+    case "kolom": KK(b.kiri, b.kanan); break;
     case "barang": {
-      const up = b.kapital ? "text-transform:uppercase;" : "";
-      let h = "";
       if (b.tata === "dua") {
-        if (b.header) h += `<div class="baris" style="font-weight:bold"><span>Item</span><span>Jumlah</span></div>`;
-        h += b.rows.map(r => `<div class="item"><div style="${up}">${esc(r.nama)}</div><div class="baris"><span>${r.qty} x ${rp(r.harga)}</span><span>${rp(r.qty * r.harga)}</span></div></div>`).join("");
-      } else if (b.tata === "satu") {
-        h += `<div class="tbl3">${b.header ? `<b>Item</b><b class="r">Qty</b><b class="r">Jumlah</b>` : ""}` +
-          b.rows.map(r => `<span style="${up}">${esc(r.nama)}</span><span class="r">${r.qty}</span><span class="r">${rp(r.qty * r.harga)}</span>`).join("") + `</div>`;
-      } else {
-        h += `<div class="tbl3">${b.header ? `<b>Item</b><b class="r">Qty×Harga</b><b class="r">Jumlah</b>` : ""}` +
-          b.rows.map(r => `<span style="${up}">${esc(r.nama)}</span><span class="r">${r.qty}×${Math.round(r.harga).toLocaleString("id-ID")}</span><span class="r">${Math.round(r.qty * r.harga).toLocaleString("id-ID")}</span>`).join("") + `</div>`;
-      }
-      if (b.ringkas) { const q = b.rows.reduce((s, r) => s + (+r.qty || 0), 0); h += `<div style="margin-top:1mm">${b.rows.length} jenis, ${q} item</div>`; }
-      return h;
-    }
-    case "total": {
-      const { sub } = hitungTotal();
-      const pjk = (sub - b.diskon) * (b.pajak / 100);
-      const tot = sub - b.diskon + pjk + (+b.layanan || 0);
-      const bayar = b.bayar > 0 ? b.bayar : tot;
-      let h = "";
-      if (b.subtotal) h += `<div class="baris"><span>Subtotal</span><span>${rp(sub)}</span></div>`;
-      if (b.diskon) h += `<div class="baris"><span>Diskon</span><span>-${rp(b.diskon)}</span></div>`;
-      if (b.pajak) h += `<div class="baris"><span>Pajak ${b.pajak}%</span><span>${rp(pjk)}</span></div>`;
-      if (b.layanan) h += `<div class="baris"><span>Biaya layanan</span><span>${rp(b.layanan)}</span></div>`;
-      h += `<div class="baris" style="font-weight:bold;${b.besar ? "font-size:calc(var(--font) + 2pt)" : ""}"><span>${esc(b.labelTotal)}</span><span>${rp(tot)}</span></div>`;
-      h += `<div class="baris"><span>${esc(b.metode)}</span><span>${rp(bayar)}</span></div>`;
-      if (b.kembali) h += `<div class="baris"><span>Kembali</span><span>${rp(Math.max(0, bayar - tot))}</span></div>`;
-      return h;
-    }
-    case "garis": return garisHTML(b.jenis, b.char);
-    case "tanggal": {
-      const d = (b.sumber === "manual" && b.manual) ? new Date(b.manual) : new Date();
-      const t = fmtTgl(d, b.fTgl), j = fmtJam(d, b.fJam);
-      if (b.tata === "pisah") return (t ? `<div class="baris"><span>${esc(b.label)}</span><span>${t}</span></div>` : "") + (j ? `<div class="baris"><span>${esc(b.labelJam)}</span><span>${j}</span></div>` : "");
-      if (b.tata === "polos") return `<div style="text-align:${b.rata}">${esc(b.label ? b.label + " " : "")}${[t, j].filter(Boolean).join(" ")}</div>`;
-      return `<div class="baris"><span>${esc(b.label)}</span><span>${[t, j].filter(Boolean).join(" ")}</span></div>`;
-    }
-    case "gambar": {
-      const src = b.bw && b._bw ? b._bw : (b._src2 || b.src);
-      if (!src) return `<div style="text-align:center;color:#999;border:1px dashed #bbb;padding:3mm">[ gambar belum dipilih ]</div>`;
-      return `<div style="text-align:${b.rata}"><img src="${src}" style="width:${b.lebarPct}%"></div>`;
-    }
-    case "qr": return `<div style="text-align:${b.rata}">${qrSVG(b.isi, b.level, b.ukuran)}${b.caption ? `<div>${esc(b.caption)}</div>` : ""}</div>`;
-    case "barcode": {
-      try { return `<div style="text-align:${b.rata}">${barcodeSVG(b)}</div>`; }
-      catch (e) { return `<div style="color:#c00;text-align:center">[ ${esc(e.message)} ]</div>`; }
-    }
-    case "spasi": return `<div style="height:${b.tinggi}mm"></div>`;
-    case "nomor": return b.tata === "polos" ? `<div style="text-align:${b.rata}">${esc(b.label ? b.label + " " : "")}${esc(nomorStr(b))}</div>`
-      : `<div class="baris"><span>${esc(b.label)}</span><span>${esc(nomorStr(b))}</span></div>`;
-    case "ttd": {
-      const kol = t => `<div style="flex:1;text-align:center">${esc(t)}<div style="height:${b.tinggi}mm"></div>(&nbsp;${"_".repeat(10)}&nbsp;)</div>`;
-      return `<div style="display:flex;gap:3mm">${b.dua ? kol(b.kiri) + kol(b.kanan) : kol(b.kanan || b.kiri)}</div>`;
-    }
-  }
-  return "";
-}
-
-function renderStruk() {
-  const R = document.documentElement.style;
-  ["lebar", "font", "jenis", "lh", "ls", "pad", "gap", "para", "feed"].forEach(k => R.setProperty("--" + k, G[k]));
-  R.setProperty("--fskala", skalaFont(G.jenis));
-  const s = $("struk");
-  s.style.fontWeight = G.tebal;
-  s.innerHTML = blocks.length
-    ? blocks.map(b => `<div class="el${aktif === b.id ? " sel" : ""}" data-id="${b.id}">${blokHTML(b)}</div>`).join("") + `<div style="height:var(--feed)"></div>`
-    : `<div style="text-align:center;color:#aaa;padding:10mm 0">Struk kosong</div>`;
-  aturZoom(); aturHalaman();
-  $("teksStruk").textContent = strukTeks();
-}
-function aturZoom() {
-  const z = +$("zoom").value, w = $("zoomwrap");
-  w.style.transform = `scale(${z})`;
-  w.style.height = ($("struk").offsetHeight * z) + "px";
-}
-function aturHalaman() {
-  const mm = Math.ceil($("struk").offsetHeight * 25.4 / 96) + 1;
-  $("pageStyle").textContent = `@page { size: ${G.lebar} ${mm}mm; margin: 0; }`;
-}
-$("zoom").addEventListener("change", aturZoom);
-$("struk").addEventListener("click", e => {
-  const el = e.target.closest(".el"); if (!el) return;
-  aktif = el.dataset.id; renderEditor(); renderStruk();
-  if (matchMedia("(max-width: 800px)").matches) modeHP(false);
-  setTimeout(() => $("ed-" + aktif)?.scrollIntoView({ block: "center", behavior: "smooth" }), 50);
-});
-function modeHP(lihat) {
-  document.body.classList.toggle("lihat", lihat);
-  $("navEdit").classList.toggle("on", !lihat); $("navLihat").classList.toggle("on", lihat);
-  if (lihat) renderStruk();
-  window.scrollTo(0, 0);
-}
-function semua() { renderEditor(); renderStruk(); simpanLokal(); tandaiUkuran(); }
-const PRESET = {
-  "58": { lebar: "58mm", pDots: "384", tCols: "32", font: "9pt" },
-  "80": { lebar: "80mm", pDots: "576", tCols: "48", font: "10pt" }
-};
-function ukuranSekarang() { return ["72mm", "80mm"].includes(G.lebar) ? "80" : "58"; }
-function tandaiUkuran() { const u = ukuranSekarang(); document.querySelectorAll(".uk").forEach(b => b.classList.toggle("on", b.dataset.uk === u)); }
-function pilihUkuran(u) {
-  Object.assign(G, PRESET[u] || PRESET["58"]);
-  try { history.replaceState(null, "", location.pathname + "?ukuran=" + u); } catch (e) {}
-  isiPengaturan(); semua();
-}
-
-/* nomor otomatis naik setelah cetak/simpan */
-function naikkanNomor() {
-  let ada = false;
-  blocks.forEach(b => { if (b.type === "nomor" && b.otomatis) { b.angka = Math.floor(b.angka) + 1; ada = true; } });
-  if (ada) semua();
-}
-
-/* ================= CETAK & EKSPOR ================= */
-function siapCetak() { const a = aktif; aktif = null; renderStruk(); return () => { aktif = a; renderStruk(); }; }
-function cetak() {
-  const balik = siapCetak();
-  setTimeout(() => { window.print(); balik(); naikkanNomor(); }, 50);
-}
-const SKALA = 4;
-function namaFile(ext) {
-  const n = blocks.find(b => b.type === "nomor");
-  return (n ? nomorStr(n) : "struk-" + new Date().toISOString().slice(0, 10)).replace(/[^\w-]+/g, "_") + "." + ext;
-}
-async function strukKeCanvas() {
-  const balik = siapCetak();
-  try {
-    const el = $("struk");
-    const w = el.offsetWidth, h = el.offsetHeight;
-    const clone = el.cloneNode(true);
-    clone.style.boxShadow = "none"; clone.style.margin = "0";
-    const vars = document.documentElement.getAttribute("style") || "";
-    const semuaFont = G.jenis + " " + blocks.filter(b => b.type === "teks").map(b => b.font).join(" ");
-    const css = (await cssFontTertanam(semuaFont)) + [...document.styleSheets].map(ss => { try { return [...ss.cssRules]; } catch (e) { return []; } }).flat()
-      .filter(r => !(r instanceof CSSMediaRule) && !(r instanceof CSSPageRule) && !(r instanceof CSSFontFaceRule)).map(r => r.cssText).join("\n");
-    try { await document.fonts.ready; } catch (e) {}
-    const xhtml = new XMLSerializer().serializeToString(clone);
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><foreignObject width="100%" height="100%">
-      <div xmlns="http://www.w3.org/1999/xhtml" style="${vars.replace(/"/g, "&quot;")}"><style>${css.replace(/</g, "&lt;")}</style>${xhtml}</div>
-      </foreignObject></svg>`;
-    const img = new Image();
-    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
-    await img.decode();
-    const c = document.createElement("canvas");
-    c.width = w * SKALA; c.height = h * SKALA;
-    const x = c.getContext("2d");
-    x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height);
-    x.scale(SKALA, SKALA); x.drawImage(img, 0, 0, w, h);
-    return c;
-  } finally { balik(); }
-}
-function unduh(blob, nama) {
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob); a.download = nama;
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-}
-async function simpanGambar() {
-  try { const nama = namaFile("png"); const c = await strukKeCanvas(); c.toBlob(b => unduh(b, nama), "image/png"); }
-  catch (e) { alert("Gagal membuat gambar: " + e.message); }
-}
-async function simpanPDF() {
-  try {
-    const nama = namaFile("pdf");
-    const c = await strukKeCanvas();
-    const jpg = atob(c.toDataURL("image/jpeg", 0.95).split(",")[1]);
-    const W = parseFloat(G.lebar) * 72 / 25.4, H = W * c.height / c.width;
-    const isi = `q ${W.toFixed(2)} 0 0 ${H.toFixed(2)} 0 0 cm /Im0 Do Q`;
-    const obj = [
-      "<< /Type /Catalog /Pages 2 0 R >>",
-      "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
-      `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W.toFixed(2)} ${H.toFixed(2)}] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>`,
-      null,
-      `<< /Length ${isi.length} >>\nstream\n${isi}\nendstream`
-    ];
-    let pdf = "%PDF-1.4\n%\xE2\xE3\xCF\xD3\n"; const off = [];
-    obj.forEach((o, i) => {
-      off.push(pdf.length);
-      pdf += o === null
-        ? `${i + 1} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${c.width} /Height ${c.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpg.length} >>\nstream\n${jpg}\nendstream\nendobj\n`
-        : `${i + 1} 0 obj\n${o}\nendobj\n`;
-    });
-    const xref = pdf.length;
-    pdf += `xref\n0 ${obj.length + 1}\n0000000000 65535 f \n` + off.map(o => String(o).padStart(10, "0") + " 00000 n \n").join("") +
-      `trailer\n<< /Size ${obj.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
-    const bytes = new Uint8Array(pdf.length);
-    for (let i = 0; i < pdf.length; i++) bytes[i] = pdf.charCodeAt(i) & 255;
-    unduh(new Blob([bytes], { type: "application/pdf" }), nama);
-  } catch (e) { alert("Gagal membuat PDF: " + e.message); }
-}
-
-/* ================= STRUK VERSI TEKS ================= */
-const ulang = (c, n) => n > 0 ? c.repeat(n) : "";
-function bungkus(t, w) {
-  const out = [];
-  String(t).split("\n").forEach(par => {
-    let baris = "";
-    par.split(/\s+/).filter(Boolean).forEach(k => {
-      while (k.length > w) { if (baris) { out.push(baris); baris = ""; } out.push(k.slice(0, w)); k = k.slice(w); }
-      if (!k) return;
-      if (!baris) baris = k;
-      else if (baris.length + 1 + k.length <= w) baris += " " + k;
-      else { out.push(baris); baris = k; }
-    });
-    out.push(baris);
-  });
-  return out;
-}
-function rataTeks(t, w, r) {
-  return bungkus(t, w).map(l => r === "center" ? ulang(" ", Math.floor((w - l.length) / 2)) + l
-    : r === "right" ? ulang(" ", w - l.length) + l : l);
-}
-function kiriKanan(a, b, w) {
-  a = String(a); b = String(b);
-  if (!b) return bungkus(a, w);
-  const ls = a ? bungkus(a, w) : [""];
-  const akhir = ls.pop();
-  if (akhir.length + 1 + b.length <= w) ls.push(akhir + ulang(" ", w - akhir.length - b.length) + b);
-  else { if (akhir) ls.push(akhir); ls.push(ulang(" ", w - b.length) + b); }
-  return ls;
-}
-function tigaKolom(nama, q, j, w, wq, wj) {
-  const wn = w - wq - wj - 2;
-  const ls = bungkus(nama, wn);
-  return ls.map((l, i) => i === ls.length - 1
-    ? l.padEnd(wn) + " " + String(q).padStart(wq) + " " + String(j).padStart(wj)
-    : l);
-}
-const angka = n => Math.round(n || 0).toLocaleString("id-ID");
-const CHAR_GARIS = { ds: "-", dd: "=", ss: "-", sd: "=", tb: "=", dt: ".", kosong: " " };
-function teksBlok(b, w) {
-  const tanda = t => G.tTanda ? rataTeks(t, w, "center") : [];
-  switch (b.type) {
-    case "teks": {
-      const isi = b.kapital ? String(b.isi).toUpperCase() : String(b.isi);
-      return rataTeks(isi, w, b.rata === "justify" ? "left" : b.rata);
-    }
-    case "kolom": return kiriKanan(b.kiri + (b.pemisah ? " " + b.pemisah : ""), b.kanan, w);
-    case "barang": {
-      const up = t => b.kapital ? String(t).toUpperCase() : String(t);
-      let L = [];
-      if (b.tata === "dua") {
-        if (b.header) L.push(...kiriKanan("Item", "Jumlah", w));
-        b.rows.forEach(r => { L.push(...bungkus(up(r.nama), w)); L.push(...kiriKanan(`${r.qty} x ${rp(r.harga)}`, rp(r.qty * r.harga), w)); });
+        if (b.header) KK("Item", "Jumlah");
+        b.rows.forEach(r => { bungkus(r.nama, w).forEach(T); KK(`${r.qty} x ${rp(r.harga)}`, rp(r.qty * r.harga)); });
       } else {
         const sat = b.tata === "satu";
-        const kolQ = b.rows.map(r => sat ? String(r.qty) : `${r.qty}x${angka(r.harga)}`);
-        const kolJ = b.rows.map(r => sat ? rp(r.qty * r.harga) : angka(r.qty * r.harga));
-        const hq = sat ? "Qty" : "Qty×Harga", hj = "Jumlah";
-        const wq = Math.max(b.header ? hq.length : 0, ...kolQ.map(x => x.length)), wj = Math.max(b.header ? hj.length : 0, ...kolJ.map(x => x.length));
-        if (b.header) L.push(...tigaKolom("Item", hq, hj, w, wq, wj));
-        b.rows.forEach((r, i) => L.push(...tigaKolom(up(r.nama), kolQ[i], kolJ[i], w, wq, wj)));
+        const kQ = b.rows.map(r => sat ? String(r.qty) : `${r.qty}x${Math.round(r.harga).toLocaleString("id-ID")}`);
+        const kJ = b.rows.map(r => sat ? rp(r.qty * r.harga) : Math.round(r.qty * r.harga).toLocaleString("id-ID"));
+        const hq = sat ? "Qty" : "QtyxHarga", wq = Math.max(b.header ? hq.length : 0, ...kQ.map(x => x.length)), wj = Math.max(b.header ? 6 : 0, ...kJ.map(x => x.length));
+        const wn = w - wq - wj - 2, baris = (n, q, j) => bungkus(n, wn).forEach((l, i, a) => T(i === a.length - 1 ? l.padEnd(wn) + " " + q.padStart(wq) + " " + j.padStart(wj) : l));
+        if (b.header) baris("Item", hq, "Jumlah");
+        b.rows.forEach((r, i) => baris(r.nama, kQ[i], kJ[i]));
       }
-      if (b.ringkas) L.push(`${b.rows.length} jenis, ${b.rows.reduce((s, r) => s + (+r.qty || 0), 0)} item`);
-      return L;
+      if (b.ringkas) T(`${b.rows.length} jenis, ${b.rows.reduce((s, r) => s + (+r.qty || 0), 0)} item`);
+      break;
     }
     case "total": {
-      const { sub } = hitungTotal();
-      const pjk = (sub - b.diskon) * (b.pajak / 100), tot = sub - b.diskon + pjk + (+b.layanan || 0);
-      const bayar = b.bayar > 0 ? b.bayar : tot, L = [];
-      if (b.subtotal) L.push(...kiriKanan("Subtotal", rp(sub), w));
-      if (b.diskon) L.push(...kiriKanan("Diskon", "-" + rp(b.diskon), w));
-      if (b.pajak) L.push(...kiriKanan(`Pajak ${b.pajak}%`, rp(pjk), w));
-      if (b.layanan) L.push(...kiriKanan("Biaya layanan", rp(b.layanan), w));
-      L.push(...kiriKanan(b.besar ? String(b.labelTotal).toUpperCase() : b.labelTotal, rp(tot), w));
-      L.push(...kiriKanan(b.metode, rp(bayar), w));
-      if (b.kembali) L.push(...kiriKanan("Kembali", rp(Math.max(0, bayar - tot)), w));
-      return L;
+      const h = hitungTotal(b);
+      if (b.subtotal) KK("Subtotal", rp(h.sub));
+      if (b.diskon) KK("Diskon", "-" + rp(b.diskon));
+      if (b.pajak) KK(`Pajak ${b.pajak}%`, rp(h.pjk));
+      if (b.layanan) KK("Biaya layanan", rp(b.layanan));
+      KK(b.labelTotal, rp(h.tot)); KK(b.metode, rp(h.bayar));
+      if (b.kembali) KK("Kembali", rp(Math.max(0, h.bayar - h.tot)));
+      break;
     }
-    case "garis": {
-      const k = b.jenis || G.garis;
-      const ch = k === "tx" ? (b.char || G.garisChar) : CHAR_GARIS[k] || "-";
-      return [ch === " " ? "" : ulang(ch, w)];
-    }
+    case "garis": { const ch = !b.jenis || b.jenis === "ikut" || b.jenis.length > 1 ? G.garis : b.jenis; T(garisTeks(ch, w)); break; }
     case "tanggal": {
       const d = (b.sumber === "manual" && b.manual) ? new Date(b.manual) : new Date();
-      const t = fmtTgl(d, b.fTgl), j = fmtJam(d, b.fJam);
-      if (b.tata === "pisah") return [...(t ? kiriKanan(b.label, t, w) : []), ...(j ? kiriKanan(b.labelJam, j, w) : [])];
-      if (b.tata === "polos") return rataTeks((b.label ? b.label + " " : "") + [t, j].filter(Boolean).join(" "), w, b.rata);
-      return kiriKanan(b.label, [t, j].filter(Boolean).join(" "), w);
+      const t = fmtTanggal(d, b.fTgl), j = fmtJam(d, b.fJam);
+      if (b.tata === "pisah") { if (t) KK(b.label, t); if (j) KK(b.labelJam, j); }
+      else if (b.tata === "polos") rataTeks((b.label ? b.label + " " : "") + [t, j].filter(Boolean).join(" "), w, b.rata).forEach(T);
+      else KK(b.label, [t, j].filter(Boolean).join(" "));
+      break;
     }
-    case "gambar": return tanda("[Gambar/Logo]");
-    case "qr": return [...tanda("[QR code]"), ...(b.caption ? rataTeks(b.caption, w, b.rata) : [])];
-    case "barcode": return tanda("[Barcode " + b.isi + "]");
-    case "spasi": return Array(Math.max(1, Math.round(b.tinggi / 4))).fill("");
-    case "nomor": return b.tata === "polos" ? rataTeks((b.label ? b.label + " " : "") + nomorStr(b), w, b.rata) : kiriKanan(b.label, nomorStr(b), w);
+    case "gambar": if (b.src) { const s = await siapkanLogo(b.src, +b.ambang || 150, true); dok.push({ raster: await rasterGambar(s, +b.lebarPct || 60, b.rata, 128, dots) }); dok.push({ feed: 6 }); } break;
+    case "qr": dok.push({ raster: rasterQR(b.isi, "M", +b.ukuran || 25, b.rata, dots) }); if (b.caption) rataTeks(b.caption, w, b.rata).forEach(T); else dok.push({ feed: 6 }); break;
+    case "barcode": try { const r = rasterBarcode(b, dots); dok.push({ raster: r.bm }); if (b.teks) rataTeks(r.teks, w, b.rata).forEach(T); else dok.push({ feed: 6 }); } catch (e) { T("[barcode tidak valid]"); } break;
+    case "spasi": for (let i = 0; i < Math.max(1, Math.min(20, +b.tinggi || 1)); i++) T(""); break;
+    case "nomor": if (b.tata === "polos") rataTeks((b.label ? b.label + " " : "") + nomorStr(b), w, b.rata).forEach(T); else KK(b.label, nomorStr(b)); break;
     case "ttd": {
-      if (!b.dua) { const t = b.kanan || b.kiri; return [...rataTeks(t, w, "center"), "", "", ...rataTeks("(" + ulang("_", 14) + ")", w, "center")]; }
-      const half = Math.floor(w / 2), c = t => { t = String(t).slice(0, half); const l = Math.floor((half - t.length) / 2); return (ulang(" ", l) + t).padEnd(half); };
-      return [c(b.kiri) + c(b.kanan), "", "", c("(" + ulang("_", Math.max(4, half - 4)) + ")") + c("(" + ulang("_", Math.max(4, half - 4)) + ")")].map(l => l.trimEnd());
+      if (!b.dua) { rataTeks(b.kanan || b.kiri, w, "center").forEach(T); T(""); T(""); rataTeks("(" + ulang("_", 14) + ")", w, "center").forEach(T); break; }
+      const half = Math.floor(w / 2), c = t => { t = String(t).slice(0, half); return (ulang(" ", Math.floor((half - t.length) / 2)) + t).padEnd(half); };
+      T(c(b.kiri) + c(b.kanan)); T(""); T(""); T(c("(" + ulang("_", Math.max(4, half - 4)) + ")") + c("(" + ulang("_", Math.max(4, half - 4)) + ")"));
+      break;
     }
   }
-  return [];
 }
-function strukTeks() {
-  const w = +G.tCols || 32;
-  return blocks.flatMap(b => teksBlok(b, w)).map(l => l.replace(/\s+$/, "")).join("\n");
+async function buatDokumen() {
+  const dots = DOTS[G.ukuran] || 384, fontB = G.pFont === "B", w = kolomPrinter(dots, fontB), dok = [];
+  for (const b of blocks) await blokKeDokumen(b, w, dots, dok);
+  return { dok, dots, fontB, w };
 }
-function modeTeks(on) {
-  document.body.classList.toggle("modeTeks", on);
-  $("tabTeks").classList.toggle("on", on); $("tabVisual").classList.toggle("on", !on);
-  $("zoom").style.display = on ? "none" : "";
-  renderStruk();
+/* QR & barcode sebagai gambar selebar printer */
+function rasterQR(text, level, sizeMm, rata, dots) {
+  const q = new QRLIB.QRCode(-1, QRLIB.Level[level] ?? QRLIB.Level.M);
+  q.addData(unescape(encodeURIComponent(text || " "))); q.make();
+  const n = q.getModuleCount(), s = Math.max(1, Math.min(Math.floor(dots / n), Math.round(sizeMm * 8 / n)));
+  const bm = bitmap(dots, n * s), x0 = geser(rata, n * s, dots);
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) kotak(bm, x0 + c * s, r * s, s, s);
+  return bm;
 }
-function tandaOk(t) { $("okSalin").textContent = t; setTimeout(() => $("okSalin").textContent = "", 2500); }
-async function salinTeks() {
-  const t = strukTeks();
-  try { await navigator.clipboard.writeText(t); tandaOk("✓ Tersalin"); }
-  catch (e) {
-    const ta = document.createElement("textarea"); ta.value = t; ta.style.position = "fixed"; ta.style.opacity = "0";
-    document.body.appendChild(ta); ta.select();
-    try { document.execCommand("copy"); tandaOk("✓ Tersalin"); } catch (e2) { tandaOk("Tekan lama teks di bawah untuk menyalin"); }
-    ta.remove();
-  }
+function rasterBarcode(b, dots) {
+  const h = Math.max(8, Math.round(b.tinggi * 8)); let segs = [], total = 0, teks = b.isi;
+  if (b.jenis === "ean13") { const e = ean13(b.isi); teks = e.text; e.mods.forEach(m => { segs.push([m.w, m.bar]); total += m.w; }); }
+  else { let bar = true; code128(b.isi || " ").forEach(w => { segs.push([w, bar]); bar = !bar; total += w; }); }
+  const m = Math.max(1, Math.floor(dots * (b.lebarPct / 100) / (total + 20))), bm = bitmap(dots, h);
+  let x = geser(b.rata, total * m, dots);
+  segs.forEach(([w, bar]) => { if (bar) kotak(bm, x, 0, w * m, h); x += w * m; });
+  return { bm, teks };
 }
-async function bagiTeks() {
-  try { await navigator.share({ text: strukTeks() }); } catch (e) { if (e.name !== "AbortError") tandaOk("Tidak bisa membagikan"); }
-}
-function unduhTeks() { unduh(new Blob([strukTeks()], { type: "text/plain;charset=utf-8" }), namaFile("txt")); }
-if (!navigator.share) $("btnBagi").style.display = "none";
 
-/* ================= PRINTER LANGSUNG (Bluetooth / Serial, ESC/POS) ================= */
-// Layanan BLE yang umum dipakai printer thermal murah (POS-58, MTP, RPP, Xprinter, dll.)
+/* ===== PRATINJAU ===== */
+let tPerbarui;
+function perbarui() {
+  clearTimeout(tPerbarui);
+  tPerbarui = setTimeout(async () => {
+    document.querySelectorAll(".opt[data-uk]").forEach(b => b.classList.toggle("on", b.dataset.uk === G.ukuran));
+    const { dok, dots, fontB, w } = await buatDokumen();
+    const c = dokumenKeKanvas(dok.length ? dok : ["", "  (struk kosong)", ""], { dots, fontB }), out = $("pratinjau");
+    out.width = c.width; out.height = c.height; out.getContext("2d").drawImage(c, 0, 0);
+    out.style.width = Math.min(innerWidth - 40, dots * (innerWidth < 820 ? 0.85 : 0.75)) + "px";
+    $("infoKertas").textContent = `Kertas ${G.ukuran} mm · ${w} karakter per baris · Font ${fontB ? "B" : "A"}`;
+    simpanLokal();
+  }, 60);
+}
+function semua() { renderEditor(); perbarui(); }
+function pilihUkuran(u) { G.ukuran = u; perbarui(); }
+$("gGaris").addEventListener("change", () => { G.garis = $("gGaris").value; perbarui(); });
+["pFont", "pFeed", "pChunk"].forEach(id => $(id).addEventListener("change", () => { G[id] = $(id).value; perbarui(); }));
+$("pCut").addEventListener("change", () => { G.pCut = $("pCut").checked; perbarui(); });
+setInterval(() => { if (blocks.some(b => b.type === "tanggal" && b.sumber === "auto")) perbarui(); }, 30000);
+
+/* ===== CETAK & FILE ===== */
+function namaFile(ext) { const n = blocks.find(b => b.type === "nomor"); return (n ? nomorStr(n) : "struk").replace(/[^\w-]+/g, "_") + "." + ext; }
+async function kanvasStruk() { const { dok, dots, fontB } = await buatDokumen(); return dokumenKeKanvas(dok, { dots, fontB }); }
+async function simpanGambar() { simpanPNG(await kanvasStruk(), namaFile("png")); }
+async function simpanPdf() { simpanPDF(await kanvasStruk(), namaFile("pdf"), (DOTS[G.ukuran] || 384) / 8); }
+async function cetak() {
+  if (!P.jenis || P.sibuk) return;
+  info(""); P.sibuk = true;
+  const bar = $("pBar"), isi = bar.firstElementChild; bar.style.display = "block"; isi.style.width = "0";
+  try {
+    statusPrinter(`Mencetak ke ${P.nama}…`, "busy");
+    const { dok, fontB } = await buatDokumen();
+    await kirim(dokumenKeEscPos(dok, { fontB, salinan: +$("salinan").value, feedBaris: +G.pFeed, potong: G.pCut }), f => isi.style.width = Math.round(f * 100) + "%");
+    isi.style.width = "100%"; P.sibuk = false; statusPrinter(`Terhubung: ${P.nama} – selesai mencetak`, "on");
+    let naik = false; blocks.forEach(b => { if (b.type === "nomor" && b.otomatis) { b.angka = Math.floor(b.angka) + 1; naik = true; } });
+    if (naik) semua();
+  } catch (e) {
+    P.sibuk = false; statusPrinter(`Terhubung: ${P.nama}`, "on");
+    info("Gagal mencetak: " + esc(e.message) + "<br>Coba ubah <b>Kecepatan kirim</b> ke <b>Paling aman</b>, atau hubungkan ulang printer.");
+  }
+  setTimeout(() => bar.style.display = "none", 1500);
+}
+
+/* ===== PRINTER LANGSUNG (Bluetooth / Serial, ESC/POS) ===== */
 const LAYANAN_BLE = [
   "000018f0-0000-1000-8000-00805f9b34fb", "e7810a71-73ae-499d-8c15-faa9aef0c3f2",
   "49535343-fe7d-4ae5-8fa9-9fafd205e455", "0000ff00-0000-1000-8000-00805f9b34fb",
@@ -2337,12 +1899,7 @@ const LAYANAN_BLE = [
 const SPP = "00001101-0000-1000-8000-00805f9b34fb";
 const P = { jenis: null, nama: "", dev: null, ch: null, tanpaRespon: false, port: null, writer: null, sibuk: false };
 const tidur = ms => new Promise(r => setTimeout(r, ms));
-
-function statusPrinter(teks, kelas = "") {
-  $("pStat").textContent = teks;
-  $("pDot").className = "dot " + kelas;
-  $("btnLangsung").disabled = !P.jenis || P.sibuk;
-}
+function statusPrinter(teks, kelas = "") { $("pStat").textContent = teks; $("pDot").className = "dot " + kelas; $("btnLangsung").disabled = !P.jenis || P.sibuk; }
 function info(html) { const el = $("pInfo"); el.style.display = html ? "block" : "none"; el.innerHTML = html || ""; }
 
 async function hubungBT() {
@@ -2366,14 +1923,10 @@ async function sambungBLE(dev) {
   statusPrinter("Menyambungkan ke " + (dev.name || "printer") + "…", "busy");
   const server = await dev.gatt.connect();
   let pilih = null;
-  const services = await server.getPrimaryServices();
-  for (const sv of services) {
+  for (const sv of await server.getPrimaryServices()) {
     let chars = []; try { chars = await sv.getCharacteristics(); } catch (e) {}
-    for (const c of chars) {
-      if (c.properties.writeWithoutResponse || c.properties.write) {
-        if (!pilih || (c.properties.writeWithoutResponse && !pilih.properties.writeWithoutResponse)) pilih = c;
-      }
-    }
+    for (const c of chars) if (c.properties.writeWithoutResponse || c.properties.write)
+      if (!pilih || (c.properties.writeWithoutResponse && !pilih.properties.writeWithoutResponse)) pilih = c;
     if (pilih && pilih.properties.writeWithoutResponse) break;
   }
   if (!pilih) {
@@ -2384,13 +1937,9 @@ async function sambungBLE(dev) {
   Object.assign(P, { jenis: "ble", nama: dev.name || "Printer Bluetooth", dev, ch: pilih, tanpaRespon: !!pilih.properties.writeWithoutResponse });
   statusPrinter(`Terhubung: ${P.nama}`, "on");
 }
-
 async function hubungSerial() {
   info("");
-  if (!navigator.serial) {
-    info("Mode Serial/COM hanya ada di <b>Chrome atau Edge di laptop/PC</b>. Di laptop Windows, pasangkan (pair) printer Bluetooth dulu di Pengaturan Bluetooth, lalu pilih port COM printer tersebut.");
-    return;
-  }
+  if (!navigator.serial) { info("Mode Serial/COM hanya ada di <b>Chrome atau Edge di laptop/PC</b>."); return; }
   try {
     let port;
     try { port = await navigator.serial.requestPort({ allowedBluetoothServiceClassIds: [SPP] }); }
@@ -2403,214 +1952,11 @@ async function hubungSerial() {
     statusPrinter(P.jenis ? `Terhubung: ${P.nama}` : "Printer belum terhubung", P.jenis ? "on" : "");
   }
 }
-
 async function putuskan() {
   try { if (P.jenis === "ble" && P.dev?.gatt.connected) P.dev.gatt.disconnect(); } catch (e) {}
   try { if (P.writer) { P.writer.releaseLock(); await P.port.close(); } } catch (e) {}
   Object.assign(P, { jenis: null, nama: "", dev: null, ch: null, port: null, writer: null });
   statusPrinter("Printer belum terhubung");
-}
-
-/* Struk → gambar 1-bit → perintah ESC/POS "GS v 0" */
-/* ===== MODE GAMBAR KUALITAS TINGGI =====
-   Struk disusun ulang selebar area cetak printer (48 mm / 72 mm), lalu digambar
-   langsung di resolusi printer (8 titik per mm) tanpa diperkecil, sehingga ukuran
-   huruf tercetak sesuai pt dan tepi huruf tetap rapi. */
-async function strukKeCanvasPrinter(dots, cssFont) {
-  const el = document.getElementById("struk");
-  const wrap = document.createElement("div");
-  wrap.style.cssText = "position:absolute;left:-100000px;top:0;";
-  const clone = el.cloneNode(true);
-  clone.removeAttribute("id");
-  clone.querySelectorAll("[id]").forEach(n => n.removeAttribute("id"));
-  Object.assign(clone.style, { width: (dots / 8) + "mm", boxShadow: "none", margin: "0", transform: "none" });
-  wrap.appendChild(clone); document.body.appendChild(wrap);
-  try {
-    // tabel teks (gaya Tabel) diskalakan agar jumlah karakter per baris tetap sama
-    const preAsli = el.querySelector("pre.tbl"), preBaru = clone.querySelector("pre.tbl");
-    if (preAsli && preBaru) {
-      const lebarIsi = (e) => { const cs = getComputedStyle(e); return e.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight); };
-      preBaru.style.fontSize = (parseFloat(getComputedStyle(preAsli).fontSize) * lebarIsi(clone) / lebarIsi(el)) + "px";
-    }
-    try { await document.fonts.ready; } catch (e) {}
-    const w = clone.offsetWidth, h = clone.offsetHeight;
-    const vars = document.documentElement.getAttribute("style") || "";
-    const css = (cssFont || "") + [...document.styleSheets].map(ss => { try { return [...ss.cssRules]; } catch (e) { return []; } }).flat()
-      .filter(r => !(r instanceof CSSMediaRule) && !(r instanceof CSSPageRule) && !(r instanceof CSSFontFaceRule)).map(r => r.cssText).join("\n");
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><foreignObject width="100%" height="100%">
-      <div xmlns="http://www.w3.org/1999/xhtml" style="${vars.replace(/"/g, "&quot;")}"><style>${css.replace(/</g, "&lt;")}</style>${new XMLSerializer().serializeToString(clone)}</div>
-      </foreignObject></svg>`;
-    const img = new Image();
-    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
-    await img.decode();
-    const H = Math.round(h * dots / w);
-    const c = document.createElement("canvas"); c.width = dots; c.height = H;
-    const x = c.getContext("2d");
-    x.fillStyle = "#fff"; x.fillRect(0, 0, dots, H);
-    x.drawImage(img, 0, 0, dots, H);   // SVG digambar langsung di ukuran akhir (satu kali rasterisasi)
-    return c;
-  } finally { wrap.remove(); }
-}
-/* gambar resolusi printer → perintah ESC/POS raster */
-function escposDariCanvas(c, o) {
-  const dots = c.width, h = c.height, lebarByte = dots / 8;
-  const px = c.getContext("2d").getImageData(0, 0, dots, h).data;
-  const hitam = new Uint8Array(dots * h);
-  for (let i = 0, j = 0; j < dots * h; i += 4, j++) hitam[j] = (0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2]) < o.thr ? 1 : 0;
-  if (o.tebal) for (let y = 0; y < h; y++) for (let xx = dots - 1; xx > 0; xx--) if (hitam[y * dots + xx - 1]) hitam[y * dots + xx] = 1;
-  const bits = new Uint8Array(lebarByte * h);
-  for (let y = 0; y < h; y++) for (let xx = 0; xx < dots; xx++) if (hitam[y * dots + xx]) bits[y * lebarByte + (xx >> 3)] |= 0x80 >> (xx & 7);
-  let akhir = h; while (akhir > 1 && bits.subarray((akhir - 1) * lebarByte, akhir * lebarByte).every(v => v === 0)) akhir--;
-  akhir = Math.min(h, akhir + Math.round((o.feedMm || 0) * 8));
-  const out = [0x1B, 0x40], BAND = 96;
-  for (let y = 0; y < akhir; y += BAND) {
-    const n = Math.min(BAND, akhir - y);
-    out.push(0x1D, 0x76, 0x30, 0x00, lebarByte & 255, lebarByte >> 8, n & 255, n >> 8);
-    for (let k = y * lebarByte; k < (y + n) * lebarByte; k++) out.push(bits[k]);
-  }
-  out.push(0x1B, 0x64, o.feedLines || 0);
-  if (o.cut) out.push(0x1D, 0x56, 0x42, 0x00);
-  return new Uint8Array(out);
-}
-async function buatESCPOS() {
-  const balik = siapCetak();
-  try {
-    const semuaFont = G.jenis + " " + blocks.filter(b => b.type === "teks").map(b => b.font).join(" ");
-    const c = await strukKeCanvasPrinter(+G.pDots, await cssFontTertanam(semuaFont));
-    return escposDariCanvas(c, { thr: +G.pThr, tebal: !!G.pTebal, feedMm: parseFloat(G.feed) || 0, feedLines: +G.pFeed || 0, cut: !!G.pCut });
-  } finally { balik(); }
-}
-
-/* ===== ESC/POS MODE TEKS (huruf bawaan printer, tajam seperti Thermer) ===== */
-const ESC = 0x1B, GS = 0x1D;
-function asciiAman(s) {
-  return String(s).replace(/[×✕]/g, "x").replace(/[–—]/g, "-").replace(/[·•]/g, ".").replace(/[“”]/g, '"').replace(/[‘’]/g, "'")
-    .normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^\x20-\x7E]/g, "?");
-}
-function kolomPrinter(dots, fontB) { return fontB ? Math.floor(dots / 9) : Math.floor(dots / 12); }
-class EscPos {
-  constructor(boldAll, fontB) { this.b = []; this.boldAll = !!boldAll; this.fontB = !!fontB; }
-  raw(...x) { for (const v of x) this.b.push(v & 255); return this; }
-  init(lhDots) { this.raw(ESC, 0x40, ESC, 0x4D, this.fontB ? 1 : 0, ESC, 0x33, Math.min(255, lhDots)); if (this.boldAll) this.raw(ESC, 0x45, 1); return this; }
-  reset() { this.raw(GS, 0x21, 0, GS, 0x42, 0, ESC, 0x2D, 0, ESC, 0x45, this.boldAll ? 1 : 0, ESC, 0x4D, this.fontB ? 1 : 0, ESC, 0x61, 0); }
-  text(s, o = {}) {
-    const a = { left: 0, center: 1, right: 2 }[o.align] ?? 0;
-    this.raw(ESC, 0x61, a, ESC, 0x45, (o.bold || this.boldAll) ? 1 : 0, ESC, 0x2D, o.ul ? 1 : 0, GS, 0x42, o.inv ? 1 : 0, GS, 0x21, o.size || 0);
-    if (o.fontB !== undefined) this.raw(ESC, 0x4D, o.fontB ? 1 : 0);
-    for (const ch of asciiAman(s)) this.b.push(ch.charCodeAt(0));
-    this.raw(0x0A); this.reset(); return this;
-  }
-  feedDots(n) { n = Math.round(n); while (n > 0) { const k = Math.min(255, n); this.raw(ESC, 0x4A, k); n -= k; } return this; }
-  raster(bm) {
-    const { bits, wB, h } = bm; this.raw(ESC, 0x61, 0);
-    for (let y = 0; y < h; y += 96) {
-      const n = Math.min(96, h - y);
-      this.raw(GS, 0x76, 0x30, 0, wB & 255, wB >> 8, n & 255, n >> 8);
-      for (let k = y * wB; k < (y + n) * wB; k++) this.b.push(bits[k]);
-    }
-    return this;
-  }
-  end(feedLines, cut) { this.raw(ESC, 0x61, 0, ESC, 0x64, feedLines || 0); if (cut) this.raw(GS, 0x56, 0x42, 0); return new Uint8Array(this.b); }
-}
-function bitmap(dots, h) { const wB = dots / 8; return { dots, wB, h, bits: new Uint8Array(wB * h) }; }
-function titik(bm, x, y) { if (x >= 0 && x < bm.dots && y >= 0 && y < bm.h) bm.bits[y * bm.wB + (x >> 3)] |= 0x80 >> (x & 7); }
-function kotak(bm, x, y, w, h) { for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) titik(bm, x + i, y + j); }
-function geser(rata, lebar, dots) { return rata === "center" ? Math.floor((dots - lebar) / 2) : rata === "right" ? dots - lebar : 0; }
-function rasterQR(text, level, sizeMm, rata, dots) {
-  const q = new QRLIB.QRCode(-1, QRLIB.Level[level] ?? QRLIB.Level.M);
-  q.addData(unescape(encodeURIComponent(text || " "))); q.make();
-  const n = q.getModuleCount();
-  const s = Math.max(1, Math.min(Math.floor(dots / n), Math.round(sizeMm * 8 / n)));
-  const bm = bitmap(dots, n * s), x0 = geser(rata, n * s, dots);
-  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) kotak(bm, x0 + c * s, r * s, s, s);
-  return bm;
-}
-function rasterBarcode(b, dots) {
-  const h = Math.max(8, Math.round(b.tinggi * 8));
-  let segs = [], total = 0, teks = b.isi;
-  if (b.jenis === "ean13") { const e = ean13(b.isi); teks = e.text; e.mods.forEach(m => { segs.push([m.w, m.bar]); total += m.w; }); }
-  else { let bar = true; code128(b.isi || " ").forEach(w => { segs.push([w, bar]); bar = !bar; total += w; }); }
-  const m = Math.max(1, Math.floor(dots * (b.lebarPct / 100) / (total + 20)));
-  const lebar = total * m, bm = bitmap(dots, h);
-  let x = geser(b.rata, lebar, dots);
-  segs.forEach(([w, bar]) => { if (bar) kotak(bm, x, 0, w * m, h); x += w * m; });
-  return { bm, teks };
-}
-function rasterGambar(src, pct, rata, ambang, dots) {
-  return new Promise((res, rej) => {
-    const img = new Image();
-    img.onload = () => {
-      const w = Math.max(8, Math.min(dots, Math.round(dots * pct / 100))), h = Math.max(1, Math.round(img.height * w / img.width));
-      const c = document.createElement("canvas"); c.width = w; c.height = h;
-      const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, w, h); x.drawImage(img, 0, 0, w, h);
-      const p = x.getImageData(0, 0, w, h).data, bm = bitmap(dots, h), x0 = geser(rata, w, dots);
-      for (let yy = 0; yy < h; yy++) for (let xx = 0; xx < w; xx++) {
-        const i = (yy * w + xx) * 4, a = p[i + 3] / 255;
-        const l = (0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2]) * a + 255 * (1 - a);
-        if (l < ambang) titik(bm, x0 + xx, yy);
-      }
-      res(bm);
-    };
-    img.onerror = () => rej(new Error("gambar tidak bisa dibaca"));
-    img.src = src;
-  });
-}
-const UKURAN_ESC = { "-1pt": [0, true], "0pt": [0, false], "2pt": [0x01, false], "3pt": [0x11, false], "4pt": [0x11, false], "6pt": [0x11, false], "7pt": [0x11, false], "12pt": [0x22, false] };
-function spasiDots(lh, fontB) { return Math.round((fontB ? 17 : 24) * (+lh || 1.3)) + 2; }
-
-/* ukuran huruf (pt, seperti Word) → ukuran huruf printer: [perintah GS !, pakai Font B kecil] */
-function ukuranEsc(pt, dasar) {
-  const r = (parseFloat(pt) || dasar) / (parseFloat(dasar) || 9);
-  if (r < 0.9) return [0, true];
-  if (r < 1.3) return [0, false];
-  if (r < 1.75) return [0x01, false];
-  if (r < 2.5) return [0x11, false];
-  return [0x22, false];
-}
-
-async function buatESCPOSTeks() {
-  const dots = +G.pDots, fontB = G.pFont === "B", cols = kolomPrinter(dots, fontB);
-  const E = new EscPos(G.tebal === "bold", fontB).init(spasiDots(G.lh, fontB));
-  for (const b of blocks) {
-    switch (b.type) {
-      case "teks": {
-        const [sz, kecil] = ukuranEsc(b.pt || G.font, G.font);
-        const c = Math.floor((kecil ? kolomPrinter(dots, true) : cols) / ((sz >> 4) + 1));
-        const isi = b.kapital ? String(b.isi).toUpperCase() : String(b.isi);
-        isi.split("\n").forEach(par => bungkus(par, c).forEach(l =>
-          E.text(l, { align: b.rata === "justify" ? "left" : b.rata, bold: b.tebal, ul: b.garisBawah, inv: b.inv, size: sz, fontB: kecil ? true : undefined })));
-        break;
-      }
-      case "garis": {
-        const k = b.jenis || G.garis;
-        if (k === "kosong") E.feedDots((parseFloat(G.gap) || 2) * 8);
-        else teksBlok(b, cols).forEach(l => E.text(l));
-        break;
-      }
-      case "barang": teksBlok(b, cols).forEach((l, i) => E.text(l, { bold: b.header && i === 0 })); break;
-      case "total": {
-        const lbl = b.besar ? String(b.labelTotal).toUpperCase() : String(b.labelTotal);
-        teksBlok(b, cols).forEach(l => l.startsWith(lbl) ? E.text(l, { bold: true, size: b.besar ? 0x01 : 0 }) : E.text(l));
-        break;
-      }
-      case "gambar": {
-        const src = b.bw && b._bw ? b._bw : (b._src2 || b.src);
-        if (src) E.raster(await rasterGambar(src, b.lebarPct, b.rata, b.bw ? 128 : +G.pThr, dots));
-        break;
-      }
-      case "qr":
-        E.raster(rasterQR(b.isi, b.level, b.ukuran, b.rata, dots));
-        if (b.caption) E.text(b.caption, { align: b.rata });
-        break;
-      case "barcode":
-        try { const { bm, teks } = rasterBarcode(b, dots); E.raster(bm); if (b.teks) E.text(teks, { align: b.rata }); } catch (e) {}
-        break;
-      case "spasi": E.feedDots(b.tinggi * 8); break;
-      default: teksBlok(b, cols).forEach(l => E.text(l));
-    }
-  }
-  E.feedDots((parseFloat(G.feed) || 0) * 8);
-  return E.end(+G.pFeed, G.pCut);
 }
 
 async function kirim(bytes, onProg) {
@@ -2619,7 +1965,7 @@ async function kirim(bytes, onProg) {
     return;
   }
   if (!P.dev.gatt.connected || !P.ch) await sambungBLE(P.dev);
-  const size = +G.pChunk, jeda = +G.pDelay;
+  const size = +$("pChunk").value, jeda = 8;
   for (let i = 0; i < bytes.length; i += size) {
     const part = bytes.slice(i, i + size);
     for (let coba = 0; ; coba++) {
@@ -2630,49 +1976,40 @@ async function kirim(bytes, onProg) {
         break;
       } catch (e) { if (coba >= 5) throw e; await tidur(60); }
     }
-    if (jeda) await tidur(size >= 180 ? jeda * 2 : jeda);
+    await tidur(size >= 180 ? jeda * 2 : jeda);
     if ((i / size) % 10 === 0) onProg(i / bytes.length);
   }
 }
 
-async function cetakLangsung() {
-  if (!P.jenis || P.sibuk) return;
-  info(""); P.sibuk = true;
-  const bar = $("pBar"), isi = bar.firstElementChild;
-  bar.style.display = "block"; isi.style.width = "0";
-  try {
-    statusPrinter("Menyiapkan struk…", "busy");
-    const data = await buatESCPOSTeks();
-    statusPrinter(`Mencetak ke ${P.nama}…`, "busy");
-    await kirim(data, f => isi.style.width = Math.round(f * 100) + "%");
-    isi.style.width = "100%";
-    P.sibuk = false; statusPrinter(`Terhubung: ${P.nama} – selesai mencetak`, "on");
-    naikkanNomor();
-  } catch (e) {
-    P.sibuk = false; statusPrinter(`Terhubung: ${P.nama}`, "on");
-    info("Gagal mencetak: " + esc(e.message) + "<br>Coba ubah <b>Kecepatan kirim</b> ke <b>Paling aman</b>, atau hubungkan ulang printer.");
-  }
-  setTimeout(() => bar.style.display = "none", 1500);
-}
-if (!navigator.serial) $("btnSerial").style.display = "none";
 
-/* ================= FILE DESAIN ================= */
-function exportDesain() {
-  const data = JSON.stringify({ app: "struk-manual", versi: 1, G, blocks: blocks.map(({ _bw, _src2, ...b }) => b) }, null, 1);
-  unduh(new Blob([data], { type: "application/json" }), "desain-struk.json");
+/* ===== SIMPAN (kompatibel dengan data lama) ===== */
+const KUNCI = "strukManual.v1";
+const GARIS_LAMA = { ds: "-", dd: "=", ss: "-", sd: "=", tb: "=", dt: ".", kosong: "" };
+let tSimpan, siap = false;
+function simpanLokal() {
+  if (!siap) return;
+  clearTimeout(tSimpan);
+  tSimpan = setTimeout(() => { try { localStorage.setItem(KUNCI, JSON.stringify({ v: 2, G, blocks })); } catch (e) {} }, 400);
 }
+function pasang(d) {
+  const g = { ...(d.G || {}) };
+  if (!g.ukuran) g.ukuran = (["72mm", "80mm"].includes(g.lebar) || +g.pDots >= 500) ? "80" : "58";
+  if (GARIS_LAMA[g.garis] !== undefined) g.garis = GARIS_LAMA[g.garis]; else if (g.garis === "tx") g.garis = g.garisChar || "-";
+  G = { ...G0, ...Object.fromEntries(Object.entries(g).filter(([k]) => k in G0)) };
+  blocks = (d.blocks || []).filter(b => BARU[b.type]).map(b => {
+    const n = { ...BARU[b.type](), ...b, id: b.id || uid() };
+    if (n.type === "garis" && n.jenis) n.jenis = GARIS_LAMA[n.jenis] !== undefined ? GARIS_LAMA[n.jenis] : (n.jenis === "tx" ? (n.char || "ikut") : n.jenis);
+    if (n.type === "spasi" && n.tinggi > 5) n.tinggi = Math.max(1, Math.round(n.tinggi / 4));   // dulu dalam mm
+    if (n.type === "gambar" && n.lebarPct && ![35, 50, 60, 90].includes(+n.lebarPct)) n.lebarPct = 60;
+    return n;
+  });
+  $("gGaris").value = G.garis; $("pFont").value = G.pFont; $("pFeed").value = G.pFeed; $("pChunk").value = G.pChunk; $("pCut").checked = !!G.pCut;
+}
+function eksporDesain() { unduh(new Blob([JSON.stringify({ app: "struk-manual", v: 2, G, blocks })], { type: "application/json" }), "desain-struk.json"); }
 $("fileDesain").addEventListener("change", e => {
   const f = e.target.files[0]; if (!f) return;
   const r = new FileReader();
-  r.onload = async () => {
-    try {
-      const d = JSON.parse(r.result); if (!Array.isArray(d.blocks)) throw new Error("bukan file desain struk");
-      G = { ...G0, ...d.G }; blocks = d.blocks.map(b => ({ ...BARU[b.type](), ...b, id: b.id || uid() })); migrasiUkuran(blocks); aktif = null;
-      await Promise.all(blocks.filter(b => b.type === "gambar").map(prosesGambar));
-      isiPengaturan(); semua();
-    } catch (err) { alert("File tidak bisa dibuka: " + err.message); }
-    e.target.value = "";
-  };
+  r.onload = () => { try { const d = JSON.parse(r.result); if (!Array.isArray(d.blocks)) throw 0; pasang(d); aktif = null; semua(); } catch (err) { alert("File tidak bisa dibuka"); } e.target.value = ""; };
   r.readAsText(f);
 });
 function kosongkan() { if (blocks.length && !confirm("Hapus semua elemen struk?")) return; blocks = []; aktif = null; semua(); }
@@ -2680,38 +2017,22 @@ function muatContoh() {
   if (blocks.length && !confirm("Ganti struk sekarang dengan contoh?")) return;
   const B = (type, p = {}) => ({ id: uid(), type, ...BARU[type](), ...p });
   blocks = [
-    B("teks", { isi: "TOKO MAJU JAYA", pt: "14pt", tebal: true }),
-    B("teks", { isi: "Jl. Merdeka No. 10, Jakarta\nTelp. 0812-3456-7890" }),
-    B("garis"),
-    B("nomor"),
-    B("tanggal"),
-    B("kolom", { kiri: "Kasir", kanan: "Admin" }),
-    B("garis"),
+    B("teks", { isi: "TOKO MAJU JAYA" }), B("teks", { isi: "Jl. Merdeka No. 10, Jakarta\nTelp. 0812-3456-7890" }),
+    B("garis"), B("nomor"), B("tanggal"), B("kolom", { kiri: "Kasir", kanan: "Admin" }), B("garis"),
     B("barang", { rows: [{ nama: "Kopi Susu Gula Aren", qty: 2, harga: 18000 }, { nama: "Roti Bakar Coklat", qty: 1, harga: 15000 }, { nama: "Air Mineral 600ml", qty: 3, harga: 5000 }] }),
-    B("garis", { jenis: "sd" }),
-    B("total", { bayar: 100000 }),
-    B("garis"),
-    B("qr", { isi: "https://instagram.com/tokomajujaya", ukuran: 20, caption: "Follow kami" }),
-    B("teks", { isi: "Terima kasih atas kunjungan Anda" })
+    B("garis"), B("total", { bayar: 100000 }), B("garis"), B("teks", { isi: "Terima kasih atas kunjungan Anda" })
   ];
   aktif = null; semua();
 }
 
-/* ================= MULAI ================= */
-(async () => {
-  const ada = bukaLokal();
-  const fontOk = f => FONTS.some(x => x[0] === f);
-  if (!fontOk(G.jenis)) G.jenis = FONTS[0][0];
-  migrasiUkuran(blocks);
-  blocks.forEach(b => { if (b.type === "teks" && b.font && !fontOk(b.font)) b.font = ""; if (b.type === "gambar" && b.crop === undefined) b.crop = true; });
-  const uParam = new URLSearchParams(location.search).get("ukuran");
-  if (uParam && PRESET[uParam]) Object.assign(G, PRESET[uParam]);
-  isiPengaturan();
-  if (ada) await Promise.all(blocks.filter(b => b.type === "gambar").map(prosesGambar));
-  semua();
-})();
-window.addEventListener("beforeprint", aturHalaman);
-setInterval(() => { if (blocks.some(b => b.type === "tanggal" && b.sumber === "auto")) renderStruk(); }, 30000);
+/* ===== MULAI ===== */
+if (!navigator.serial) $("btnSerial").style.display = "none";
+let adaData = false;
+try { const d = JSON.parse(localStorage.getItem(KUNCI)); if (d && d.blocks) { pasang(d); adaData = true; } } catch (e) {}
+if (!adaData) muatContoh();
+const uq = new URLSearchParams(location.search).get("ukuran"); if (uq === "58" || uq === "80") G.ukuran = uq;
+siap = true;
+semua();
 </script>
 </body>
 </html>
