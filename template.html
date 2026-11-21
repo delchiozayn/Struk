@@ -5,7 +5,7 @@
 <title>Template Struk 58mm</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Roboto+Mono:wght@400;700&family=Inconsolata:wght@400;700&family=VT323&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Roboto+Mono:wght@400;700&family=Inconsolata:wght@400;700&family=VT323&family=Poppins:wght@400;700&display=swap">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style id="pageStyle">@page { size: 58mm 200mm; margin: 0; }</style>
 <style>
@@ -86,6 +86,12 @@
   .ukuran-pilih .uk small { display: block; font-size: 11px; font-weight: 400; color: #777; }
   .ukuran-pilih .uk.on { border-color: #1a73e8; background: #e8f0fe; color: #1a56c4; }
 
+  .apl .row-a { display: flex; justify-content: space-between; gap: 2mm; margin: 1.2mm 0; }
+  .apl .row-a > span:last-child { font-weight: bold; text-align: right; }
+  .apl .item-a { margin: 1.6mm 0; }
+  .apl .total-a { font-size: 1.18em; font-weight: bold; }
+  .apl .alamat-a { font-size: 0.88em; }
+  .apl .garis { margin: 2.2mm 0; }
   pre.tbl { margin: 0; font: inherit; white-space: pre; overflow: hidden; letter-spacing: inherit; }
   pre.tbl b { font-weight: bold; }
 
@@ -122,11 +128,9 @@
       <button type="button" class="uk" data-uk="58" onclick="pilihUkuran('58')">58 mm<small>printer mini</small></button>
       <button type="button" class="uk" data-uk="80" onclick="pilihUkuran('80')">80 mm<small>printer kasir</small></button>
     </div>
-    <label>Gaya struk</label>
-    <div class="ukuran-pilih">
-      <button type="button" class="uk gy" data-gy="standar" onclick="pilihGaya('standar')">Standar<small>nama di atas, qty × harga</small></button>
-      <button type="button" class="uk gy" data-gy="tabel" onclick="pilihGaya('tabel')">Tabel<small>Item · Harga · Qty · Jumlah</small></button>
-    </div>
+    <label>Desain struk</label>
+    <select id="gayaSel" onchange="pilihGaya(this.value, true)" style="font-weight:600"></select>
+    <div class="ket" id="gayaKet" style="font-size:11px;color:#777;margin-top:3px"></div>
     <div id="opsiTabel" style="display:none">
       <label>Nama barang yang panjang (gaya tabel)</label>
       <select id="namaPanjang">
@@ -165,6 +169,7 @@
           <option value='"Roboto Mono", monospace'>Roboto Mono (modern)</option>
           <option value='Inconsolata, monospace'>Inconsolata (ramping)</option>
           <option value='VT323, monospace'>VT323 (dot matrix jadul)</option>
+          <option value='"Poppins", sans-serif'>Poppins (gaya aplikasi kasir)</option>
         </select></div>
       <div><label>Ketebalan huruf</label>
         <select id="tebal">
@@ -382,7 +387,7 @@ Telp. 0812-3456-7890</textarea>
     </div>
     <div class="row2" id="barisBayar">
       <div><label>Metode</label>
-        <select id="metode"><option>Tunai</option><option>QRIS</option><option>Transfer</option><option>Debit</option></select></div>
+        <select id="metode"><option>Tunai</option><option>Non Tunai</option><option>QRIS</option><option>Transfer</option><option>Debit</option></select></div>
       <div><label>Dibayar (Rp)</label><input type="number" id="bayar" value="100000"></div>
     </div>
 
@@ -553,12 +558,96 @@ let gaya = "standar";
 function setParam(k, v) {
   try { const q = new URLSearchParams(location.search); q.set(k, v); history.replaceState(null, "", location.pathname + "?" + q.toString()); } catch (e) {}
 }
+/* ===== DAFTAR DESAIN STRUK =====
+   Tambah desain baru cukup dengan menambah entri di sini (+ fungsi tampilan & baris printer-nya).
+   preset = pengaturan yang otomatis dipasang saat desain dipilih (tetap bisa diubah). */
+const DESAIN = [
+  { id: "standar", nama: "Standar", ket: "Nama barang di atas, qty × harga di bawah" },
+  { id: "tabel", nama: "Tabel", ket: "Kolom Item · Harga · Qty · Jumlah, ringkasan rata kanan" },
+  { id: "aplikasi", nama: "Aplikasi Kasir (Warung Kopi Mamang)", ket: "Label di kiri, nilai tebal di kanan, garis lurus, Total lebih besar",
+    preset: { jenis: '"Poppins", sans-serif', garis: "ss", garisTotal: "same", alignHeader: "center", alignFooter: "center",
+      tglFormat: "dd-mm-yyyy", jamFormat: "hm", tglLabel: "Tanggal", tglPosisi: "satu", metode: "Non Tunai", bayar: "0", tokoPlus: "12pt", tebal: "normal" } }
+];
+$("gayaSel").innerHTML = DESAIN.map(d => `<option value="${d.id}">${d.nama}</option>`).join("");
 function tandaiGaya() {
-  document.querySelectorAll(".gy").forEach(b => b.classList.toggle("on", b.dataset.gy === gaya));
+  $("gayaSel").value = gaya;
+  $("gayaKet").textContent = (DESAIN.find(d => d.id === gaya) || {}).ket || "";
   $("opsiTabel").style.display = gaya === "tabel" ? "block" : "none";
   $("barisBayar").style.display = gaya === "tabel" ? "none" : "";   // gaya tabel tidak memakai Tunai & Kembali
 }
-function pilihGaya(g) { gaya = g; tandaiGaya(); setParam("gaya", g); render(); }
+function pilihGaya(g, pasangPreset) {
+  gaya = DESAIN.some(d => d.id === g) ? g : "standar";
+  const d = DESAIN.find(x => x.id === gaya);
+  if (pasangPreset && d.preset) Object.entries(d.preset).forEach(([id, v]) => { if ($(id)) $(id).value = v; });
+  tandaiGaya(); setParam("gaya", gaya); render();
+}
+
+/* ===== DESAIN: APLIKASI KASIR ===== */
+function hitungAplikasi() {
+  const subtotal = items.reduce((s, it) => s + it.qty * it.harga, 0);
+  const diskon = +$("diskon").value || 0, pj = +$("pajak").value || 0;
+  const pajak = (subtotal - diskon) * (pj / 100), total = subtotal - diskon + pajak;
+  const bayar = (+$("bayar").value || 0) > 0 ? +$("bayar").value : total;   // 0 = bayar pas (non tunai)
+  return { subtotal, diskon, pj, pajak, total, bayar, kembali: Math.max(0, bayar - total) };
+}
+function infoAplikasi() {
+  const tgl = ($("tglMode").value === "manual" && $("tanggal").value) ? new Date($("tanggal").value) : new Date();
+  const tS = fmtTanggal(tgl, $("tglFormat").value), jS = fmtJam(tgl, $("jamFormat").value);
+  const r = [];
+  if ($("noStruk").value.trim()) r.push(["No", $("noStruk").value]);
+  r.push([$("tglLabel").value || "Tanggal", tS + (jS ? " " + jS : "")]);
+  if ($("kasir").value.trim()) r.push(["Kasir", $("kasir").value]);
+  r.push(["Pembayaran", $("metode").value]);
+  return r;
+}
+function htmlAplikasi() {
+  const aH = $("alignHeader").value, aF = $("alignFooter").value, up = $("caseItem").value;
+  const G = garisHTML(), H = hitungAplikasi();
+  const baris = (k, v, kelas = "") => `<div class="row-a ${kelas}"><span>${esc(k)}</span><span>${esc(v)}</span></div>`;
+  return `<div class="apl">
+    ${logoData ? `<div class="logo" style="text-align:${aH}"><img src="${logoData}" style="width:${$("logoLebar").value}%"></div>` : ""}
+    <div class="toko" style="text-align:${aH}">${esc($("namaToko").value)}</div>
+    <div class="alamat-a" style="text-align:${aH}">${$("alamat").value.split("\n").map(l => `<div class="para">${esc(l) || "&nbsp;"}</div>`).join("")}</div>
+    ${G}
+    ${infoAplikasi().map(([k, v]) => baris(k, v)).join("")}
+    ${G}
+    ${items.map(it => `<div class="item-a"><div class="item-nama ${up}">${esc(it.nama)}</div>
+      <div class="row-a" style="margin:0"><span>${rp(it.harga)} x ${it.qty}</span><span>${rp(it.qty * it.harga)}</span></div></div>`).join("")}
+    ${G}
+    ${baris("Total Pesanan", rp(H.subtotal))}
+    ${H.diskon ? baris("Diskon", "-" + rp(H.diskon)) : ""}
+    ${H.pajak ? baris(`Pajak ${H.pj}%`, rp(H.pajak)) : ""}
+    ${baris("Total", rp(H.total), "total-a")}
+    ${baris("Bayar", rp(H.bayar))}
+    ${baris("Kembali", rp(H.kembali))}
+    ${$("footer").value.trim() ? `<div style="text-align:${aF};margin-top:3mm">${$("footer").value.split("\n").map(l => `<div class="para">${esc(l) || "&nbsp;"}</div>`).join("")}</div>` : ""}
+    <div class="feed"></div></div>`;
+}
+/* baris untuk printer (huruf printer). {parts:[{s, bold}], size} = satu baris dengan bagian tebal */
+function barisAplikasi(w) {
+  const L = [], up = $("caseItem").value === "upper";
+  const aF = $("alignFooter").value === "justify" ? "left" : $("alignFooter").value;
+  const gK = $("garis").value, H = hitungAplikasi();
+  const kv = (k, v, o = {}) => {
+    k = String(k); v = String(v);
+    if (k.length + 1 + v.length > w) { L.push(...bungkus(k, w)); L.push({ parts: [{ s: " ".repeat(Math.max(0, w - v.length)) }, { s: v, bold: true }], size: o.size }); return; }
+    L.push({ parts: [{ s: k + " ".repeat(w - k.length - v.length), bold: !!o.tebalLabel }, { s: v, bold: true }], size: o.size });
+  };
+  L.push(garisTeks(gK, w));
+  infoAplikasi().forEach(([k, v]) => kv(k, v));
+  L.push(garisTeks(gK, w));
+  items.forEach(it => { L.push(...bungkus(up ? String(it.nama).toUpperCase() : it.nama, w)); kv(`${rp(it.harga)} x ${it.qty}`, rp(it.qty * it.harga)); });
+  L.push(garisTeks(gK, w));
+  kv("Total Pesanan", rp(H.subtotal));
+  if (H.diskon) kv("Diskon", "-" + rp(H.diskon));
+  if (H.pajak) kv(`Pajak ${H.pj}%`, rp(H.pajak));
+  kv("Total", rp(H.total), { tebalLabel: true, size: 0x01 });
+  kv("Bayar", rp(H.bayar));
+  kv("Kembali", rp(H.kembali));
+  if ($("footer").value.trim()) { L.push(""); $("footer").value.split("\n").forEach(l => L.push(...rataTeks(l, w, aF))); }
+  return L;
+}
+const teksBaris = l => typeof l === "string" ? l : l.parts ? l.parts.map(p => p.s).join("") : l.s;
 
 /* jumlah karakter per baris yang muat di pratinjau, sesuai font & lebar kertas */
 function kolomPreview() {
@@ -660,6 +749,13 @@ function render() {
   const G = garisHTML();
   const GT = $("garisTotal").value === "same" ? G : garisHTML($("garisTotal").value);
 
+  if (gaya === "aplikasi") {
+    $("struk").innerHTML = htmlAplikasi();
+    if ($("teksStruk")) $("teksStruk").textContent = strukTeks();
+    const mm3 = Math.ceil($("struk").scrollHeight * 25.4 / 96) + 1;
+    $("pageStyle").textContent = `@page { size: ${$("lebar").value} ${mm3}mm; margin: 0; }`;
+    return;
+  }
   if (gaya === "tabel") {
     $("struk").innerHTML = `
     ${logoData ? `<div class="logo" style="text-align:${aH}"><img src="${logoData}" style="width:${$("logoLebar").value}%"></div>` : ""}
@@ -842,6 +938,11 @@ function strukTeks(wArg, printer) {
     if (logoData && $("tTanda").checked) L.push(...rataTeks("[Logo]", w, "center"));
     L.push(...rataTeks($("namaToko").value, w, aH));
     $("alamat").value.split("\n").forEach(l => L.push(...rataTeks(l, w, aH)));
+  }
+  if (gaya === "aplikasi") {
+    const T = barisAplikasi(w);
+    if (printer) return [...L, ...T];
+    return [...L, ...T.map(teksBaris)].map(l => l.replace(/\s+$/, "")).join("\n");
   }
   if (gaya === "tabel") {
     const T = barisTabel(w);
@@ -1124,7 +1225,15 @@ async function buatESCPOSTeks() {
   const [sz] = ukuranEsc($("tokoPlus").value, $("font").value);
   bungkus($("namaToko").value, Math.floor(cols / ((sz >> 4) + 1))).forEach(l => E.text(l, { align: aH, bold: true, size: sz }));
   $("alamat").value.split("\n").forEach(par => bungkus(par, cols).forEach(l => E.text(l, { align: aH })));
-  strukTeks(cols, true).forEach(l => typeof l === "string" ? E.text(l.replace(/\s+$/, "")) : E.text(l.s, { bold: l.bold, size: l.size }));
+  strukTeks(cols, true).forEach(l => {
+    if (typeof l === "string") return E.text(l.replace(/\s+$/, ""));
+    if (l.parts) {   // satu baris dengan bagian tebal & biasa
+      E.raw(ESC, 0x61, 0, GS, 0x21, l.size || 0);
+      l.parts.forEach(p => { E.raw(ESC, 0x45, (p.bold || E.boldAll) ? 1 : 0); for (const ch of asciiAman(p.s)) E.b.push(ch.charCodeAt(0)); });
+      E.raw(0x0A); E.reset(); return;
+    }
+    E.text(l.s, { bold: l.bold, size: l.size });
+  });
   E.feedDots((parseFloat($("feed").value) || 0) * 8);
   return E.end(+$("pFeed").value || 0, $("pCut").checked);
 }
@@ -1171,7 +1280,7 @@ async function cetakLangsung() {
 if (!navigator.serial) $("btnSerial").style.display = "none";
 
 /* ===== FONT STRUK (Google Fonts) — ditanam ke PNG/PDF ===== */
-const FONT_GOOGLE = { "Courier Prime": "Courier+Prime:wght@400;700", "Roboto Mono": "Roboto+Mono:wght@400;700", "Inconsolata": "Inconsolata:wght@400;700", "VT323": "VT323" };
+const FONT_GOOGLE = { "Poppins": "Poppins:wght@400;700", "Courier Prime": "Courier+Prime:wght@400;700", "Roboto Mono": "Roboto+Mono:wght@400;700", "Inconsolata": "Inconsolata:wght@400;700", "VT323": "VT323" };
 const cacheFont = {};
 async function cssFontTertanam(teksFont) {
   let css = "";
@@ -1249,7 +1358,9 @@ window.addEventListener("beforeprint", render);
 setInterval(() => { if ($("tglMode").value === "auto") render(); }, 30000);
 document.querySelector(".btn-print").onclick = () => { render(); window.print(); };
 renderItemInputs();
-gaya = new URLSearchParams(location.search).get("gaya") === "tabel" ? "tabel" : "standar";
+{ const gp = new URLSearchParams(location.search).get("gaya");
+  gaya = DESAIN.some(d => d.id === gp) ? gp : "standar";
+  const d0 = DESAIN.find(d => d.id === gaya); if (d0.preset) Object.entries(d0.preset).forEach(([id, v]) => { if ($(id)) $(id).value = v; }); }
 tandaiGaya();
 pilihUkuran(new URLSearchParams(location.search).get("ukuran") === "80" ? "80" : "58");
 try { document.fonts.addEventListener("loadingdone", render); } catch (e) {}
