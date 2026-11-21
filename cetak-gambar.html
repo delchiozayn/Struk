@@ -397,13 +397,18 @@ function pertajam(L, W, H) {
 }
 
 /* ===== OCR: susun ulang kata-kata hasil baca menjadi baris struk selebar N karakter ===== */
-function susunTeksStruk(words, cols, garisY) {
+function susunTeksStruk(words, cols, garisY, imgH) {
   const ulang = (c, n) => n > 0 ? c.repeat(n) : "";
   words = words.filter(w => String(w.text).trim() && (w.confidence ?? 100) > 25)
     .map(w => ({ t: String(w.text).trim(), x0: w.bbox.x0, x1: w.bbox.x1, y0: w.bbox.y0, y1: w.bbox.y1, cy: (w.bbox.y0 + w.bbox.y1) / 2, h: w.bbox.y1 - w.bbox.y0 }));
   if (!words.length) return { baris: [], judul: -1 };
   const hs = words.map(w => w.h).sort((a, b) => a - b), hMed = hs[hs.length >> 1] || 10;
-  const kiriAll = Math.min(...words.map(w => w.x0)), kananAll = Math.max(...words.map(w => w.x1)), lebar = Math.max(1, kananAll - kiriAll);
+  // buang tulisan yang terpotong di tepi atas/bawah gambar (sisa layar sebelumnya)
+  if (imgH) words = words.filter(w => !((w.y0 <= 2 || w.y1 >= imgH - 2) && w.h < hMed * 0.9));
+  if (!words.length) return { baris: [], judul: -1 };
+  // batas kiri/kanan struk: diambil dari mayoritas baris, bukan kata paling pinggir
+  const pct = (arr, p) => { const a = [...arr].sort((x, y) => x - y); return a[Math.min(a.length - 1, Math.max(0, Math.round((a.length - 1) * p)))]; };
+  const kiriAll = pct(words.map(w => w.x0), 0.03), kananAll = pct(words.map(w => w.x1), 0.97), lebar = Math.max(1, kananAll - kiriAll);
 
   // 1) kelompokkan kata menjadi baris berdasarkan posisi vertikal
   words.sort((a, b) => a.cy - b.cy);
@@ -425,8 +430,8 @@ function susunTeksStruk(words, cols, garisY) {
     l.h = Math.max(...l.w.map(w => w.h));
   }
   // 3) gabungkan label (kiri) dan nilai (kanan) yang letaknya sedikit beda tinggi
-  const kiriSaja = l => l.seg.length === 1 && (l.x0 - kiriAll) < lebar * 0.15 && (l.x1 - kiriAll) < lebar * 0.6;
-  const kananSaja = l => l.seg.length === 1 && (kananAll - l.x1) < lebar * 0.12 && (l.x0 - kiriAll) > lebar * 0.45;
+  const kiriSaja = l => l.seg.length === 1 && (l.x0 - kiriAll) < lebar * 0.2 && (l.x1 - kiriAll) < lebar * 0.65;
+  const kananSaja = l => l.seg.length === 1 && (kananAll - l.x1) < lebar * 0.15 && (l.x0 - kiriAll) > lebar * 0.4;
   for (let i = 0; i < lines.length - 1; i++) {
     const a = lines[i], b = lines[i + 1];
     if (Math.abs(a.cy - b.cy) < hMed * 1.25 && ((kiriSaja(a) && kananSaja(b)) || (kananSaja(a) && kiriSaja(b)))) {
@@ -457,11 +462,16 @@ function susunTeksStruk(words, cols, garisY) {
       const t = l.seg[0].t, mKiri = l.x0 - kiriAll, mKanan = kananAll - l.x1;
       const tengah = mKiri > lebar * 0.06 && Math.abs(mKiri - mKanan) < lebar * 0.12;
       const kanan = !tengah && mKiri > lebar * 0.45 && mKanan < lebar * 0.12;
-      bungkusOCR(t, cols).forEach(p => baris.push(tengah ? ulang(" ", Math.floor((cols - p.length) / 2)) + p : kanan ? ulang(" ", cols - p.length) + p : p));
+      const indent = Math.max(0, Math.min(cols - 4, Math.round(mKiri / lebar * cols)));
+      bungkusOCR(t, tengah || kanan ? cols : cols - indent).forEach(p => baris.push(
+        tengah ? ulang(" ", Math.floor((cols - p.length) / 2)) + p
+        : kanan ? ulang(" ", cols - p.length) + p
+        : ulang(" ", indent > 1 ? indent : 0) + p));
       continue;
     }
-    if (l.seg.length === 2 && (kananAll - l.seg[1].x1) < lebar * 0.12) {
-      const a = l.seg[0].t, b = l.seg[1].t;
+    if (l.seg.length === 2 && (kananAll - l.seg[1].x1) < lebar * 0.15) {
+      const ind = Math.round((l.seg[0].x0 - kiriAll) / lebar * cols);
+      const a = (ind > 1 ? ulang(" ", Math.min(ind, 6)) : "") + l.seg[0].t, b = l.seg[1].t;
       if (a.length + 1 + b.length <= cols) baris.push(a + ulang(" ", cols - a.length - b.length) + b);
       else { bungkusOCR(a, cols).forEach(p => baris.push(p)); baris.push(ulang(" ", cols - b.length) + b); }
       continue;
@@ -490,7 +500,8 @@ function bungkusOCR(t, w) {
   return out.length ? out : [""];
 }
 
-/* cari garis pemisah (putus-putus atau lurus) di gambar pada area yang tidak berisi teks */
+/* cari garis pemisah (titik-titik, putus-putus, atau lurus; boleh abu-abu muda dan tidak selebar kertas)
+   di area gambar yang tidak berisi teks */
 function deteksiGaris(canvas, words) {
   const W = canvas.width, H = canvas.height, px = canvas.getContext("2d").getImageData(0, 0, W, H).data;
   const tertutup = new Uint8Array(H);
@@ -498,31 +509,30 @@ function deteksiGaris(canvas, words) {
     const m = Math.max(3, Math.round((w.bbox.y1 - w.bbox.y0) * 0.3));
     for (let y = Math.max(0, Math.floor(w.bbox.y0 - m)); y <= Math.min(H - 1, Math.ceil(w.bbox.y1 + m)); y++) tertutup[y] = 1;
   });
-  let kiri = W, kanan = 0; words.forEach(w => { kiri = Math.min(kiri, w.bbox.x0); kanan = Math.max(kanan, w.bbox.x1); });
-  if (kanan <= kiri) { kiri = 0; kanan = W; }
-  const lebar = kanan - kiri, hasil = [];
+  const xs0 = words.map(w => w.bbox.x0).sort((a, b) => a - b), xs1 = words.map(w => w.bbox.x1).sort((a, b) => a - b);
+  const kiri = xs0.length ? xs0[Math.floor(xs0.length * 0.03)] : 0, kanan = xs1.length ? xs1[Math.ceil(xs1.length * 0.97) - 1] : W;
+  const lebar = Math.max(1, kanan - kiri), hasil = [];
   const cv = a => { if (a.length < 2) return 0; const m = a.reduce((x, y) => x + y, 0) / a.length; return Math.sqrt(a.reduce((x, y) => x + (y - m) * (y - m), 0) / a.length) / (m || 1); };
   const cocok = y => {
     if (tertutup[y]) return false;
     const seg = [], gap = []; let run = 0, white = 0, gelap = 0, x0 = -1, x1 = -1;
     for (let x = 0; x < W; x++) {
-      const i = (y * W + x) * 4, g = (0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2]) < 160;
+      const i = (y * W + x) * 4, g = (0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2]) < 215;
       if (g) { if (run === 0 && x0 >= 0 && white) gap.push(white); run++; white = 0; gelap++; if (x0 < 0) x0 = x; x1 = x; }
       else { if (run) seg.push(run); run = 0; if (x0 >= 0) white++; }
     }
     if (run) seg.push(run);
-    if (x0 < 0 || x1 - x0 < lebar * 0.45) return false;
+    if (x0 < 0 || x1 - x0 < lebar * 0.22) return false;
     const bentang = x1 - x0;
-    if (gelap > bentang * 0.85 && seg.length <= 4) return true;                 // garis lurus
-    return seg.length >= 8 && cv(seg) < 0.45 && cv(gap) < 0.6;                  // garis putus-putus yang seragam
+    if (gelap > bentang * 0.85 && seg.length <= 4) return true;                                   // garis lurus
+    return seg.length >= 6 && Math.max(...seg) <= Math.max(14, W / 60) && cv(seg) < 0.6 && cv(gap) < 0.7;   // titik-titik / putus-putus
   };
   let mulai = -1;
   for (let y = 0; y <= H; y++) {
     const ok = y < H && cocok(y);
     if (ok && mulai < 0) mulai = y;
-    if (!ok && mulai >= 0) { if (y - mulai < 12) hasil.push((mulai + y) / 2); mulai = -1; }
+    if (!ok && mulai >= 0) { if (y - mulai < 14) hasil.push((mulai + y) / 2); mulai = -1; }
   }
-  // gabungkan garis yang sangat berdekatan (garis ganda dihitung satu)
   return hasil.filter((y, k) => k === 0 || y - hasil[k - 1] > 10);
 }
 
@@ -615,7 +625,7 @@ function ukuranEsc(pt, dasar) {
 
 
 /* ===== MODE TEKS (OCR) ===== */
-let ocrKata = null, ocrGaris = [], ocrJudul = -1;
+let ocrKata = null, ocrGaris = [], ocrJudul = -1, ocrTinggi = 0;
 const kolomOCR = () => kolomPrinter(dotsPrinter(), $("ocrFont").value === "B");
 function muatTesseract() {
   if (window.Tesseract) return Promise.resolve();
@@ -641,20 +651,25 @@ async function bacaTeks() {
     const worker = await Tesseract.createWorker(["ind", "eng"], 1, {
       logger: m => { if (m.status === "recognizing text") st.textContent = "Membaca teks… " + Math.round(m.progress * 100) + "%"; }
     });
+    window.__ocrCanvas = c;
     const { data } = await worker.recognize(c);
     await worker.terminate();
-    ocrKata = data.words || [];
-    ocrGaris = deteksiGaris(c, ocrKata);
-    if (!ocrKata.length) { st.textContent = "Tidak ada tulisan yang terbaca. Coba gambar yang lebih jelas atau potong bagian struknya saja."; return; }
-    susunUlang();
-    st.textContent = `Selesai: ${ocrKata.length} kata terbaca. Periksa hasilnya di bawah.`;
+    prosesOCR(c, data.words || []);
   } catch (e) { st.textContent = "Gagal membaca teks: " + e.message; }
   finally { btn.disabled = false; }
+}
+function prosesOCR(c, words) {
+  const st = $("ocrStatus");
+  ocrKata = words; ocrTinggi = c.height;
+  ocrGaris = deteksiGaris(c, ocrKata);
+  if (!ocrKata.length) { st.textContent = "Tidak ada tulisan yang terbaca. Coba gambar yang lebih jelas atau potong bagian struknya saja."; return; }
+  susunUlang();
+  st.textContent = `Selesai: ${ocrKata.length} kata terbaca. Periksa hasilnya di bawah.`;
 }
 function susunUlang() {
   $("ocrKol").textContent = kolomOCR() + " karakter per baris";
   if (!ocrKata) { tampilPreview(); return; }
-  const r = susunTeksStruk(ocrKata, kolomOCR(), ocrGaris);
+  const r = susunTeksStruk(ocrKata, kolomOCR(), ocrGaris, ocrTinggi);
   ocrJudul = r.judul >= 0 ? r.judul : 0;
   $("ocrTeks").value = r.baris.join("\n");
   tampilPreview();
