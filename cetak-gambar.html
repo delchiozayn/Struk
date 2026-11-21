@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cetak dari Gambar</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, sans-serif; background: #eef0f3; color: #222; }
+  .wrap { display: flex; gap: 20px; padding: 16px; align-items: flex-start; }
+  .panel { background: #fff; border-radius: 10px; padding: 14px; width: 440px; flex-shrink: 0; }
+  .panel h2 { margin: 0 0 4px; font-size: 18px; }
+  .sub { font-size: 12px; color: #777; margin-bottom: 10px; line-height: 1.5; }
+  h3 { margin: 14px 0 6px; font-size: 14px; color: #555; }
+  label { display: block; font-size: 12px; margin: 6px 0 2px; color: #555; }
+  input, select { width: 100%; padding: 6px; font-size: 13px; border: 1px solid #ccc; border-radius: 5px; font-family: inherit; }
+  input[type=checkbox] { width: auto; }
+  input[type=range] { padding: 0; }
+  .row { display: flex; gap: 8px; } .row > * { flex: 1; min-width: 0; }
+  .chk { display: flex; align-items: center; gap: 6px; font-size: 13px; margin: 8px 0 2px; color: #333; }
+  .btn { padding: 8px 12px; border: 0; border-radius: 6px; cursor: pointer; font-size: 13px; background: #e8eaed; }
+  .pilih { display: flex; gap: 8px; }
+  .pilih .opt { flex: 1; padding: 10px; border: 2px solid #ccc; background: #fff; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; }
+  .pilih .opt small { display: block; font-size: 11px; font-weight: 400; color: #777; }
+  .pilih .opt.on { border-color: #1a73e8; background: #e8f0fe; color: #1a56c4; }
+  .unggah { display: block; border: 2px dashed #9bb7e8; border-radius: 10px; padding: 18px; text-align: center; color: #1a56c4; background: #f5f8ff; cursor: pointer; font-size: 14px; }
+  .unggah input { display: none; }
+  .stat { display: flex; align-items: center; gap: 6px; font-weight: 600; margin: 8px 0; font-size: 13px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: #bbb; flex-shrink: 0; }
+  .dot.on { background: #34a853; } .dot.busy { background: #f9ab00; }
+  .fbar { display: flex; gap: 6px; flex-wrap: wrap; }
+  .fbar .bt { background: #1a73e8; color: #fff; }
+  .go { background: #0b8043; color: #fff; width: 100%; font-size: 16px; padding: 13px; margin-top: 10px; }
+  .go:disabled { background: #9ccfae; cursor: not-allowed; }
+  .catatan { font-size: 11px; color: #a15c00; background: #fff6e0; border-radius: 6px; padding: 6px 8px; margin-top: 8px; line-height: 1.45; }
+  .bar { height: 6px; background: #eee; border-radius: 3px; overflow: hidden; margin-top: 8px; display: none; }
+  .bar > div { height: 100%; width: 0; background: #0b8043; }
+  details summary { cursor: pointer; font-size: 13px; color: #444; margin-top: 10px; font-weight: 600; }
+  .nilai { font-size: 12px; color: #1a56c4; font-weight: 600; float: right; }
+
+  .prev { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0; position: sticky; top: 16px; }
+  .kertas { background: #fff; padding: 10px 8px; box-shadow: 0 2px 10px rgba(0,0,0,.15); max-width: 100%; }
+  #hasil { display: block; image-rendering: pixelated; image-rendering: crisp-edges; width: 100%; }
+  .ket { font-size: 12px; color: #666; text-align: center; }
+  .kosong { color: #999; font-size: 13px; padding: 40px 20px; text-align: center; width: 260px; }
+  .zoom { display: flex; gap: 6px; align-items: center; font-size: 12px; color: #555; }
+  .zoom select { width: auto; }
+  .kembali { font-size: 13px; color: #1a56c4; text-decoration: none; display: inline-block; margin-bottom: 8px; }
+
+  @media (max-width: 800px) {
+    .wrap { flex-direction: column; padding: 8px; }
+    .panel { width: 100%; }
+    .prev { position: static; width: 100%; }
+    input, select { font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="panel">
+    <a class="kembali" href="./">← Halaman depan</a>
+    <h2>🖨️ Cetak dari Gambar</h2>
+    <div class="sub">Unggah foto atau gambar struk, atur hasilnya, lalu cetak langsung ke printer thermal lewat Bluetooth.
+      Pratinjau di samping menampilkan <b>titik demi titik persis seperti yang akan tercetak</b>.</div>
+
+    <label class="unggah">📷 Pilih gambar (PNG / JPG)
+      <input type="file" id="file" accept="image/*">
+    </label>
+    <div class="ket" id="namaFile" style="margin-top:6px"></div>
+
+    <h3>Ukuran kertas</h3>
+    <div class="pilih">
+      <button type="button" class="opt" data-k="384" onclick="pilihKertas(384)">58 mm<small>lebar cetak 48 mm</small></button>
+      <button type="button" class="opt" data-k="576" onclick="pilihKertas(576)">80 mm<small>lebar cetak 72 mm</small></button>
+    </div>
+
+    <h3>Jenis gambar</h3>
+    <div class="pilih">
+      <button type="button" class="opt" data-m="teks" onclick="pilihMode('teks')">Struk / teks<small>huruf tegas, paling tajam</small></button>
+      <button type="button" class="opt" data-m="foto" onclick="pilihMode('foto')">Foto / logo<small>gradasi dengan titik-titik</small></button>
+    </div>
+
+    <h3>Pengaturan hasil</h3>
+    <label>Kepekatan <span class="nilai" id="nilaiAmbang"></span></label>
+    <input type="range" id="ambang" min="-60" max="60" step="5" value="0">
+    <div class="row" style="font-size:11px;color:#888"><span>← lebih terang</span><span style="text-align:right">lebih gelap →</span></div>
+    <div class="row">
+      <div><label>Lebar gambar di kertas</label>
+        <select id="lebar">
+          <option value="100" selected>Penuh (100%)</option><option value="90">90%</option><option value="75">75%</option>
+          <option value="60">60%</option><option value="50">50%</option>
+        </select></div>
+      <div><label>Putar gambar</label>
+        <select id="putar">
+          <option value="0" selected>Tidak diputar</option><option value="90">90° kanan</option>
+          <option value="180">180°</option><option value="270">90° kiri</option>
+        </select></div>
+    </div>
+    <label class="chk"><input type="checkbox" id="crop" checked> Potong otomatis tepi putih di sekeliling gambar</label>
+    <details id="potongManual">
+      <summary>✂️ Potong manual (untuk foto struk di atas meja)</summary>
+      <div class="sub" style="margin:6px 0 0">Geser sampai hanya kertas struk yang tersisa di pratinjau.</div>
+      <div class="row">
+        <div><label>Atas <span class="nilai" id="vAtas">0%</span></label><input type="range" id="pAtas" min="0" max="45" value="0"></div>
+        <div><label>Bawah <span class="nilai" id="vBawah">0%</span></label><input type="range" id="pBawah" min="0" max="45" value="0"></div>
+      </div>
+      <div class="row">
+        <div><label>Kiri <span class="nilai" id="vKiri">0%</span></label><input type="range" id="pKiri" min="0" max="45" value="0"></div>
+        <div><label>Kanan <span class="nilai" id="vKanan">0%</span></label><input type="range" id="pKanan" min="0" max="45" value="0"></div>
+      </div>
+      <button class="btn" style="margin-top:6px" onclick="resetPotong()">Atur ulang potongan</button>
+    </details>
+    <label class="chk"><input type="checkbox" id="tajam" checked> Pertajam huruf sebelum dicetak</label>
+    <label class="chk"><input type="checkbox" id="tebal"> Pertebal huruf (untuk tulisan tipis)</label>
+    <label class="chk"><input type="checkbox" id="balik"> Balik warna (putih di atas hitam)</label>
+
+    <h3>Printer</h3>
+    <div class="stat"><span class="dot" id="pDot"></span><span id="pStat">Printer belum terhubung</span></div>
+    <div class="fbar">
+      <button class="btn bt" onclick="hubungBT()">🔵 Hubungkan Bluetooth</button>
+      <button class="btn" id="btnSerial" onclick="hubungSerial()">🔌 Serial / COM</button>
+      <button class="btn" onclick="putuskan()">Putuskan</button>
+    </div>
+    <div class="row">
+      <div><label>Jumlah cetak</label>
+        <select id="salinan"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+      <div><label>Kertas maju setelah cetak</label>
+        <select id="pFeed"><option value="0">0 baris</option><option value="2">2 baris</option><option value="3" selected>3 baris</option><option value="5">5 baris</option></select></div>
+    </div>
+    <button class="btn go" id="btnLangsung" onclick="cetak()" disabled>⚡ Cetak Gambar</button>
+    <div class="bar" id="pBar"><div></div></div>
+    <details>
+      <summary>Pengaturan printer lainnya</summary>
+      <div class="row">
+        <div><label>Kecepatan kirim</label>
+          <select id="pChunk"><option value="20">Paling aman (lambat)</option><option value="100" selected>Normal</option><option value="180">Cepat</option><option value="512">Sangat cepat</option></select></div>
+        <div><label>Lebar printer khusus</label>
+          <select id="dotsKhusus"><option value="">Ikuti ukuran kertas</option><option value="432">58 mm lebar (432 titik)</option><option value="512">80 mm sempit (512 titik)</option></select></div>
+      </div>
+      <label class="chk"><input type="checkbox" id="pCut"> Potong kertas otomatis (printer dengan auto-cutter)</label>
+      <div class="catatan">Kalau hasil cetak terputus atau ada bagian yang hilang, pilih kecepatan <b>Paling aman</b>.</div>
+    </details>
+    <div class="catatan" id="pInfo" style="display:none"></div>
+  </div>
+
+  <div class="prev">
+    <div class="zoom">Perbesar pratinjau
+      <select id="zoom"><option value="1">100%</option><option value="1.5">150%</option><option value="2" selected>200%</option><option value="3">300%</option></select>
+    </div>
+    <div class="kertas" id="kertas">
+      <div class="kosong" id="kosong">Belum ada gambar.<br>Pilih gambar di sebelah kiri.</div>
+      <canvas id="hasil" style="display:none"></canvas>
+    </div>
+    <div class="ket" id="ukuranCetak"></div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+
+/* ===== POTONG OTOMATIS LOGO (buang ruang putih / transparan di sekeliling) ===== */
+const cacheCrop = {};
+function potongOtomatis(src) {
+  const key = src.length + ":" + src.slice(-60);
+  if (cacheCrop[key]) return Promise.resolve(cacheCrop[key]);
+  return new Promise(res => {
+    const img = new Image();
+    img.onload = () => {
+      const s = Math.min(1, 1200 / Math.max(img.width, img.height));
+      const W = Math.max(1, Math.round(img.width * s)), H = Math.max(1, Math.round(img.height * s));
+      const c = document.createElement("canvas"); c.width = W; c.height = H;
+      const x = c.getContext("2d"); x.drawImage(img, 0, 0, W, H);
+      const p = x.getImageData(0, 0, W, H).data;
+      // piksel dianggap "kosong" jika transparan atau hampir putih
+      const isi = i => p[i + 3] > 24 && (0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2]) < 235;
+      let x0 = W, y0 = H, x1 = -1, y1 = -1;
+      for (let yy = 0; yy < H; yy++) for (let xx = 0; xx < W; xx++) {
+        if (isi((yy * W + xx) * 4)) { if (xx < x0) x0 = xx; if (xx > x1) x1 = xx; if (yy < y0) y0 = yy; if (yy > y1) y1 = yy; }
+      }
+      if (x1 < 0) { cacheCrop[key] = src; return res(src); }          // gambar kosong: biarkan
+      const pad = Math.max(2, Math.round(Math.max(x1 - x0, y1 - y0) * 0.02));
+      x0 = Math.max(0, x0 - pad); y0 = Math.max(0, y0 - pad); x1 = Math.min(W - 1, x1 + pad); y1 = Math.min(H - 1, y1 + pad);
+      if (x0 === 0 && y0 === 0 && x1 === W - 1 && y1 === H - 1 && s === 1) { cacheCrop[key] = src; return res(src); }
+      const o = document.createElement("canvas"); o.width = x1 - x0 + 1; o.height = y1 - y0 + 1;
+      o.getContext("2d").drawImage(c, x0, y0, o.width, o.height, 0, 0, o.width, o.height);
+      res(cacheCrop[key] = o.toDataURL("image/png"));
+    };
+    img.onerror = () => res(src);
+    img.src = src;
+  });
+}
+
+
+/* ===== PENGATURAN (disimpan di browser) ===== */
+const S = { kertas: 384, mode: "teks", ambang: 0, lebar: "100", crop: true, tajam: true, tebal: false, balik: false, pChunk: "100", pFeed: "3" };
+try { Object.assign(S, JSON.parse(localStorage.getItem("cetakGambar.v1")) || {}); } catch (e) {}
+function simpan() { try { localStorage.setItem("cetakGambar.v1", JSON.stringify(S)); } catch (e) {} }
+function isiForm() {
+  $("ambang").value = S.ambang; $("lebar").value = S.lebar; $("crop").checked = S.crop; $("tajam").checked = S.tajam;
+  $("tebal").checked = S.tebal; $("balik").checked = S.balik; $("pChunk").value = S.pChunk; $("pFeed").value = S.pFeed;
+  document.querySelectorAll(".opt[data-k]").forEach(b => b.classList.toggle("on", +b.dataset.k === S.kertas));
+  document.querySelectorAll(".opt[data-m]").forEach(b => b.classList.toggle("on", b.dataset.m === S.mode));
+  $("nilaiAmbang").textContent = S.ambang === 0 ? "Normal" : (S.ambang > 0 ? "+" : "") + S.ambang;
+}
+function pilihKertas(d) { S.kertas = d; simpan(); isiForm(); olah(); }
+function pilihMode(m) { S.mode = m; simpan(); isiForm(); olah(); }
+[["ambang", "ambang", v => +v], ["lebar", "lebar", v => v], ["pChunk", "pChunk", v => v], ["pFeed", "pFeed", v => v]].forEach(([id, k, f]) =>
+  $(id).addEventListener("input", () => { S[k] = f($(id).value); simpan(); isiForm(); if (id === "ambang" || id === "lebar") olah(); }));
+["crop", "tajam", "tebal", "balik"].forEach(id => $(id).addEventListener("change", () => { S[id] = $(id).checked; simpan(); olah(); }));
+["putar", "dotsKhusus"].forEach(id => $(id).addEventListener("change", olah));
+const SISI = ["Atas", "Bawah", "Kiri", "Kanan"];
+SISI.forEach(k => $("p" + k).addEventListener("input", () => { $("v" + k).textContent = $("p" + k).value + "%"; olah(); }));
+function resetPotong() { SISI.forEach(k => { $("p" + k).value = 0; $("v" + k).textContent = "0%"; }); olah(); }
+$("zoom").addEventListener("change", aturZoom);
+
+/* ===== GAMBAR ===== */
+let asli = null;          // dataURL gambar asli
+let hasil = null;         // canvas 1-bit selebar printer
+$("file").addEventListener("change", e => {
+  const f = e.target.files[0]; if (!f) return;
+  $("namaFile").textContent = f.name;
+  const r = new FileReader();
+  r.onload = () => { asli = r.result; resetPotong(); };
+  r.readAsDataURL(f);
+});
+const muat = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error("Gambar tidak bisa dibuka")); i.src = src; });
+const dotsPrinter = () => +$("dotsKhusus").value || S.kertas;
+
+let tOlah;
+function olah() { clearTimeout(tOlah); tOlah = setTimeout(olahSekarang, 60); }
+async function olahSekarang() {
+  if (!asli) return;
+  try {
+    let img = await muat(asli);
+    // putar
+    const deg = +$("putar").value;
+    if (deg) {
+      const c = document.createElement("canvas"), sw = deg % 180 !== 0;
+      c.width = sw ? img.height : img.width; c.height = sw ? img.width : img.height;
+      const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height);
+      x.translate(c.width / 2, c.height / 2); x.rotate(deg * Math.PI / 180); x.drawImage(img, -img.width / 2, -img.height / 2);
+      img = await muat(c.toDataURL("image/png"));
+    }
+    // potong manual (persen tiap sisi)
+    const pa = +$("pAtas").value, pb = +$("pBawah").value, pk = +$("pKiri").value, pn = +$("pKanan").value;
+    if (pa || pb || pk || pn) {
+      const sx = Math.round(img.width * pk / 100), sy = Math.round(img.height * pa / 100);
+      const sw2 = Math.max(8, Math.round(img.width * (100 - pk - pn) / 100)), sh2 = Math.max(8, Math.round(img.height * (100 - pa - pb) / 100));
+      const c = document.createElement("canvas"); c.width = sw2; c.height = sh2;
+      c.getContext("2d").drawImage(img, sx, sy, sw2, sh2, 0, 0, sw2, sh2);
+      img = await muat(c.toDataURL("image/png"));
+    }
+    // potong tepi putih
+    if (S.crop) img = await muat(await potongOtomatis(img.src));
+
+    const dots = dotsPrinter();
+    const W = Math.max(8, Math.round(dots * (+S.lebar) / 100));
+    const H = Math.max(1, Math.round(img.height * W / img.width));
+    // ubah ukuran bertahap agar huruf tidak pecah (kualitas lebih baik dari sekali perkecil)
+    let src = img, sw = img.width, sh = img.height;
+    while (sw / 2 > W) {
+      const c = document.createElement("canvas"); c.width = Math.round(sw / 2); c.height = Math.round(sh / 2);
+      const x = c.getContext("2d"); x.imageSmoothingQuality = "high"; x.drawImage(src, 0, 0, c.width, c.height);
+      src = c; sw = c.width; sh = c.height;
+    }
+    const c = document.createElement("canvas"); c.width = W; c.height = H;
+    const x = c.getContext("2d");
+    x.fillStyle = "#fff"; x.fillRect(0, 0, W, H);
+    x.imageSmoothingEnabled = true; x.imageSmoothingQuality = "high";
+    x.drawImage(src, 0, 0, W, H);
+    const d = x.getImageData(0, 0, W, H), p = d.data;
+
+    // kecerahan (0 = hitam, 255 = putih)
+    let L = new Float32Array(W * H);
+    for (let i = 0, j = 0; j < W * H; i += 4, j++) {
+      const a = p[i + 3] / 255;
+      L[j] = (0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2]) * a + 255 * (1 - a);
+    }
+    if (S.balik) for (let j = 0; j < L.length; j++) L[j] = 255 - L[j];
+
+    const hitam = new Uint8Array(W * H);
+    if (S.mode === "teks") {
+      if (S.tajam) L = pertajam(L, W, H);
+      adaptif(L, W, H, hitam, S.ambang);
+    } else {
+      // Floyd–Steinberg dithering untuk foto/gradasi
+      const off = S.ambang;
+      for (let j = 0; j < L.length; j++) L[j] = L[j] - off;
+      for (let y = 0; y < H; y++) for (let xx = 0; xx < W; xx++) {
+        const j = y * W + xx, lama = L[j], baru = lama < 128 ? 0 : 255, err = lama - baru;
+        hitam[j] = baru === 0 ? 1 : 0;
+        if (xx + 1 < W) L[j + 1] += err * 7 / 16;
+        if (y + 1 < H) { if (xx > 0) L[j + W - 1] += err * 3 / 16; L[j + W] += err * 5 / 16; if (xx + 1 < W) L[j + W + 1] += err / 16; }
+      }
+    }
+    if (S.tebal) for (let y = 0; y < H; y++) for (let xx = W - 1; xx > 0; xx--) if (hitam[y * W + xx - 1]) hitam[y * W + xx] = 1;
+
+    // letakkan di tengah kertas selebar printer
+    const out = $("hasil"); out.width = dots; out.height = H;
+    const o = out.getContext("2d"), od = o.createImageData(dots, H), q = od.data, x0 = Math.floor((dots - W) / 2);
+    q.fill(255);
+    for (let y = 0; y < H; y++) for (let xx = 0; xx < W; xx++) if (hitam[y * W + xx]) { const k = (y * dots + x0 + xx) * 4; q[k] = q[k + 1] = q[k + 2] = 0; }
+    o.putImageData(od, 0, 0);
+    hasil = out;
+    out.style.display = "block"; $("kosong").style.display = "none";
+    $("ukuranCetak").textContent = `Ukuran cetak: ${(dots / 8).toFixed(0)} × ${(H / 8).toFixed(0)} mm · ${dots} × ${H} titik`;
+    aturZoom();
+    statusPrinter($("pStat").textContent, $("pDot").className.replace("dot", "").trim());
+  } catch (e) { $("ukuranCetak").textContent = e.message; }
+}
+function aturZoom() {
+  if (!hasil) return;
+  const z = +$("zoom").value;
+  $("hasil").style.width = Math.min(hasil.width * z, innerWidth - 40) + "px";
+}
+addEventListener("resize", aturZoom);
+
+/* ambang adaptif (metode Bradley): tiap titik dibandingkan dengan rata-rata sekitarnya,
+   sehingga tulisan pudar tetap terbaca dan bayangan / cahaya tidak rata tidak ikut menghitam */
+function adaptif(L, W, H, hitam, ambang) {
+  const I = new Float64Array((W + 1) * (H + 1));
+  for (let y = 0; y < H; y++) { let r = 0; for (let x = 0; x < W; x++) { r += L[y * W + x]; I[(y + 1) * (W + 1) + x + 1] = I[y * (W + 1) + x + 1] + r; } }
+  const s2 = Math.max(4, Math.round(Math.max(W, H) / 24));
+  const k = Math.min(0.4, Math.max(0.0, 0.15 - ambang / 400));
+  const tGlobal = otsu(L);
+  for (let y = 0; y < H; y++) {
+    const y1 = Math.max(0, y - s2), y2 = Math.min(H, y + s2 + 1);
+    for (let x = 0; x < W; x++) {
+      const x1 = Math.max(0, x - s2), x2 = Math.min(W, x + s2 + 1);
+      const n = (x2 - x1) * (y2 - y1);
+      const sum = I[y2 * (W + 1) + x2] - I[y1 * (W + 1) + x2] - I[y2 * (W + 1) + x1] + I[y1 * (W + 1) + x1];
+      const v = L[y * W + x];
+      // hitam jika lebih gelap dari rata-rata sekitar; area yang sangat gelap juga dianggap hitam
+      hitam[y * W + x] = (v < (sum / n) * (1 - k) || v < tGlobal * 0.45 + ambang) ? 1 : 0;
+    }
+  }
+}
+/* ambang otomatis (metode Otsu): memisahkan tulisan dari latar secara otomatis */
+function otsu(L) {
+  const h = new Array(256).fill(0); L.forEach(v => h[Math.max(0, Math.min(255, v | 0))]++);
+  const n = L.length; let sum = 0; for (let i = 0; i < 256; i++) sum += i * h[i];
+  let sB = 0, wB = 0, best = 0, t = 128;
+  for (let i = 0; i < 256; i++) {
+    wB += h[i]; if (!wB) continue; const wF = n - wB; if (!wF) break;
+    sB += i * h[i]; const mB = sB / wB, mF = (sum - sB) / wF, v = wB * wF * (mB - mF) * (mB - mF);
+    if (v > best) { best = v; t = i; }
+  }
+  return Math.min(200, Math.max(90, t));
+}
+/* pertajam ringan (unsharp mask 3x3) agar tepi huruf lebih tegas */
+function pertajam(L, W, H) {
+  const o = new Float32Array(L.length);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    let s = 0, n = 0;
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+      const yy = y + dy, xx = x + dx; if (yy < 0 || yy >= H || xx < 0 || xx >= W) continue; s += L[yy * W + xx]; n++;
+    }
+    const j = y * W + x; o[j] = L[j] + 0.8 * (L[j] - s / n);
+  }
+  return o;
+}
+
+/* ===== PRINTER LANGSUNG (Bluetooth / Serial, ESC/POS) ===== */
+const LAYANAN_BLE = [
+  "000018f0-0000-1000-8000-00805f9b34fb", "e7810a71-73ae-499d-8c15-faa9aef0c3f2",
+  "49535343-fe7d-4ae5-8fa9-9fafd205e455", "0000ff00-0000-1000-8000-00805f9b34fb",
+  "0000ffe0-0000-1000-8000-00805f9b34fb", "0000fee7-0000-1000-8000-00805f9b34fb",
+  "0000ae30-0000-1000-8000-00805f9b34fb", "0000ff80-0000-1000-8000-00805f9b34fb",
+  "0000af30-0000-1000-8000-00805f9b34fb", "0000fff0-0000-1000-8000-00805f9b34fb",
+  "0000ae00-0000-1000-8000-00805f9b34fb", "0000ffb0-0000-1000-8000-00805f9b34fb"
+];
+const SPP = "00001101-0000-1000-8000-00805f9b34fb";
+const P = { jenis: null, nama: "", dev: null, ch: null, tanpaRespon: false, port: null, writer: null, sibuk: false };
+const tidur = ms => new Promise(r => setTimeout(r, ms));
+function statusPrinter(teks, kelas = "") { $("pStat").textContent = teks; $("pDot").className = "dot " + kelas; $("btnLangsung").disabled = !P.jenis || P.sibuk; }
+function info(html) { const el = $("pInfo"); el.style.display = html ? "block" : "none"; el.innerHTML = html || ""; }
+
+async function hubungBT() {
+  info("");
+  if (!navigator.bluetooth) {
+    info("Browser ini belum bisa terhubung langsung ke Bluetooth. Gunakan <b>Google Chrome</b> (Android, Windows, Mac) atau <b>Microsoft Edge</b>. " +
+      "Di iPhone/iPad, buka file ini dengan aplikasi browser <b>Bluefy</b>." + (window.isSecureContext ? "" : "<br>Halaman juga harus dibuka dari alamat <b>https://</b>."));
+    return;
+  }
+  try {
+    statusPrinter("Mencari printer…", "busy");
+    const dev = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: LAYANAN_BLE });
+    await sambungBLE(dev);
+  } catch (e) {
+    statusPrinter(P.jenis ? `Terhubung: ${P.nama}` : "Printer belum terhubung", P.jenis ? "on" : "");
+    if (e.name !== "NotFoundError") info("Gagal terhubung: " + esc(e.message) +
+      "<br>Pastikan printer menyala, Bluetooth &amp; Lokasi HP aktif, dan printer tidak sedang tersambung ke aplikasi lain.");
+  }
+}
+async function sambungBLE(dev) {
+  statusPrinter("Menyambungkan ke " + (dev.name || "printer") + "…", "busy");
+  const server = await dev.gatt.connect();
+  let pilih = null;
+  for (const sv of await server.getPrimaryServices()) {
+    let chars = []; try { chars = await sv.getCharacteristics(); } catch (e) {}
+    for (const c of chars) if (c.properties.writeWithoutResponse || c.properties.write)
+      if (!pilih || (c.properties.writeWithoutResponse && !pilih.properties.writeWithoutResponse)) pilih = c;
+    if (pilih && pilih.properties.writeWithoutResponse) break;
+  }
+  if (!pilih) {
+    dev.gatt.disconnect();
+    throw new Error("Printer ini tidak menyediakan jalur Bluetooth LE untuk mencetak. Kemungkinan printer hanya mendukung Bluetooth klasik. Coba tombol Serial / COM di laptop, atau gunakan aplikasi RawBT di Android.");
+  }
+  dev.addEventListener("gattserverdisconnected", () => { if (P.dev === dev) { P.ch = null; statusPrinter(`Terputus dari ${P.nama} – tekan Cetak Langsung untuk menyambung ulang`, "busy"); $("btnLangsung").disabled = false; } });
+  Object.assign(P, { jenis: "ble", nama: dev.name || "Printer Bluetooth", dev, ch: pilih, tanpaRespon: !!pilih.properties.writeWithoutResponse });
+  statusPrinter(`Terhubung: ${P.nama}`, "on");
+}
+async function hubungSerial() {
+  info("");
+  if (!navigator.serial) { info("Mode Serial/COM hanya ada di <b>Chrome atau Edge di laptop/PC</b>."); return; }
+  try {
+    let port;
+    try { port = await navigator.serial.requestPort({ allowedBluetoothServiceClassIds: [SPP] }); }
+    catch (e) { if (e.name === "NotFoundError") throw e; port = await navigator.serial.requestPort(); }
+    await port.open({ baudRate: 9600 });
+    Object.assign(P, { jenis: "serial", nama: "Printer Serial/COM", port, writer: port.writable.getWriter() });
+    statusPrinter(`Terhubung: ${P.nama}`, "on");
+  } catch (e) {
+    if (e.name !== "NotFoundError") info("Gagal membuka port: " + esc(e.message));
+    statusPrinter(P.jenis ? `Terhubung: ${P.nama}` : "Printer belum terhubung", P.jenis ? "on" : "");
+  }
+}
+async function putuskan() {
+  try { if (P.jenis === "ble" && P.dev?.gatt.connected) P.dev.gatt.disconnect(); } catch (e) {}
+  try { if (P.writer) { P.writer.releaseLock(); await P.port.close(); } } catch (e) {}
+  Object.assign(P, { jenis: null, nama: "", dev: null, ch: null, port: null, writer: null });
+  statusPrinter("Printer belum terhubung");
+}
+
+async function kirim(bytes, onProg) {
+  if (P.jenis === "serial") {
+    for (let i = 0; i < bytes.length; i += 1024) { await P.writer.write(bytes.slice(i, i + 1024)); onProg(i / bytes.length); }
+    return;
+  }
+  if (!P.dev.gatt.connected || !P.ch) await sambungBLE(P.dev);
+  const size = +$("pChunk").value, jeda = 8;
+  for (let i = 0; i < bytes.length; i += size) {
+    const part = bytes.slice(i, i + size);
+    for (let coba = 0; ; coba++) {
+      try {
+        if (P.tanpaRespon && P.ch.writeValueWithoutResponse) await P.ch.writeValueWithoutResponse(part);
+        else if (P.ch.writeValueWithResponse) await P.ch.writeValueWithResponse(part);
+        else await P.ch.writeValue(part);
+        break;
+      } catch (e) { if (coba >= 5) throw e; await tidur(60); }
+    }
+    await tidur(size >= 180 ? jeda * 2 : jeda);
+    if ((i / size) % 10 === 0) onProg(i / bytes.length);
+  }
+}
+
+
+function escposDariHitamPutih(c, salinan) {
+  const dots = c.width, h = c.height, wB = dots / 8, px = c.getContext("2d").getImageData(0, 0, dots, h).data;
+  const bits = new Uint8Array(wB * h);
+  for (let y = 0; y < h; y++) for (let x = 0; x < dots; x++) if (px[(y * dots + x) * 4] < 128) bits[y * wB + (x >> 3)] |= 0x80 >> (x & 7);
+  const out = [0x1B, 0x40];
+  for (let s = 0; s < salinan; s++) {
+    for (let y = 0; y < h; y += 96) {
+      const n = Math.min(96, h - y);
+      out.push(0x1D, 0x76, 0x30, 0x00, wB & 255, wB >> 8, n & 255, n >> 8);
+      for (let k = y * wB; k < (y + n) * wB; k++) out.push(bits[k]);
+    }
+    out.push(0x1B, 0x64, +$("pFeed").value || 0);
+    if ($("pCut").checked) out.push(0x1D, 0x56, 0x42, 0x00);
+  }
+  return new Uint8Array(out);
+}
+async function cetak() {
+  if (!P.jenis || P.sibuk) return;
+  if (!hasil) { info("Pilih gambar dulu sebelum mencetak."); return; }
+  info(""); P.sibuk = true;
+  const bar = $("pBar"), isi = bar.firstElementChild;
+  bar.style.display = "block"; isi.style.width = "0";
+  try {
+    statusPrinter(`Mencetak ke ${P.nama}…`, "busy");
+    await kirim(escposDariHitamPutih(hasil, +$("salinan").value), f => isi.style.width = Math.round(f * 100) + "%");
+    isi.style.width = "100%";
+    P.sibuk = false; statusPrinter(`Terhubung: ${P.nama} – selesai mencetak`, "on");
+  } catch (e) {
+    P.sibuk = false; statusPrinter(`Terhubung: ${P.nama}`, "on");
+    info("Gagal mencetak: " + esc(e.message) + "<br>Coba ubah <b>Kecepatan kirim</b> ke <b>Paling aman</b>, atau hubungkan ulang printer.");
+  }
+  setTimeout(() => bar.style.display = "none", 1500);
+}
+if (!navigator.serial) $("btnSerial").style.display = "none";
+isiForm();
+</script>
+</body>
+</html>
