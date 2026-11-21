@@ -400,7 +400,7 @@ function pertajam(L, W, H) {
 function susunTeksStruk(words, cols, garisY, imgH) {
   const ulang = (c, n) => n > 0 ? c.repeat(n) : "";
   words = words.filter(w => String(w.text).trim() && (w.confidence ?? 100) > 25)
-    .map(w => ({ t: String(w.text).trim(), x0: w.bbox.x0, x1: w.bbox.x1, y0: w.bbox.y0, y1: w.bbox.y1, cy: (w.bbox.y0 + w.bbox.y1) / 2, h: w.bbox.y1 - w.bbox.y0 }));
+    .map(w => ({ t: koreksiAngka(String(w.text).trim()), x0: w.bbox.x0, x1: w.bbox.x1, y0: w.bbox.y0, y1: w.bbox.y1, cy: (w.bbox.y0 + w.bbox.y1) / 2, h: w.bbox.y1 - w.bbox.y0 }));
   if (!words.length) return { baris: [], judul: -1 };
   const hs = words.map(w => w.h).sort((a, b) => a - b), hMed = hs[hs.length >> 1] || 10;
   // buang tulisan yang terpotong di tepi atas/bawah gambar (sisa layar sebelumnya)
@@ -518,13 +518,16 @@ function deteksiGaris(canvas, words) {
   const cv = a => { if (a.length < 2) return 0; const m = a.reduce((x, y) => x + y, 0) / a.length; return Math.sqrt(a.reduce((x, y) => x + (y - m) * (y - m), 0) / a.length) / (m || 1); };
   const cocok = y => {
     if (tertutup[y]) return false;
-    const seg = [], gap = []; let run = 0, white = 0, gelap = 0, x0 = -1, x1 = -1;
+    const seg = [], gap = []; let run = 0, white = 0, gelap = 0, x0 = -1, x1 = -1, pucat = 0;
     for (let x = 0; x < W; x++) {
-      const i = (y * W + x) * 4, g = (0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2]) < 215;
+      const i = (y * W + x) * 4, lum = 0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2];
+      if (lum < 242) pucat++;
+      const g = lum < 215;
       if (g) { if (run === 0 && x0 >= 0 && white) gap.push(white); run++; white = 0; gelap++; if (x0 < 0) x0 = x; x1 = x; }
       else { if (run) seg.push(run); run = 0; if (x0 >= 0) white++; }
     }
     if (run) seg.push(run);
+    if (pucat > lebar * 0.6 && pucat < W * 0.98) return "lurus";       // garis lurus tipis, boleh sangat pucat
     if (x0 < 0 || x1 - x0 < lebar * 0.22) return false;
     const bentang = x1 - x0;
     if (gelap > bentang * 0.85 && seg.length <= 4) return true;                                   // garis lurus
@@ -537,6 +540,14 @@ function deteksiGaris(canvas, words) {
     if (!ok && mulai >= 0) { if (y - mulai < 14) hasil.push((mulai + y) / 2); mulai = -1; }
   }
   return hasil.filter((y, k) => k === 0 || y - hasil[k - 1] > 10);
+}
+
+/* OCR sering tertukar antara angka 1/0 dan huruf l, I, |, O pada font struk.
+   Koreksi hanya di posisi yang jelas berupa angka (setelah titik/garis miring, atau di antara angka). */
+function koreksiAngka(t) {
+  t = t.replace(/([.\/])([lI|]+)(?=[,.\/]|$)/g, (m, a, b) => a + "1".repeat(b.length));
+  t = t.replace(/(?<=\d)[lI|]|[lI|](?=\d)/g, "1").replace(/(?<=\d)[Oo](?=\d|\b)/g, "0");
+  return t;
 }
 
 /* ===== ESC/POS MODE TEKS (huruf bawaan printer, tajam seperti Thermer) ===== */
