@@ -433,6 +433,7 @@ Barang yang sudah dibeli tidak dapat dikembalikan</textarea>
             <select id="pChunk"><option value="20">Paling aman (lambat)</option><option value="100" selected>Normal</option><option value="180">Cepat</option><option value="512">Sangat cepat</option></select></div>
         </div>
         <label class="chk"><input type="checkbox" id="pCut"> Potong kertas otomatis (printer dengan auto-cutter)</label>
+        <label class="chk"><input type="checkbox" id="pTebal"> Pertebal huruf (mode Gambar) – bantu font tipis agar lebih jelas</label>
         <div class="catatan"><b>Mode teks</b> memakai huruf bawaan printer sehingga paling tajam. Jenis font dari website tidak berlaku, tetapi tebal, perataan, ukuran nama toko, spasi baris, dan logo tetap tercetak.<br>Kalau hasil cetak terputus, pilih kecepatan <b>Paling aman</b>. Agar ukuran huruf pas, atur <b>Lebar area cetak</b> ke <b>48 mm</b> untuk printer 58 mm.</div>
       </details>
       <div class="catatan" id="pInfo" style="display:none"></div>
@@ -968,32 +969,71 @@ async function putuskan() {
   Object.assign(P, { jenis: null, nama: "", dev: null, ch: null, port: null, writer: null });
   statusPrinter("Printer belum terhubung");
 }
-async function buatESCPOS() {
-  const src = await strukKeCanvas();
-  const dots = +$("pDots").value, lebarByte = dots / 8;
-  const h = Math.round(src.height * dots / src.width);
-  const c = document.createElement("canvas"); c.width = dots; c.height = h;
-  const x = c.getContext("2d");
-  x.fillStyle = "#fff"; x.fillRect(0, 0, dots, h);
-  x.imageSmoothingEnabled = true; x.imageSmoothingQuality = "high";
-  x.drawImage(src, 0, 0, dots, h);
-  const px = x.getImageData(0, 0, dots, h).data, thr = +$("pThr").value;
+/* ===== MODE GAMBAR KUALITAS TINGGI =====
+   Struk disusun ulang selebar area cetak printer (48 mm / 72 mm), lalu digambar
+   langsung di resolusi printer (8 titik per mm) tanpa diperkecil, sehingga ukuran
+   huruf tercetak sesuai pt dan tepi huruf tetap rapi. */
+async function strukKeCanvasPrinter(dots, cssFont) {
+  const el = document.getElementById("struk");
+  const wrap = document.createElement("div");
+  wrap.style.cssText = "position:absolute;left:-100000px;top:0;";
+  const clone = el.cloneNode(true);
+  clone.removeAttribute("id");
+  clone.querySelectorAll("[id]").forEach(n => n.removeAttribute("id"));
+  Object.assign(clone.style, { width: (dots / 8) + "mm", boxShadow: "none", margin: "0", transform: "none" });
+  wrap.appendChild(clone); document.body.appendChild(wrap);
+  try {
+    // tabel teks (gaya Tabel) diskalakan agar jumlah karakter per baris tetap sama
+    const preAsli = el.querySelector("pre.tbl"), preBaru = clone.querySelector("pre.tbl");
+    if (preAsli && preBaru) {
+      const lebarIsi = (e) => { const cs = getComputedStyle(e); return e.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight); };
+      preBaru.style.fontSize = (parseFloat(getComputedStyle(preAsli).fontSize) * lebarIsi(clone) / lebarIsi(el)) + "px";
+    }
+    try { await document.fonts.ready; } catch (e) {}
+    const w = clone.offsetWidth, h = clone.offsetHeight;
+    const vars = document.documentElement.getAttribute("style") || "";
+    const css = (cssFont || "") + [...document.styleSheets].map(ss => { try { return [...ss.cssRules]; } catch (e) { return []; } }).flat()
+      .filter(r => !(r instanceof CSSMediaRule) && !(r instanceof CSSPageRule) && !(r instanceof CSSFontFaceRule)).map(r => r.cssText).join("\n");
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><foreignObject width="100%" height="100%">
+      <div xmlns="http://www.w3.org/1999/xhtml" style="${vars.replace(/"/g, "&quot;")}"><style>${css.replace(/</g, "&lt;")}</style>${new XMLSerializer().serializeToString(clone)}</div>
+      </foreignObject></svg>`;
+    const img = new Image();
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+    await img.decode();
+    const H = Math.round(h * dots / w);
+    const c = document.createElement("canvas"); c.width = dots; c.height = H;
+    const x = c.getContext("2d");
+    x.fillStyle = "#fff"; x.fillRect(0, 0, dots, H);
+    x.drawImage(img, 0, 0, dots, H);   // SVG digambar langsung di ukuran akhir (satu kali rasterisasi)
+    return c;
+  } finally { wrap.remove(); }
+}
+/* gambar resolusi printer → perintah ESC/POS raster */
+function escposDariCanvas(c, o) {
+  const dots = c.width, h = c.height, lebarByte = dots / 8;
+  const px = c.getContext("2d").getImageData(0, 0, dots, h).data;
+  const hitam = new Uint8Array(dots * h);
+  for (let i = 0, j = 0; j < dots * h; i += 4, j++) hitam[j] = (0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2]) < o.thr ? 1 : 0;
+  if (o.tebal) for (let y = 0; y < h; y++) for (let xx = dots - 1; xx > 0; xx--) if (hitam[y * dots + xx - 1]) hitam[y * dots + xx] = 1;
   const bits = new Uint8Array(lebarByte * h);
-  for (let y = 0; y < h; y++) for (let xx = 0; xx < dots; xx++) {
-    const i = (y * dots + xx) * 4;
-    if (0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2] < thr) bits[y * lebarByte + (xx >> 3)] |= 0x80 >> (xx & 7);
-  }
+  for (let y = 0; y < h; y++) for (let xx = 0; xx < dots; xx++) if (hitam[y * dots + xx]) bits[y * lebarByte + (xx >> 3)] |= 0x80 >> (xx & 7);
   let akhir = h; while (akhir > 1 && bits.subarray((akhir - 1) * lebarByte, akhir * lebarByte).every(v => v === 0)) akhir--;
-  akhir = Math.min(h, akhir + Math.round((parseFloat($("feed").value) || 0) * 8));
+  akhir = Math.min(h, akhir + Math.round((o.feedMm || 0) * 8));
   const out = [0x1B, 0x40], BAND = 96;
   for (let y = 0; y < akhir; y += BAND) {
     const n = Math.min(BAND, akhir - y);
     out.push(0x1D, 0x76, 0x30, 0x00, lebarByte & 255, lebarByte >> 8, n & 255, n >> 8);
     for (let k = y * lebarByte; k < (y + n) * lebarByte; k++) out.push(bits[k]);
   }
-  out.push(0x1B, 0x64, +$("pFeed").value || 0);
-  if ($("pCut").checked) out.push(0x1D, 0x56, 0x42, 0x00);
+  out.push(0x1B, 0x64, o.feedLines || 0);
+  if (o.cut) out.push(0x1D, 0x56, 0x42, 0x00);
   return new Uint8Array(out);
+}
+async function buatESCPOS() {
+  render();
+  const c = await strukKeCanvasPrinter(+$("pDots").value, await cssFontTertanam($("jenis").value));
+  return escposDariCanvas(c, { thr: +$("pThr").value, tebal: $("pTebal").checked, feedMm: parseFloat($("feed").value) || 0,
+    feedLines: +$("pFeed").value || 0, cut: $("pCut").checked });
 }
 /* ===== ESC/POS MODE TEKS (huruf bawaan printer, tajam seperti Thermer) ===== */
 const ESC = 0x1B, GS = 0x1D;
