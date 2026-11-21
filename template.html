@@ -92,6 +92,8 @@
   .apl .total-a { font-size: 1.18em; font-weight: bold; }
   .apl .alamat-a { font-size: 0.88em; }
   .apl .garis { margin: 2.2mm 0; }
+  .struk.tipis b, .struk.tipis .toko, .struk.tipis .total, .struk.tipis .total-a,
+  .struk.tipis .row-a > span:last-child, .struk.tipis pre.tbl b { font-weight: normal !important; }
   pre.tbl { margin: 0; font: inherit; white-space: pre; overflow: hidden; letter-spacing: inherit; }
   pre.tbl b { font-weight: bold; }
 
@@ -194,6 +196,11 @@
           <option value="bold">Tebal semua</option>
         </select></div>
     </div>
+    <label>Penebalan huruf</label>
+    <select id="gayaTebal">
+      <option value="tipis" selected>Tipis – seperti aplikasi kasir (tanpa huruf tebal)</option>
+      <option value="tebal">Tebal – nama toko, nilai &amp; total ditebalkan</option>
+    </select>
     <div class="row2">
       <div><label>Jenis garis pemisah</label>
         <select id="garis">
@@ -830,6 +837,7 @@ function render() {
     document.documentElement.style.setProperty("--" + k, $(k).value));
   const aH = $("alignHeader").value, aF = $("alignFooter").value, up = $("caseItem").value;
   $("struk").style.fontWeight = $("tebal").value;
+  $("struk").classList.toggle("tipis", $("gayaTebal").value === "tipis" && $("tebal").value !== "bold");
   $("garisChar").disabled = $("garis").value !== "tx";
   $("tanggal").disabled = $("tglMode").value !== "manual";
 
@@ -1322,19 +1330,20 @@ function ukuranEsc(pt, dasar) {
 async function buatESCPOSTeks() {
   const dots = +$("pDots").value, fontB = $("pFont").value === "B", cols = kolomPrinter(dots, fontB);
   const E = new EscPos($("tebal").value === "bold", fontB).init(spasiDots($("lh").value, fontB));
+  const tipis = $("gayaTebal").value === "tipis";   // tanpa huruf tebal, seperti struk aplikasi kasir
   const aH = $("alignHeader").value;
   if (logoData) { E.raster(await rasterGambar(logoData, +$("logoLebar").value, aH, $("logoBW").checked ? 128 : +$("pThr").value, dots)); E.feedDots(8); }
   const [sz] = ukuranEsc($("tokoPlus").value, $("font").value);
-  bungkus($("namaToko").value, Math.floor(cols / ((sz >> 4) + 1))).forEach(l => E.text(l, { align: aH, bold: true, size: sz }));
+  bungkus($("namaToko").value, Math.floor(cols / ((sz >> 4) + 1))).forEach(l => E.text(l, { align: aH, bold: !tipis, size: sz }));
   $("alamat").value.split("\n").forEach(par => bungkus(par, cols).forEach(l => E.text(l, { align: aH })));
   strukTeks(cols, true).forEach(l => {
     if (typeof l === "string") return E.text(l.replace(/\s+$/, ""));
     if (l.parts) {   // satu baris dengan bagian tebal & biasa
       E.raw(ESC, 0x61, 0, GS, 0x21, l.size || 0);
-      l.parts.forEach(p => { E.raw(ESC, 0x45, (p.bold || E.boldAll) ? 1 : 0); for (const ch of asciiAman(p.s)) E.b.push(ch.charCodeAt(0)); });
+      l.parts.forEach(p => { E.raw(ESC, 0x45, ((p.bold && !tipis) || E.boldAll) ? 1 : 0); for (const ch of asciiAman(p.s)) E.b.push(ch.charCodeAt(0)); });
       E.raw(0x0A); E.reset(); return;
     }
-    E.text(l.s, { bold: l.bold, size: l.size });
+    E.text(l.s, { bold: l.bold && !tipis, size: l.size });
   });
   E.feedDots((parseFloat($("feed").value) || 0) * 8);
   return E.end(+$("pFeed").value || 0, $("pCut").checked);
