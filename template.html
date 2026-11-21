@@ -122,6 +122,23 @@
   <div class="panel">
     <h2>Template Struk Thermal</h2>
 
+    <details class="kartu" id="kartuSimpan" open style="margin-top:6px">
+      <summary>💾 Struk tersimpan</summary>
+      <div style="font-size:12px;color:#777;margin:6px 0">Semua isian <b>tersimpan otomatis</b> di browser ini. Simpan dengan nama untuk membuat beberapa versi struk (mis. per toko / cabang).</div>
+      <div class="row2">
+        <div><input id="profilNama" placeholder="Nama, mis. Warung Kopi Mamang"></div>
+        <div style="flex:0 0 auto"><button type="button" class="btn btn-add" style="margin:0;background:#1a73e8;color:#fff" onclick="simpanProfil()">💾 Simpan</button></div>
+      </div>
+      <div id="daftarProfil" style="margin-top:6px"></div>
+      <div class="fbar" style="margin-top:8px">
+        <button type="button" class="btn" onclick="eksporProfil()">⬇️ Simpan ke file</button>
+        <button type="button" class="btn" onclick="$('fileProfil').click()">⬆️ Buka file</button>
+        <button type="button" class="btn" onclick="isianBaru()">🆕 Isian baru</button>
+        <input type="file" id="fileProfil" accept=".json,application/json" style="display:none">
+      </div>
+      <div class="ok" id="okSimpan" style="margin-top:4px"></div>
+    </details>
+
     <h3>Kertas</h3>
     <label>Ukuran kertas struk</label>
     <div class="ukuran-pilih">
@@ -717,7 +734,94 @@ function barisTabel(w) {
   return L;
 }
 
+/* ===== SIMPAN OTOMATIS & STRUK TERSIMPAN ===== */
+const KUNCI_AUTO = "templateStruk.auto.v1", KUNCI_PROFIL = "templateStruk.profil.v1";
+let siapSimpan = false, tSimpan;
+const LEWATI = ["logo", "profilNama", "fileProfil"];
+function ambilState() {
+  const f = {};
+  document.querySelectorAll(".panel input[id], .panel select[id], .panel textarea[id]").forEach(el => {
+    if (el.type === "file" || LEWATI.includes(el.id)) return;
+    f[el.id] = el.type === "checkbox" ? el.checked : el.value;
+  });
+  return { v: 1, fields: f, items: JSON.parse(JSON.stringify(items)), logo: logoAsli || "", gaya };
+}
+async function pasangState(st) {
+  Object.entries(st.fields || {}).forEach(([id, v]) => {
+    const el = $(id); if (!el || el.type === "file" || LEWATI.includes(id)) return;
+    if (el.type === "checkbox") el.checked = !!v; else el.value = v;
+  });
+  if (Array.isArray(st.items)) items = st.items;
+  logoAsli = st.logo || "";
+  gaya = DESAIN.some(d => d.id === st.gaya) ? st.gaya : "standar";
+  renderItemInputs(); tandaiGaya();
+  const u = ["72mm", "80mm"].includes($("lebar").value) ? "80" : "58";
+  document.querySelectorAll(".uk[data-uk]").forEach(b => b.classList.toggle("on", b.dataset.uk === u));
+  await prosesLogo();
+}
+function simpanOtomatis() {
+  if (!siapSimpan) return;
+  clearTimeout(tSimpan);
+  tSimpan = setTimeout(() => {
+    try { localStorage.setItem(KUNCI_AUTO, JSON.stringify(ambilState())); }
+    catch (e) { pesanSimpan("⚠️ Penyimpanan penuh – coba logo yang lebih kecil."); }
+  }, 400);
+}
+function pesanSimpan(t) { $("okSimpan").textContent = t; clearTimeout(pesanSimpan.t); pesanSimpan.t = setTimeout(() => $("okSimpan").textContent = "", 3500); }
+function bacaProfil() { try { return JSON.parse(localStorage.getItem(KUNCI_PROFIL)) || {}; } catch (e) { return {}; } }
+function tulisProfil(p) { try { localStorage.setItem(KUNCI_PROFIL, JSON.stringify(p)); return true; } catch (e) { pesanSimpan("⚠️ Penyimpanan penuh – hapus struk lama atau pakai logo lebih kecil."); return false; } }
+function tampilProfil() {
+  const p = bacaProfil(), nama = Object.keys(p).sort((a, b) => (p[b].waktu || 0) - (p[a].waktu || 0));
+  $("daftarProfil").innerHTML = nama.length ? nama.map(n => `
+    <div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid #f0f0f0">
+      <span style="flex:1;font-size:13px">📄 <b>${esc(n)}</b> <small style="color:#999">${p[n].waktu ? new Date(p[n].waktu).toLocaleDateString("id-ID") : ""}</small></span>
+      <button type="button" class="btn" style="padding:5px 10px;background:#e8f0fe" onclick="bukaProfil('${encodeURIComponent(n)}')">Buka</button>
+      <button type="button" class="btn btn-del" style="padding:5px 9px" onclick="hapusProfil('${encodeURIComponent(n)}')">✕</button>
+    </div>`).join("") : `<div style="font-size:12px;color:#999">Belum ada struk yang disimpan dengan nama.</div>`;
+}
+function simpanProfil() {
+  const n = $("profilNama").value.trim() || $("namaToko").value.trim();
+  if (!n) { pesanSimpan("Isi nama dulu."); return; }
+  const p = bacaProfil();
+  if (p[n] && !confirm(`"${n}" sudah ada. Timpa dengan isian sekarang?`)) return;
+  p[n] = { ...ambilState(), waktu: Date.now() };
+  if (tulisProfil(p)) { $("profilNama").value = ""; tampilProfil(); pesanSimpan(`✓ Tersimpan sebagai "${n}"`); }
+}
+async function bukaProfil(enc) {
+  const n = decodeURIComponent(enc), st = bacaProfil()[n]; if (!st) return;
+  siapSimpan = false; await pasangState(st); siapSimpan = true; simpanOtomatis();
+  setParam("gaya", gaya); pesanSimpan(`✓ "${n}" dibuka`);
+}
+function hapusProfil(enc) {
+  const n = decodeURIComponent(enc); if (!confirm(`Hapus "${n}"?`)) return;
+  const p = bacaProfil(); delete p[n]; tulisProfil(p); tampilProfil();
+}
+function eksporProfil() {
+  const data = { app: "template-struk", v: 1, sekarang: ambilState(), profil: bacaProfil() };
+  unduh(new Blob([JSON.stringify(data)], { type: "application/json" }), "struk-tersimpan.json");
+}
+$("fileProfil").addEventListener("change", e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = async () => {
+    try {
+      const d = JSON.parse(r.result);
+      if (d.profil) { const p = bacaProfil(); Object.assign(p, d.profil); tulisProfil(p); tampilProfil(); }
+      if (d.sekarang) { siapSimpan = false; await pasangState(d.sekarang); siapSimpan = true; simpanOtomatis(); }
+      pesanSimpan("✓ File dibuka");
+    } catch (err) { pesanSimpan("⚠️ File tidak bisa dibuka"); }
+    e.target.value = "";
+  };
+  r.readAsText(f);
+});
+function isianBaru() {
+  if (!confirm("Kosongkan isian sekarang dan kembali ke contoh awal? (Struk yang sudah disimpan dengan nama tidak terhapus.)")) return;
+  try { localStorage.removeItem(KUNCI_AUTO); } catch (e) {}
+  siapSimpan = false; location.reload();
+}
+
 function render() {
+  simpanOtomatis();
   document.documentElement.style.setProperty("--lebar", $("lebar").value);
   document.documentElement.style.setProperty("--font", $("font").value);
   document.documentElement.style.setProperty("--jenis", $("jenis").value);
@@ -1356,11 +1460,21 @@ window.addEventListener("beforeprint", render);
 setInterval(() => { if ($("tglMode").value === "auto") render(); }, 30000);
 document.querySelector(".btn-print").onclick = () => { render(); window.print(); };
 renderItemInputs();
-{ const gp = new URLSearchParams(location.search).get("gaya");
-  gaya = DESAIN.some(d => d.id === gp) ? gp : "standar";
-  const d0 = DESAIN.find(d => d.id === gaya); if (d0.preset) Object.entries(d0.preset).forEach(([id, v]) => { if ($(id)) $(id).value = v; }); }
-tandaiGaya();
-pilihUkuran(new URLSearchParams(location.search).get("ukuran") === "80" ? "80" : "58");
+(async () => {
+  const q = new URLSearchParams(location.search);
+  let st = null; try { st = JSON.parse(localStorage.getItem(KUNCI_AUTO)); } catch (e) {}
+  if (st) await pasangState(st);
+  const gp = q.get("gaya");
+  if (gp && DESAIN.some(d => d.id === gp)) gaya = gp;
+  else if (!st) gaya = "standar";
+  tandaiGaya();
+  const uSimpan = ["72mm", "80mm"].includes($("lebar").value) ? "80" : "58";
+  const uq = q.get("ukuran");
+  if (!st || (uq && uq !== uSimpan)) pilihUkuran(uq === "80" ? "80" : "58");
+  else { document.querySelectorAll(".uk[data-uk]").forEach(b => b.classList.toggle("on", b.dataset.uk === uSimpan)); setParam("gaya", gaya); render(); }
+  tampilProfil();
+  siapSimpan = true;
+})();
 try { document.fonts.addEventListener("loadingdone", render); } catch (e) {}
 </script>
 </body>
