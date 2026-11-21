@@ -166,7 +166,7 @@ Telp. 0812-3456-7890</textarea>
       <button type="button" class="btn" onclick="putuskan()">Putuskan</button>
     </div>
     <div class="row">
-      <div><label>Huruf printer</label><select id="pFont"><option value="A">Font A – normal</option><option value="B">Font B – kecil</option></select></div>
+      
       <div><label>Jumlah cetak</label><select id="salinan"><option>1</option><option>2</option><option>3</option></select></div>
     </div>
     <details style="margin-top:8px">
@@ -497,7 +497,7 @@ function barisStruk(w) {
   return L;
 }
 async function buatDokumen() {
-  const dots = DOTS[$("ukuran").value] || 384, fontB = $("pFont").value === "B", w = kolomPrinter(dots, fontB);
+  const dots = DOTS[$("ukuran").value] || 384, fontB = false, w = kolomPrinter(dots, fontB);
   const dok = [];
   if (logoSiap) { dok.push({ raster: await rasterGambar(logoSiap, +$("logoLebar").value, $("alignHeader").value, 128, dots) }); dok.push({ feed: 8 }); }
   barisStruk(w).forEach(l => dok.push(l));
@@ -517,7 +517,7 @@ function perbarui() {
     const c = dokumenKeKanvas(dok, { dots, fontB }), out = $("pratinjau");
     out.width = c.width; out.height = c.height; out.getContext("2d").drawImage(c, 0, 0);
     out.style.width = Math.min(innerWidth - 40, dots * (innerWidth < 820 ? 0.85 : 0.75)) + "px";
-    $("infoKertas").textContent = `Kertas ${$("ukuran").value} mm · ${w} karakter per baris · Font ${fontB ? "B" : "A"}`;
+    $("infoKertas").textContent = `Kertas ${$("ukuran").value} mm · ${w} karakter per baris`;
     simpanOtomatis();
   }, 60);
 }

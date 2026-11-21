@@ -131,7 +131,7 @@
         <button type="button" class="btn" onclick="putuskan()">Putuskan</button>
       </div>
       <div class="row">
-        <div><label>Huruf printer</label><select id="pFont"><option value="A">Font A – normal</option><option value="B">Font B – kecil</option></select></div>
+        
         <div><label>Jumlah cetak</label><select id="salinan"><option>1</option><option>2</option><option>3</option></select></div>
       </div>
       <details style="margin-top:8px">
@@ -1820,7 +1820,7 @@ async function blokKeDokumen(b, w, dots, dok) {
   }
 }
 async function buatDokumen() {
-  const dots = DOTS[G.ukuran] || 384, fontB = G.pFont === "B", w = kolomPrinter(dots, fontB), dok = [];
+  const dots = DOTS[G.ukuran] || 384, fontB = false, w = kolomPrinter(dots, fontB), dok = [];
   for (const b of blocks) await blokKeDokumen(b, w, dots, dok);
   return { dok, dots, fontB, w };
 }
@@ -1853,14 +1853,14 @@ function perbarui() {
     const c = dokumenKeKanvas(dok.length ? dok : ["", "  (struk kosong)", ""], { dots, fontB }), out = $("pratinjau");
     out.width = c.width; out.height = c.height; out.getContext("2d").drawImage(c, 0, 0);
     out.style.width = Math.min(innerWidth - 40, dots * (innerWidth < 820 ? 0.85 : 0.75)) + "px";
-    $("infoKertas").textContent = `Kertas ${G.ukuran} mm · ${w} karakter per baris · Font ${fontB ? "B" : "A"}`;
+    $("infoKertas").textContent = `Kertas ${G.ukuran} mm · ${w} karakter per baris`;
     simpanLokal();
   }, 60);
 }
 function semua() { renderEditor(); perbarui(); }
 function pilihUkuran(u) { G.ukuran = u; perbarui(); }
 $("gGaris").addEventListener("change", () => { G.garis = $("gGaris").value; perbarui(); });
-["pFont", "pFeed", "pChunk"].forEach(id => $(id).addEventListener("change", () => { G[id] = $(id).value; perbarui(); }));
+["pFeed", "pChunk"].forEach(id => $(id).addEventListener("change", () => { G[id] = $(id).value; perbarui(); }));
 $("pCut").addEventListener("change", () => { G.pCut = $("pCut").checked; perbarui(); });
 setInterval(() => { if (blocks.some(b => b.type === "tanggal" && b.sumber === "auto")) perbarui(); }, 30000);
 
@@ -2003,7 +2003,7 @@ function pasang(d) {
     if (n.type === "gambar" && n.lebarPct && ![35, 50, 60, 90].includes(+n.lebarPct)) n.lebarPct = 60;
     return n;
   });
-  $("gGaris").value = G.garis; $("pFont").value = G.pFont; $("pFeed").value = G.pFeed; $("pChunk").value = G.pChunk; $("pCut").checked = !!G.pCut;
+  $("gGaris").value = G.garis; $("pFeed").value = G.pFeed; $("pChunk").value = G.pChunk; $("pCut").checked = !!G.pCut;
 }
 function eksporDesain() { unduh(new Blob([JSON.stringify({ app: "struk-manual", v: 2, G, blocks })], { type: "application/json" }), "desain-struk.json"); }
 $("fileDesain").addEventListener("change", e => {
