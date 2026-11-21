@@ -450,7 +450,7 @@ function susunTeksStruk(words, cols, garisY, imgH) {
   jarak.sort((a, b) => a - b);
   const jarakMed = jarak.length ? jarak[jarak.length >> 1] : hMed * 1.5;
   // 4) ubah ke teks selebar "cols" karakter
-  const baris = []; let judul = -1, prevCy = null;
+  const baris = []; let judul = -1, prevCy = null, sudahKolom = false;
   const garis = s => /^[-_.=~*·•]{3,}$/.test(s.replace(/\s/g, ""));
   for (const l of lines) {
     if (l.garisLine) { if (baris[baris.length - 1] !== ulang("-", cols)) baris.push(ulang("-", cols)); prevCy = l.cy; continue; }
@@ -460,7 +460,9 @@ function susunTeksStruk(words, cols, garisY, imgH) {
     if (judul < 0 && baris.filter(Boolean).length === 0 && l.h > hMed * 1.15) judul = baris.length;
     if (l.seg.length === 1) {
       const t = l.seg[0].t, mKiri = l.x0 - kiriAll, mKanan = kananAll - l.x1;
-      const tengah = mKiri > lebar * 0.06 && Math.abs(mKiri - mKanan) < lebar * 0.12;
+      const simetris = Math.abs(mKiri - mKanan) < lebar * 0.12;
+      // di bagian kepala struk (sebelum baris label–nilai pertama), baris yang simetris dianggap rata tengah
+      const tengah = simetris && (mKiri > lebar * 0.06 || !sudahKolom);
       const kanan = !tengah && mKiri > lebar * 0.45 && mKanan < lebar * 0.12;
       const indent = Math.max(0, Math.min(cols - 4, Math.round(mKiri / lebar * cols)));
       bungkusOCR(t, tengah || kanan ? cols : cols - indent).forEach(p => baris.push(
@@ -469,6 +471,7 @@ function susunTeksStruk(words, cols, garisY, imgH) {
         : ulang(" ", indent > 1 ? indent : 0) + p));
       continue;
     }
+    if (l.seg.length >= 2) sudahKolom = true;
     if (l.seg.length === 2 && (kananAll - l.seg[1].x1) < lebar * 0.15) {
       const ind = Math.round((l.seg[0].x0 - kiriAll) / lebar * cols);
       const a = (ind > 1 ? ulang(" ", Math.min(ind, 6)) : "") + l.seg[0].t, b = l.seg[1].t;
