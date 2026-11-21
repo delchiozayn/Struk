@@ -403,12 +403,7 @@ Barang yang sudah dibeli tidak dapat dikembalikan</textarea>
         <button class="btn" onclick="putuskan()">Putuskan</button>
       </div>
       <div class="row2">
-        <div><label>Mode cetak</label>
-          <select id="pMode">
-            <option value="teks" selected>Teks printer – tajam (seperti Thermer)</option>
-            <option value="gambar">Gambar – persis seperti pratinjau</option>
-          </select></div>
-        <div><label>Huruf printer (mode teks)</label>
+        <div><label>Huruf printer</label>
           <select id="pFont"><option value="A" selected>Font A – normal</option><option value="B">Font B – kecil</option></select></div>
       </div>
       <button class="btn go" id="btnLangsung" onclick="cetakLangsung()" disabled>⚡ Cetak Langsung ke Printer</button>
@@ -433,8 +428,7 @@ Barang yang sudah dibeli tidak dapat dikembalikan</textarea>
             <select id="pChunk"><option value="20">Paling aman (lambat)</option><option value="100" selected>Normal</option><option value="180">Cepat</option><option value="512">Sangat cepat</option></select></div>
         </div>
         <label class="chk"><input type="checkbox" id="pCut"> Potong kertas otomatis (printer dengan auto-cutter)</label>
-        <label class="chk"><input type="checkbox" id="pTebal"> Pertebal huruf (mode Gambar) – bantu font tipis agar lebih jelas</label>
-        <div class="catatan"><b>Mode teks</b> memakai huruf bawaan printer sehingga paling tajam. Jenis font dari website tidak berlaku, tetapi tebal, perataan, ukuran nama toko, spasi baris, dan logo tetap tercetak.<br>Kalau hasil cetak terputus, pilih kecepatan <b>Paling aman</b>. Agar ukuran huruf pas, atur <b>Lebar area cetak</b> ke <b>48 mm</b> untuk printer 58 mm.</div>
+        <div class="catatan">Struk dicetak dengan <b>huruf bawaan printer</b> agar paling tajam. Jenis font pilihan hanya berlaku untuk pratinjau dan file PNG/PDF; tebal, perataan, ukuran nama toko, spasi baris, dan logo tetap tercetak.<br>Kalau hasil cetak terputus, pilih kecepatan <b>Paling aman</b>. Agar ukuran huruf pas, atur <b>Lebar area cetak</b> ke <b>48 mm</b> untuk printer 58 mm.</div>
       </details>
       <div class="catatan" id="pInfo" style="display:none"></div>
     </details>
@@ -1163,7 +1157,7 @@ async function cetakLangsung() {
   bar.style.display = "block"; isi.style.width = "0";
   try {
     statusPrinter("Menyiapkan struk…", "busy");
-    const data = $("pMode").value === "gambar" ? await buatESCPOS() : await buatESCPOSTeks();
+    const data = await buatESCPOSTeks();
     statusPrinter(`Mencetak ke ${P.nama}…`, "busy");
     await kirim(data, f => isi.style.width = Math.round(f * 100) + "%");
     isi.style.width = "100%";

@@ -254,12 +254,7 @@
         <button class="btn" onclick="putuskan()">Putuskan</button>
       </div>
       <div class="row" style="margin-top:4px">
-        <div><label>Mode cetak</label>
-          <select data-g="pMode">
-            <option value="teks">Teks printer – tajam (seperti Thermer)</option>
-            <option value="gambar">Gambar – persis seperti pratinjau</option>
-          </select></div>
-        <div><label>Huruf printer (mode teks)</label>
+        <div><label>Huruf printer</label>
           <select data-g="pFont">
             <option value="A">Font A – normal</option>
             <option value="B">Font B – kecil</option>
@@ -293,8 +288,7 @@
             </select></div>
         </div>
         <label class="chk"><input type="checkbox" data-g="pCut"> Potong kertas otomatis (printer dengan pisau/auto-cutter)</label>
-        <label class="chk"><input type="checkbox" data-g="pTebal"> Pertebal huruf (mode Gambar) – bantu font tipis agar lebih jelas</label>
-        <div class="catatan"><b>Mode teks</b> memakai huruf bawaan printer sehingga paling tajam. Jenis font &amp; jarak huruf dari website tidak berlaku, tetapi tebal, garis bawah, perataan, ukuran besar, spasi baris, logo, QR, dan barcode tetap tercetak.<br>
+        <div class="catatan">Struk dicetak dengan <b>huruf bawaan printer</b> agar paling tajam. Jenis font &amp; jarak huruf pilihan hanya berlaku untuk pratinjau dan file PNG/PDF; tebal, garis bawah, perataan, ukuran besar, spasi baris, logo, QR, dan barcode tetap tercetak.<br>
           Kalau hasil cetak terputus atau ada bagian yang hilang, pilih kecepatan <b>Paling aman</b>.
           Agar ukuran huruf sesuai, atur <b>Lebar area cetak</b> ke <b>48 mm</b> untuk printer 58 mm, atau <b>72 mm</b> untuk printer 80 mm.</div>
       </details>
@@ -2648,7 +2642,7 @@ async function cetakLangsung() {
   bar.style.display = "block"; isi.style.width = "0";
   try {
     statusPrinter("Menyiapkan struk…", "busy");
-    const data = G.pMode === "gambar" ? await buatESCPOS() : await buatESCPOSTeks();
+    const data = await buatESCPOSTeks();
     statusPrinter(`Mencetak ke ${P.nama}…`, "busy");
     await kirim(data, f => isi.style.width = Math.round(f * 100) + "%");
     isi.style.width = "100%";
