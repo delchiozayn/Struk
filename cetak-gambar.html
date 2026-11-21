@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cetak dari Gambar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Roboto:wght@400;700&family=Montserrat:wght@400;700&family=Open+Sans:wght@400;700&family=Courier+Prime:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap">
 <style>
   * { box-sizing: border-box; }
   body { margin: 0; font-family: system-ui, sans-serif; background: #eef0f3; color: #222; }
@@ -73,6 +76,9 @@
       <button type="button" class="opt" data-c="teks" onclick="pilihCara('teks')">🔤 Sebagai teks<small>baca tulisan (OCR), huruf printer – paling tajam</small></button>
       <button type="button" class="opt" data-c="gambar" onclick="pilihCara('gambar')">🖼️ Sebagai gambar<small>persis seperti gambar aslinya</small></button>
     </div>
+    <div class="pilih" style="margin-top:8px">
+      <button type="button" class="opt" data-c="font" onclick="pilihCara('font')">🅰️ Teks + font pilihan<small>tata letak rapi selebar kertas, bentuk huruf bisa dipilih (mis. Poppins)</small></button>
+    </div>
 
     <h3>Ukuran kertas</h3>
     <div class="pilih">
@@ -117,6 +123,24 @@
           <select id="ocrFont"><option value="A">Font A – normal</option><option value="B">Font B – kecil (muat lebih banyak)</option></select></div>
         <div><label>Spasi baris</label>
           <select id="ocrSpasi"><option value="1">Rapat</option><option value="1.3" selected>Normal</option><option value="1.6">Renggang</option></select></div>
+      </div>
+      <div id="opsiFont">
+        <div class="row">
+          <div><label>Font</label>
+            <select id="fFont">
+              <option value="Poppins" selected>Poppins (mirip struk aplikasi kasir)</option>
+              <option value="Montserrat">Montserrat</option>
+              <option value="Roboto">Roboto</option>
+              <option value="Open Sans">Open Sans</option>
+              <option value="Courier Prime">Courier Prime</option>
+              <option value="Roboto Mono">Roboto Mono</option>
+            </select></div>
+          <div><label>Ukuran huruf (pt)</label>
+            <select id="fUkuran"><option>7</option><option>8</option><option selected>9</option><option>10</option><option>11</option><option>12</option><option>14</option></select></div>
+        </div>
+        <label class="chk"><input type="checkbox" id="fKanan" checked> Nilai di sebelah kanan tebal (seperti struk aplikasi kasir)</label>
+        <label class="chk"><input type="checkbox" id="fTebal" checked> Pertebal huruf (disarankan untuk kertas thermal)</label>
+        <div class="sub" style="margin:4px 0 0">Ukuran otomatis diperkecil bila ada baris yang tidak muat di lebar kertas.</div>
       </div>
       <label class="chk"><input type="checkbox" id="ocrJudul" checked> Nama toko (baris pertama) tebal &amp; tinggi 2×</label>
       <label class="chk"><input type="checkbox" id="ocrTotal" checked> Tebalkan baris yang berisi "Total"</label>
@@ -178,6 +202,7 @@
     <div class="kertas" id="kertas">
       <div class="kosong" id="kosong">Belum ada gambar.<br>Pilih gambar di sebelah kiri.</div>
       <canvas id="hasil" style="display:none"></canvas>
+      <canvas id="hasilFont" style="display:none;image-rendering:pixelated;image-rendering:crisp-edges"></canvas>
       <pre id="prevTeks" style="display:none;margin:0;font-family:'Courier New',monospace;font-size:12px;line-height:1.35;white-space:pre;color:#000"></pre>
     </div>
     <div class="ket" id="ukuranCetak"></div>
@@ -231,9 +256,10 @@ function isiForm() {
   document.querySelectorAll(".opt[data-k]").forEach(b => b.classList.toggle("on", +b.dataset.k === S.kertas));
   document.querySelectorAll(".opt[data-m]").forEach(b => b.classList.toggle("on", b.dataset.m === S.mode));
   document.querySelectorAll(".opt[data-c]").forEach(b => b.classList.toggle("on", b.dataset.c === S.cara));
-  $("bagianOCR").style.display = S.cara === "teks" ? "block" : "none";
+  $("bagianOCR").style.display = S.cara !== "gambar" ? "block" : "none";
+  $("opsiFont").style.display = S.cara === "font" ? "block" : "none";
   $("bagianGambar").style.display = S.cara === "gambar" ? "block" : "none";
-  $("btnLangsung").textContent = S.cara === "teks" ? "⚡ Cetak Teks" : "⚡ Cetak Gambar";
+  $("btnLangsung").textContent = S.cara === "teks" ? "⚡ Cetak Teks" : S.cara === "font" ? "⚡ Cetak Teks + Font" : "⚡ Cetak Gambar";
   tampilPreview();
   $("nilaiAmbang").textContent = S.ambang === 0 ? "Normal" : (S.ambang > 0 ? "+" : "") + S.ambang;
 }
@@ -689,7 +715,8 @@ function susunUlang() {
   tampilPreview();
 }
 ["ocrFont"].forEach(id => $(id).addEventListener("change", susunUlang));
-["ocrSpasi", "ocrJudul", "ocrTotal"].forEach(id => $(id).addEventListener("change", tampilPreview));
+["ocrSpasi", "ocrJudul", "ocrTotal", "fFont", "fUkuran", "fTebal", "fKanan"].forEach(id => $(id).addEventListener("change", tampilPreview));
+try { document.fonts.addEventListener("loadingdone", () => { if (S.cara === "font") tampilPreview(); }); } catch (e) {}
 $("ocrTeks").addEventListener("input", tampilPreview);
 function barisOCR() {
   const kol = kolomOCR();
@@ -697,6 +724,8 @@ function barisOCR() {
 }
 function judulIndex(L) { const i = L.findIndex(l => l.trim()); return i; }
 function tampilPreview() {
+  if (S.cara === "font") { tampilFont(); return; }
+  $("hasilFont").style.display = "none";
   const teks = S.cara === "teks";
   $("prevTeks").style.display = teks && $("ocrTeks").value.trim() ? "block" : "none";
   $("hasil").style.display = !teks && hasil ? "block" : "none";
@@ -717,6 +746,97 @@ function tampilPreview() {
   pre.style.fontSize = (lebarPx / (kol * 0.6)) + "px";
   $("ukuranCetak").textContent = `${kol} karakter per baris · ${L.length} baris · dicetak dengan huruf bawaan printer`;
 }
+/* ===== MODE TEKS + FONT PILIHAN =====
+   Baris teks (yang disusun selebar N karakter) dianalisis menjadi bagian kiri / kanan / tengah / garis,
+   lalu digambar dengan font proporsional langsung di resolusi printer. */
+function uraiBaris(l, kol) {
+  if (/^\s*[-=_]{5,}\s*$/.test(l)) return { garis: true };
+  if (!l.trim()) return { kosong: true };
+  const awal = l.length - l.trimStart().length, akhir = kol - l.trimEnd().length;
+  const bagian = []; const re = /\S+(?: \S+)*/g; let m;
+  while ((m = re.exec(l))) bagian.push({ t: m[0], mulai: m.index, selesai: m.index + m[0].length });
+  if (bagian.length === 1) {
+    const b = bagian[0];
+    if (awal > 0 && Math.abs(awal - akhir) <= 2) return { tengah: b.t };
+    if (akhir <= 1 && awal > kol * 0.35) return { kanan: b.t };
+    return { kiri: b.t, indent: awal };
+  }
+  return { bagian, kol };
+}
+let fontCanvas = null;
+function gambarDenganFont() {
+  const dots = dotsPrinter(), kol = kolomOCR(), L = barisOCR(), ji = judulIndex(L);
+  const fam = $("fFont").value, ptDasar = +$("fUkuran").value;
+  const tmp = document.createElement("canvas").getContext("2d");
+  const pxDariPt = pt => pt * 203 / 72;
+  const rinci = L.map((l, i) => ({ ...uraiBaris(l, kol), judul: $("ocrJudul").checked && i === ji, tebal: $("ocrTotal").checked && /\btotal\b/i.test(l) }));
+  const fontStr = (px, r, kanan) => `${r.judul || r.tebal || (kanan && $("fKanan").checked) ? 700 : 400} ${px}px "${fam}", sans-serif`;
+  const lebarBaris = (r, px) => {
+    tmp.font = fontStr(px * (r.judul ? 1.3 : 1), r);
+    const w = t => tmp.measureText(t).width;
+    if (r.garis || r.kosong) return 0;
+    if (r.tengah) return w(r.tengah);
+    if (r.kanan) { tmp.font = fontStr(px, r, true); return w(r.kanan); }
+    if (r.kiri) return w(r.kiri) + w(" ".repeat(Math.min(r.indent, 6)));
+    const kiriW = r.bagian.slice(0, -1).reduce((s, b) => s + w(b.t), 0) + w("  ") * (r.bagian.length - 1);
+    tmp.font = fontStr(px, r, true);
+    return kiriW + w(r.bagian[r.bagian.length - 1].t);
+  };
+  // ukuran huruf: sesuai pilihan, diperkecil otomatis bila ada baris yang tidak muat
+  let px = pxDariPt(ptDasar);
+  const terlebar = Math.max(1, ...rinci.map(r => lebarBaris(r, px)));
+  if (terlebar > dots) px *= dots / terlebar * 0.98;
+  const lh = px * 1.3 * (+$("ocrSpasi").value / 1.3);
+  const tinggiBaris = r => r.garis ? px * 0.9 : r.kosong ? lh * 0.6 : r.judul ? lh * 1.3 : lh;
+  const H = Math.ceil(rinci.reduce((s, r) => s + tinggiBaris(r), 0) + px * 0.5);
+  const c = document.createElement("canvas"); c.width = dots; c.height = Math.max(8, H);
+  const x = c.getContext("2d");
+  x.fillStyle = "#fff"; x.fillRect(0, 0, dots, c.height); x.fillStyle = "#000"; x.textBaseline = "alphabetic";
+  let y = 0;
+  for (const r of rinci) {
+    const th = tinggiBaris(r), fpx = px * (r.judul ? 1.3 : 1);
+    if (r.garis) { x.fillRect(0, Math.round(y + th / 2) - 1, dots, 2); y += th; continue; }
+    if (r.kosong) { y += th; continue; }
+    x.font = fontStr(fpx, r);
+    const base = y + th * 0.5 + fpx * 0.35;
+    if (r.tengah) { x.textAlign = "center"; x.fillText(r.tengah, dots / 2, base); }
+    else if (r.kanan) { x.font = fontStr(fpx, r, true); x.textAlign = "right"; x.fillText(r.kanan, dots, base); }
+    else if (r.kiri) { x.textAlign = "left"; x.fillText(r.kiri, r.indent > 1 ? x.measureText(" ".repeat(Math.min(r.indent, 6))).width : 0, base); }
+    else {
+      const n = r.bagian.length;
+      r.bagian.forEach((b, k) => {
+        const ujungKanan = k === n - 1 && b.selesai >= r.kol - 1;
+        const kanan = ujungKanan || (b.mulai + b.selesai) / 2 > r.kol * 0.5;
+        x.font = fontStr(fpx, r, kanan);
+        if (kanan) { x.textAlign = "right"; x.fillText(b.t, ujungKanan ? dots : Math.round(b.selesai / r.kol * dots), base); }
+        else { x.textAlign = "left"; x.fillText(b.t, Math.round(b.mulai / r.kol * dots), base); }
+      });
+    }
+    y += th;
+  }
+  // ubah ke hitam-putih murni (+ pertebal)
+  const d = x.getImageData(0, 0, dots, c.height), p = d.data, hit = new Uint8Array(dots * c.height);
+  for (let i = 0, j = 0; j < hit.length; i += 4, j++) hit[j] = p[i] < 150 ? 1 : 0;
+  if ($("fTebal").checked) for (let yy = 0; yy < c.height; yy++) for (let xx = dots - 1; xx > 0; xx--) if (hit[yy * dots + xx - 1]) hit[yy * dots + xx] = 1;
+  for (let i = 0, j = 0; j < hit.length; i += 4, j++) { const v = hit[j] ? 0 : 255; p[i] = p[i + 1] = p[i + 2] = v; p[i + 3] = 255; }
+  x.putImageData(d, 0, 0);
+  return c;
+}
+async function tampilFont() {
+  $("hasil").style.display = "none"; $("prevTeks").style.display = "none";
+  const ada = $("ocrTeks").value.trim();
+  $("kosong").style.display = ada ? "none" : "block";
+  $("kosong").innerHTML = asli ? "Ketuk <b>🔍 Baca teks dari gambar</b>." : "Belum ada gambar.<br>Pilih gambar di sebelah kiri.";
+  if (!ada) { $("hasilFont").style.display = "none"; return; }
+  try { await document.fonts.load(`700 20px "${$("fFont").value}"`); await document.fonts.load(`400 20px "${$("fFont").value}"`); } catch (e) {}
+  const c = gambarDenganFont(), out = $("hasilFont");
+  out.width = c.width; out.height = c.height; out.getContext("2d").drawImage(c, 0, 0);
+  fontCanvas = out;
+  out.style.display = "block";
+  out.style.width = Math.min(c.width * (+$("zoom").value), innerWidth - 40) + "px";
+  $("ukuranCetak").textContent = `Font ${$("fFont").value} · ${(c.width / 8).toFixed(0)} × ${(c.height / 8).toFixed(0)} mm`;
+}
+
 function escposTeks(salinan) {
   const L = barisOCR(), fontB = $("ocrFont").value === "B", ji = judulIndex(L);
   const E = new EscPos(false, fontB).init(spasiDots($("ocrSpasi").value, fontB));
@@ -845,13 +965,16 @@ function escposDariHitamPutih(c, salinan) {
 async function cetak() {
   if (!P.jenis || P.sibuk) return;
   if (S.cara === "gambar" && !hasil) { info("Pilih gambar dulu sebelum mencetak."); return; }
-  if (S.cara === "teks" && !$("ocrTeks").value.trim()) { info("Baca teks dari gambar dulu (tombol 🔍), atau ketik teksnya di kotak teks."); return; }
+  if (S.cara !== "gambar" && !$("ocrTeks").value.trim()) { info("Baca teks dari gambar dulu (tombol 🔍), atau ketik teksnya di kotak teks."); return; }
   info(""); P.sibuk = true;
   const bar = $("pBar"), isi = bar.firstElementChild;
   bar.style.display = "block"; isi.style.width = "0";
   try {
     statusPrinter(`Mencetak ke ${P.nama}…`, "busy");
-    const data = S.cara === "teks" ? escposTeks(+$("salinan").value) : escposDariHitamPutih(hasil, +$("salinan").value);
+    if (S.cara === "font") await tampilFont();
+    const data = S.cara === "teks" ? escposTeks(+$("salinan").value)
+      : S.cara === "font" ? escposDariHitamPutih(fontCanvas, +$("salinan").value)
+      : escposDariHitamPutih(hasil, +$("salinan").value);
     await kirim(data, f => isi.style.width = Math.round(f * 100) + "%");
     isi.style.width = "100%";
     P.sibuk = false; statusPrinter(`Terhubung: ${P.nama} – selesai mencetak`, "on");
